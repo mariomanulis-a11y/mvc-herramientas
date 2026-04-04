@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVC Abogados — Herramientas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- MOBILE TOGGLE -->
+<button id="menu-toggle" aria-label="Abrir menú">☰</button>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" role="navigation" aria-label="Navegación principal">
+
+  <div class="sidebar-brand">
+    <a class="brand-logo" href="#" data-tool="home">
+      <div class="brand-icon">M</div>
+      <span class="brand-name">MVC<br>ABOGADOS</span>
+    </a>
+    <div class="brand-sub">Panel de Herramientas</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Herramientas</div>
+
+    <button class="nav-item" data-tool="calculator">
+      <span class="nav-icon">🧮</span>
+      Calculadora
+    </button>
+
+    <button class="nav-item" data-tool="converter">
+      <span class="nav-icon">⚖️</span>
+      Conversor de Unidades
+    </button>
+
+    <button class="nav-item" data-tool="password">
+      <span class="nav-icon">🔐</span>
+      Generador de Contraseñas
+    </button>
+
+    <button class="nav-item" data-tool="text">
+      <span class="nav-icon">📝</span>
+      Utilidades de Texto
+    </button>
+
+    <button class="nav-item" data-tool="stopwatch">
+      <span class="nav-icon">⏱</span>
+      Cronómetro
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    MVC Abogados &copy; 2025<br>
+    Prov. de Buenos Aires, Argentina
+  </div>
+</aside>
+
+<!-- MAIN AREA -->
+<div id="main">
+
+  <header class="topbar">
+    <div class="topbar-title" id="topbar-title">Panel de Herramientas</div>
+    <div class="topbar-badge">MVC Abogados</div>
+  </header>
+
+  <div id="tool-container">
+    <!-- injected by JS -->
+  </div>
+
+</div>
+
+<script type="module">
+  const TOOLS = {
+    calculator: {
+      label: 'Calculadora',
+      load: () => import('./tools/calculator.js').then(m => m.initCalculator)
+    },
+    converter: {
+      label: 'Conversor de Unidades',
+      load: () => import('./tools/converter.js').then(m => m.initConverter)
+    },
+    password: {
+      label: 'Generador de Contraseñas',
+      load: () => import('./tools/password.js').then(m => m.initPassword)
+    },
+    text: {
+      label: 'Utilidades de Texto',
+      load: () => import('./tools/text.js').then(m => m.initText)
+    },
+    stopwatch: {
+      label: 'Cronómetro',
+      load: () => import('./tools/stopwatch.js').then(m => m.initStopwatch)
+    }
+  };
+
+  const ICONS = {
+    calculator: '🧮', converter: '⚖️', password: '🔐',
+    text: '📝', stopwatch: '⏱'
+  };
+
+  let currentTool = null;
+  let cleanupFn   = null;
+
+  const container   = document.getElementById('tool-container');
+  const topbarTitle = document.getElementById('topbar-title');
+  const sidebar     = document.getElementById('sidebar');
+
+  /* ── Welcome ── */
+  function showWelcome() {
+    if (typeof cleanupFn === 'function') { cleanupFn(); cleanupFn = null; }
+    currentTool = null;
+
+    const cards = Object.entries(TOOLS).map(([key, { label }]) =>
+      `<div class="welcome-card" data-tool="${key}">
+         <div class="wc-icon">${ICONS[key]}</div>
+         <div class="wc-name">${label}</div>
+       </div>`
+    ).join('');
+
+    container.innerHTML = `
+      <div class="welcome-screen">
+        <h1>Bienvenido</h1>
+        <p>Seleccioná una herramienta del menú lateral o hacé clic en una de las opciones.</p>
+        <div class="welcome-grid">${cards}</div>
+      </div>`;
+
+    container.querySelectorAll('.welcome-card').forEach(card =>
+      card.addEventListener('click', () => loadTool(card.dataset.tool))
+    );
+
+    topbarTitle.textContent = 'Panel de Herramientas';
+    setActive(null);
+  }
+
+  /* ── Load tool ── */
+  async function loadTool(key) {
+    if (key === currentTool) return;
+    if (typeof cleanupFn === 'function') { cleanupFn(); cleanupFn = null; }
+
+    currentTool = key;
+    setActive(key);
+    topbarTitle.textContent = TOOLS[key].label;
+
+    container.innerHTML = '';
+    container.style.animation = 'none';
+    void container.offsetHeight;
+    container.style.animation = '';
+
+    try {
+      const initFn = await TOOLS[key].load();
+      const result = initFn(container);
+      if (typeof result === 'function') cleanupFn = result;
+    } catch (err) {
+      container.innerHTML = `<div class="tool-card">
+        <h2>&#9888; Error</h2>
+        <p style="color:var(--color-muted);">No se pudo cargar: ${err.message}</p>
+      </div>`;
+    }
+
+    sidebar.classList.remove('open');
+  }
+
+  /* ── Active nav ── */
+  function setActive(key) {
+    document.querySelectorAll('.nav-item[data-tool]').forEach(btn =>
+      btn.classList.toggle('active', btn.dataset.tool === key)
+    );
+  }
+
+  /* ── Events ── */
+  document.querySelectorAll('[data-tool]').forEach(el =>
+    el.addEventListener('click', () => {
+      const t = el.dataset.tool;
+      t === 'home' ? showWelcome() : loadTool(t);
+    })
+  );
+
+  document.getElementById('menu-toggle').addEventListener('click', () =>
+    sidebar.classList.toggle('open')
+  );
+
+  document.getElementById('main').addEventListener('click', () => {
+    if (window.innerWidth <= 768) sidebar.classList.remove('open');
+  });
+
+  showWelcome();
+</script>
+
+</body>
+</html>
