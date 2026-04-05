@@ -3,51 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVC Abogados — Herramientas</title>
+  <title>MVC Abogados — Herramientas Legales</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- MOBILE TOGGLE -->
 <button id="menu-toggle" aria-label="Abrir menú">☰</button>
 
-<!-- SIDEBAR -->
 <aside id="sidebar" role="navigation" aria-label="Navegación principal">
-
   <div class="sidebar-brand">
     <a class="brand-logo" href="#" data-tool="home">
       <div class="brand-icon">M</div>
       <span class="brand-name">MVC<br>ABOGADOS</span>
     </a>
-    <div class="brand-sub">Panel de Herramientas</div>
+    <div class="brand-sub">Herramientas Legales</div>
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-label">Herramientas</div>
-
-    <button class="nav-item" data-tool="calculator">
-      <span class="nav-icon">🧮</span>
-      Calculadora
+    <div class="nav-label">Derecho Laboral</div>
+    <button class="nav-item" data-tool="liquidacion">
+      <span class="nav-icon">⚖️</span> Liquidación LCT
+    </button>
+    <button class="nav-item" data-tool="ley24013">
+      <span class="nav-icon">📋</span> Ley 24.013
+    </button>
+    <button class="nav-item" data-tool="ley25323">
+      <span class="nav-icon">➕</span> Ley 25.323
     </button>
 
-    <button class="nav-item" data-tool="converter">
-      <span class="nav-icon">⚖️</span>
-      Conversor de Unidades
+    <div class="nav-label">Cálculos Judiciales</div>
+    <button class="nav-item" data-tool="intereses">
+      <span class="nav-icon">📈</span> Intereses BPBA
+    </button>
+    <button class="nav-item" data-tool="actualizacion">
+      <span class="nav-icon">💹</span> Actualización
+    </button>
+    <button class="nav-item" data-tool="plazos">
+      <span class="nav-icon">📅</span> Plazos Procesales
     </button>
 
-    <button class="nav-item" data-tool="password">
-      <span class="nav-icon">🔐</span>
-      Generador de Contraseñas
+    <div class="nav-label">Indemnizaciones</div>
+    <button class="nav-item" data-tool="incapacidad">
+      <span class="nav-icon">🩺</span> Incapacidad Física
+    </button>
+    <button class="nav-item" data-tool="danio-punitivo">
+      <span class="nav-icon">⚠️</span> Daño Punitivo
     </button>
 
-    <button class="nav-item" data-tool="text">
-      <span class="nav-icon">📝</span>
-      Utilidades de Texto
-    </button>
-
-    <button class="nav-item" data-tool="stopwatch">
-      <span class="nav-icon">⏱</span>
-      Cronómetro
+    <div class="nav-label">Documentos</div>
+    <button class="nav-item" data-tool="carta-documento">
+      <span class="nav-icon">✉️</span> Carta Documento
     </button>
   </nav>
 
@@ -57,129 +62,114 @@
   </div>
 </aside>
 
-<!-- MAIN AREA -->
 <div id="main">
-
   <header class="topbar">
-    <div class="topbar-title" id="topbar-title">Panel de Herramientas</div>
+    <div class="topbar-title" id="topbar-title">Herramientas Legales</div>
     <div class="topbar-badge">MVC Abogados</div>
   </header>
-
-  <div id="tool-container">
-    <!-- injected by JS -->
-  </div>
-
+  <div id="tool-container"></div>
 </div>
 
 <script type="module">
   const TOOLS = {
-    calculator: {
-      label: 'Calculadora',
-      load: () => import('./tools/calculator.js').then(m => m.initCalculator)
-    },
-    converter: {
-      label: 'Conversor de Unidades',
-      load: () => import('./tools/converter.js').then(m => m.initConverter)
-    },
-    password: {
-      label: 'Generador de Contraseñas',
-      load: () => import('./tools/password.js').then(m => m.initPassword)
-    },
-    text: {
-      label: 'Utilidades de Texto',
-      load: () => import('./tools/text.js').then(m => m.initText)
-    },
-    stopwatch: {
-      label: 'Cronómetro',
-      load: () => import('./tools/stopwatch.js').then(m => m.initStopwatch)
-    }
+    liquidacion:      { label: 'Liquidación Laboral — LCT',          load: () => import('./tools/liquidacion.js').then(m => m.initLiquidacion) },
+    ley24013:         { label: 'Ley 24.013 — Empleo No Registrado',  load: () => import('./tools/ley24013.js').then(m => m.initLey24013) },
+    ley25323:         { label: 'Ley 25.323 — Recargos',              load: () => import('./tools/ley25323.js').then(m => m.initLey25323) },
+    intereses:        { label: 'Intereses Judiciales — BPBA',        load: () => import('./tools/intereses.js').then(m => m.initIntereses) },
+    actualizacion:    { label: 'Actualización Monetaria',            load: () => import('./tools/actualizacion.js').then(m => m.initActualizacion) },
+    plazos:           { label: 'Plazos Procesales',                  load: () => import('./tools/plazos.js').then(m => m.initPlazos) },
+    incapacidad:      { label: 'Indemnización por Incapacidad',       load: () => import('./tools/incapacidad.js').then(m => m.initIncapacidad) },
+    'danio-punitivo': { label: 'Daño Punitivo — Art. 52 bis',        load: () => import('./tools/danio-punitivo.js').then(m => m.initDanioPunitivo) },
+    'carta-documento':{ label: 'Generador de Carta Documento',       load: () => import('./tools/carta-documento.js').then(m => m.initCartaDocumento) },
   };
 
   const ICONS = {
-    calculator: '🧮', converter: '⚖️', password: '🔐',
-    text: '📝', stopwatch: '⏱'
+    liquidacion:'⚖️', ley24013:'📋', ley25323:'➕',
+    intereses:'📈', actualizacion:'💹', plazos:'📅',
+    incapacidad:'🩺', 'danio-punitivo':'⚠️', 'carta-documento':'✉️'
   };
 
-  let currentTool = null;
-  let cleanupFn   = null;
+  const CATS = {
+    'Derecho Laboral':    ['liquidacion','ley24013','ley25323'],
+    'Cálculos Judiciales':['intereses','actualizacion','plazos'],
+    'Indemnizaciones':    ['incapacidad','danio-punitivo'],
+    'Documentos':         ['carta-documento'],
+  };
 
+  let currentTool = null, cleanupFn = null;
   const container   = document.getElementById('tool-container');
   const topbarTitle = document.getElementById('topbar-title');
   const sidebar     = document.getElementById('sidebar');
 
-  /* ── Welcome ── */
   function showWelcome() {
     if (typeof cleanupFn === 'function') { cleanupFn(); cleanupFn = null; }
     currentTool = null;
 
-    const cards = Object.entries(TOOLS).map(([key, { label }]) =>
-      `<div class="welcome-card" data-tool="${key}">
-         <div class="wc-icon">${ICONS[key]}</div>
-         <div class="wc-name">${label}</div>
-       </div>`
-    ).join('');
+    const sections = Object.entries(CATS).map(([cat, keys]) => {
+      const cards = keys.map(key => `
+        <div class="welcome-card" data-tool="${key}">
+          <div class="wc-icon">${ICONS[key]}</div>
+          <div class="wc-name">${TOOLS[key].label}</div>
+        </div>`).join('');
+      return `
+        <div style="margin-bottom:28px;">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-muted);margin-bottom:12px;">${cat}</div>
+          <div class="welcome-grid">${cards}</div>
+        </div>`;
+    }).join('');
 
     container.innerHTML = `
       <div class="welcome-screen">
-        <h1>Bienvenido</h1>
-        <p>Seleccioná una herramienta del menú lateral o hacé clic en una de las opciones.</p>
-        <div class="welcome-grid">${cards}</div>
+        <h1>MVC Abogados</h1>
+        <p>Herramientas para la práctica profesional del derecho laboral y procesal bonaerense.</p>
+        ${sections}
       </div>`;
 
-    container.querySelectorAll('.welcome-card').forEach(card =>
-      card.addEventListener('click', () => loadTool(card.dataset.tool))
-    );
+    container.querySelectorAll('.welcome-card').forEach(c =>
+      c.addEventListener('click', () => loadTool(c.dataset.tool)));
 
-    topbarTitle.textContent = 'Panel de Herramientas';
+    topbarTitle.textContent = 'Herramientas Legales';
     setActive(null);
   }
 
-  /* ── Load tool ── */
   async function loadTool(key) {
     if (key === currentTool) return;
     if (typeof cleanupFn === 'function') { cleanupFn(); cleanupFn = null; }
-
     currentTool = key;
     setActive(key);
     topbarTitle.textContent = TOOLS[key].label;
 
-    container.innerHTML = '';
-    container.style.animation = 'none';
-    void container.offsetHeight;
-    container.style.animation = '';
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--color-muted);">Cargando...</div>';
 
     try {
-      const initFn = await TOOLS[key].load();
-      const result = initFn(container);
-      if (typeof result === 'function') cleanupFn = result;
-    } catch (err) {
-      container.innerHTML = `<div class="tool-card">
-        <h2>&#9888; Error</h2>
-        <p style="color:var(--color-muted);">No se pudo cargar: ${err.message}</p>
-      </div>`;
+      const fn = await TOOLS[key].load();
+      container.innerHTML = '';
+      container.style.animation = 'none';
+      void container.offsetHeight;
+      container.style.animation = '';
+      const r = fn(container);
+      if (typeof r === 'function') cleanupFn = r;
+    } catch(err) {
+      container.innerHTML = `<div class="tool-card"><h2>⚠ Error al cargar</h2>
+        <p style="color:var(--color-muted);margin-top:8px;">${err.message}</p></div>`;
     }
 
     sidebar.classList.remove('open');
   }
 
-  /* ── Active nav ── */
   function setActive(key) {
-    document.querySelectorAll('.nav-item[data-tool]').forEach(btn =>
-      btn.classList.toggle('active', btn.dataset.tool === key)
-    );
+    document.querySelectorAll('.nav-item[data-tool]').forEach(b =>
+      b.classList.toggle('active', b.dataset.tool === key));
   }
 
-  /* ── Events ── */
   document.querySelectorAll('[data-tool]').forEach(el =>
     el.addEventListener('click', () => {
       const t = el.dataset.tool;
       t === 'home' ? showWelcome() : loadTool(t);
-    })
-  );
+    }));
 
   document.getElementById('menu-toggle').addEventListener('click', () =>
-    sidebar.classList.toggle('open')
-  );
+    sidebar.classList.toggle('open'));
 
   document.getElementById('main').addEventListener('click', () => {
     if (window.innerWidth <= 768) sidebar.classList.remove('open');
@@ -187,6 +177,5 @@
 
   showWelcome();
 </script>
-
 </body>
 </html>
