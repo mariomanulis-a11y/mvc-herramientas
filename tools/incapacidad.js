@@ -1,5 +1,6 @@
 // Calculadora de Indemnización por Incapacidad Física
 // Fórmula de renta constante no perpetua (valor presente de renta futura)
+import { exportarPDF, exportarCSV } from './exportar.js';
 
 export function initIncapacidad(container) {
 
@@ -171,12 +172,56 @@ export function initIncapacidad(container) {
         </div>
       </div>
 
-      <div class="form-row">
-        <button class="btn btn-success" id="inc-btn-copiar">Copiar resumen</button>
+      <div class="form-row" style="flex-wrap:wrap;gap:10px">
+        <button class="btn btn-success" id="inc-btn-copiar">📋 Copiar resumen</button>
+        <button class="btn btn-ghost"   id="inc-btn-pdf">📄 Exportar PDF</button>
+        <button class="btn btn-ghost"   id="inc-btn-csv">📊 Exportar CSV</button>
       </div>
     `;
 
-    // Copiar resumen
+    // — Exportar PDF
+    container.querySelector('#inc-btn-pdf').addEventListener('click', () => {
+      const html = `
+        ${caratula ? `<div class="info-box"><strong>Carátula:</strong> ${caratula}</div>` : ''}
+        ${nombre   ? `<div class="info-box"><strong>Damnificado:</strong> ${nombre}</div>` : ''}
+        <table>
+          <thead><tr><th>Paso</th><th>Descripción</th><th style="text-align:right">Valor</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Ingreso mensual</td><td class="monto">$ ${fmt(ingreso)}</td></tr>
+            <tr><td>1</td><td>Ingreso anualizado (× 13)</td><td class="monto">$ ${fmt(A)}</td></tr>
+            <tr><td>2</td><td>Vida laboral restante (n = 70 − ${edad})</td><td class="monto">${n} años</td></tr>
+            <tr><td>3</td><td>Tasa de descuento (i)</td><td class="monto">${tasaPct.toFixed(2)}%</td></tr>
+            <tr><td>4</td><td>Factor de descuento [(1+i)ⁿ−1] / [i×(1+i)ⁿ]</td><td class="monto">${factor.toFixed(6)}</td></tr>
+            <tr><td>5</td><td>Valor presente total (A × Factor)</td><td class="monto">$ ${fmt(antesIncap)}</td></tr>
+            <tr><td>6</td><td>Porcentaje de incapacidad</td><td class="monto">${incapPct.toFixed(2)}%</td></tr>
+            <tr class="total-row"><td colspan="2">INDEMNIZACIÓN POR INCAPACIDAD</td><td class="monto">$ ${fmt(resultado)}</td></tr>
+          </tbody>
+        </table>
+        <div class="result-big">$ ${fmt(resultado)}</div>`;
+      exportarPDF('Indemnización por Incapacidad Física', html);
+    });
+
+    // — Exportar CSV
+    container.querySelector('#inc-btn-csv').addEventListener('click', () => {
+      const csvFilas = [
+        ['Parámetro', 'Valor'],
+        ['Edad', edad],
+        ['Ingreso mensual ($)', ingreso.toFixed(2)],
+        ['Ingreso anualizado × 13 ($)', A.toFixed(2)],
+        ['Vida laboral restante n (años)', n],
+        ['Tasa de descuento i (%)', tasaPct.toFixed(2)],
+        ['Factor de descuento', factor.toFixed(6)],
+        ['Valor presente total ($)', antesIncap.toFixed(2)],
+        ['Porcentaje de incapacidad (%)', incapPct.toFixed(2)],
+        ['INDEMNIZACIÓN ($)', resultado.toFixed(2)],
+        ['', ''],
+        ['Carátula', caratula],
+        ['Damnificado', nombre],
+      ];
+      exportarCSV('Incapacidad' + (nombre ? '_' + nombre : ''), csvFilas);
+    });
+
+    // — Copiar resumen
     container.querySelector('#inc-btn-copiar').addEventListener('click', () => {
       const texto = [
         caratula ? `CARÁTULA: ${caratula}` : '',
