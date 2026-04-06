@@ -2,6 +2,7 @@
    Daño Punitivo — Art. 52 bis Ley 24.240
    tools/danio-punitivo.js
    ============================================================ */
+import { exportarPDF, exportarCSV } from './exportar.js';
 
 export function initDanioPunitivo(container) {
 
@@ -83,8 +84,10 @@ export function initDanioPunitivo(container) {
         </div>
       </div>
 
-      <div class="btn-row">
+      <div class="btn-row" style="display:flex;flex-wrap:wrap;gap:10px">
         <button class="btn btn-success" id="dp-copiar">📋 Copiar resultado</button>
+        <button class="btn btn-ghost"   id="dp-pdf">📄 Exportar PDF</button>
+        <button class="btn btn-ghost"   id="dp-csv">📊 Exportar CSV</button>
       </div>
       <div id="dp-toast" style="display:none;font-size:0.8rem;color:var(--color-success);margin-top:6px;">✓ Copiado al portapapeles</div>
 
@@ -145,6 +148,54 @@ export function initDanioPunitivo(container) {
     await navigator.clipboard.writeText(txt).catch(() => {});
     getEl('dp-toast').style.display = 'block';
     setTimeout(() => getEl('dp-toast').style.display = 'none', 2000);
+  });
+
+  getEl('dp-pdf').addEventListener('click', () => {
+    const caratula = getEl('dp-caratula').value || '';
+    const canastas  = parseInt(getEl('dp-empresa').value) || 100;
+    const valCanasta = parseFloat(getEl('dp-canasta').value) || 400000;
+    const fmtPesos = n => '$ ' + Math.round(n).toLocaleString('es-AR');
+    const tope  = canastas * valCanasta;
+    const F     = parseFloat(getEl('dp-factor').textContent) || 0;
+    const multa = F * tope;
+    const filasHtml = FACTORES.map(f => {
+      const sel   = container.querySelector(`[data-fid="${f.id}"]`);
+      const nivel = sel.options[sel.selectedIndex].text;
+      const pct   = container.querySelector(`[data-pid="${f.id}"]`).value;
+      return `<tr><td>${f.label}</td><td>${nivel}</td><td style="text-align:right">${pct}%</td></tr>`;
+    }).join('');
+    const html = `
+      ${caratula ? `<div class="info-box"><strong>Carátula:</strong> ${caratula}</div>` : ''}
+      <table>
+        <thead><tr><th>Factor</th><th>Nivel</th><th style="text-align:right">Ponderación</th></tr></thead>
+        <tbody>${filasHtml}</tbody>
+      </table>
+      <div class="info-box" style="margin-top:12px">
+        <strong>Factor F:</strong> ${getEl('dp-factor').textContent}<br>
+        <strong>Tope:</strong> ${getEl('dp-tope').textContent}<br>
+      </div>
+      <div class="result-big">${getEl('dp-multa').textContent}</div>`;
+    exportarPDF('Daño Punitivo — Art. 52 bis Ley 24.240', html);
+  });
+
+  getEl('dp-csv').addEventListener('click', () => {
+    const caratula = getEl('dp-caratula').value || '';
+    const csvFilas = [
+      ['Factor', 'Nivel', 'Ponderación (%)', 'Valor (0-1)'],
+      ...FACTORES.map(f => {
+        const sel   = container.querySelector(`[data-fid="${f.id}"]`);
+        const nivel = sel.options[sel.selectedIndex].text;
+        const pct   = container.querySelector(`[data-pid="${f.id}"]`).value;
+        const val   = parseFloat(sel.value) || 0;
+        return [f.label, nivel, pct, val];
+      }),
+      ['', '', '', ''],
+      ['Factor F (0–1)', getEl('dp-factor').textContent, '', ''],
+      ['Tope', getEl('dp-tope').textContent, '', ''],
+      ['Multa estimada', getEl('dp-multa').textContent, '', ''],
+      ['Carátula', caratula, '', ''],
+    ];
+    exportarCSV('DanoPunitivo' + (caratula ? '_' + caratula : ''), csvFilas);
   });
 
   recalcular();
