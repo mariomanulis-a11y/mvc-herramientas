@@ -1,4 +1,6 @@
 // Generador de Carta Documento / Telegrama Laboral
+import { exportarPDF, exportarCSV } from './exportar.js';
+
 export function initCartaDocumento(container) {
 
   // ── Plantillas ─────────────────────────────────────────────────────────────
@@ -105,9 +107,10 @@ export function initCartaDocumento(container) {
 
       <div id="cd-resultado" style="display:none;margin-top:24px">
         <label for="cd-texto" style="font-weight:600;display:block;margin-bottom:6px">Texto generado (editable)</label>
-        <textarea id="cd-texto" rows="10" style="width:100%;resize:vertical;font-family:inherit;font-size:.9rem;padding:12px;border:1px solid var(--color-border);border-radius:6px;background:var(--color-bg-input,#fff);color:inherit;line-height:1.6"></textarea>
-        <div style="margin-top:10px;display:flex;gap:10px">
-          <button class="btn btn-success" id="cd-copiar">Copiar texto</button>
+        <textarea id="cd-texto" rows="10" style="width:100%;resize:vertical;font-family:inherit;font-size:.9rem;padding:12px;border:1px solid var(--color-border);border-radius:6px;background:#ffffff;color:#1a1a1a;line-height:1.6"></textarea>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">
+          <button class="btn btn-success" id="cd-copiar">📋 Copiar texto</button>
+          <button class="btn btn-ghost"   id="cd-pdf">📄 Exportar PDF</button>
           <button class="btn btn-ghost"   id="cd-reset-texto">Restablecer</button>
         </div>
       </div>
@@ -216,5 +219,16 @@ export function initCartaDocumento(container) {
 
   btnReset.addEventListener('click', () => {
     if (ultimoTextoGenerado) textarea.value = ultimoTextoGenerado;
+  });
+
+  container.querySelector('#cd-pdf').addEventListener('click', () => {
+    const texto = textarea.value;
+    if (!texto) return;
+    const tipo = selTipo.value;
+    const plantilla = PLANTILLAS[tipo];
+    const lineas = texto.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    const html = `
+      <div class="info-box" style="font-size:13px;line-height:1.8">${lineas}</div>`;
+    exportarPDF(plantilla.label, html);
   });
 }
