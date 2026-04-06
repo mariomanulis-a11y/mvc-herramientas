@@ -1,5 +1,6 @@
 // ley24013.js — Calculadora Ley 24013 - Empleo No Registrado
 // Panel Legal — Herramienta de multas por trabajo no registrado
+import { exportarPDF, exportarCSV } from './exportar.js';
 
 export function initLey24013(container) {
   container.innerHTML = `
@@ -8,8 +9,8 @@ export function initLey24013(container) {
 
       <div class="form-row">
         <div class="field-group">
-          <label for="l24-caratula">Carátula / Expediente</label>
-          <input type="text" id="l24-caratula" placeholder="Ej: Pérez c/ Empresa SA" autocomplete="off">
+          <label for="l24-empleador">Empleador / Demandada</label>
+          <input type="text" id="l24-empleador" placeholder="Ej: Empresa SA" autocomplete="off">
         </div>
         <div class="field-group">
           <label for="l24-nombre">Nombre del trabajador</label>
@@ -103,17 +104,16 @@ export function initLey24013(container) {
       .field-error { color:#e53935;font-size:.78rem;display:block;min-height:1rem;margin-top:2px; }
       input.error,select.error { border-color:#e53935!important;box-shadow:0 0 0 2px rgba(229,57,53,.18); }
       .l24-tabla { width:100%;border-collapse:collapse;margin-top:1rem; }
-      .l24-tabla th { text-align:left;padding:.5rem .7rem;background:var(--color-card,#1e2130);color:var(--color-accent,#7c8cf8);font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--color-accent,#7c8cf8); }
+      .l24-tabla th { text-align:left;padding:.5rem .7rem;background:var(--color-card,#1e2130);color:var(--color-accent,#c9a84c);font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--color-accent,#c9a84c); }
       .l24-tabla td { padding:.5rem .7rem;border-bottom:1px solid rgba(255,255,255,.07);font-size:.95rem; }
       .l24-tabla .monto { text-align:right;font-variant-numeric:tabular-nums; }
-      .l24-tabla .total-row td { font-weight:700;background:rgba(124,140,248,.10);color:var(--color-accent,#7c8cf8);font-size:1.05rem; }
-      .l24-total-grande { font-size:1.6rem;font-weight:800;color:var(--color-accent,#7c8cf8);margin-top:1rem;text-align:right; }
+      .l24-tabla .total-row td { font-weight:700;background:rgba(201,168,76,.10);color:var(--color-accent,#c9a84c);font-size:1.05rem; }
+      .l24-total-grande { font-size:1.6rem;font-weight:800;color:var(--color-accent,#c9a84c);margin-top:1rem;text-align:right; }
       .l24-aviso-noprocede { background:rgba(229,57,53,.12);border-left:3px solid #e53935;padding:.8rem 1rem;border-radius:4px;color:#e57373;font-weight:600; }
     `;
     document.head.appendChild(st);
   }
 
-  // Mostrar/ocultar campos condicionales
   container.querySelector('#l24-art9').addEventListener('change', function () {
     container.querySelector('#l24-art9-campos').style.display = this.checked ? 'block' : 'none';
   });
@@ -145,7 +145,7 @@ export function initLey24013(container) {
     resultDiv.style.display = 'none';
     resultDiv.innerHTML = '';
 
-    const caratula     = container.querySelector('#l24-caratula').value.trim();
+    const empleador    = container.querySelector('#l24-empleador').value.trim();
     const nombre       = container.querySelector('#l24-nombre').value.trim();
     const inicioStr    = container.querySelector('#l24-inicio-real').value;
     const telegramStr  = container.querySelector('#l24-telegrama').value;
@@ -155,6 +155,11 @@ export function initLey24013(container) {
     const art10        = container.querySelector('#l24-art10').checked;
     const art11        = container.querySelector('#l24-art11').checked;
     const regularizo   = container.querySelector('#l24-regularizo').checked;
+
+    // Auto-carátula
+    const autoCaratula = nombre && empleador
+      ? `${nombre} c/ ${empleador} s/ Cobro de Multas Ley 24013`
+      : (nombre ? `${nombre} s/ Cobro de Multas Ley 24013` : '');
 
     let valid = true;
 
@@ -203,45 +208,46 @@ export function initLey24013(container) {
 
     if (!valid) return;
 
-    const inicio   = new Date(inicioStr   + 'T00:00:00');
+    const inicio    = new Date(inicioStr   + 'T00:00:00');
     const telegrama = new Date(telegramStr + 'T00:00:00');
 
-    // Meses no registrados (período inicio real → telegrama)
     let mesesNR = (telegrama.getFullYear() - inicio.getFullYear()) * 12
                 + (telegrama.getMonth() - inicio.getMonth());
     if (telegrama.getDate() < inicio.getDate()) mesesNR--;
     if (mesesNR < 0) mesesNR = 0;
-    // Al menos 1 mes para que tenga sentido
     const mesesNRDisplay = mesesNR === 0 ? 1 : mesesNR;
 
-    // Calcular multas base
     const mult = art11 ? 2 : 1;
 
     let multa8 = 0, multa8Base = '', multa8Label = '';
     if (art8) {
-      multa8 = rem * mesesNRDisplay * 0.25 * mult;
-      multa8Label = `Art. 8 — No registro${art11 ? ' (×2 art. 11)' : ''}`;
-      multa8Base  = `${fmt(rem)} × ${mesesNRDisplay} mes(es) × 25%${art11 ? ' × 2' : ''}`;
+      multa8       = rem * mesesNRDisplay * 0.25 * mult;
+      multa8Label  = `Art. 8 — No registro${art11 ? ' (×2 art. 11)' : ''}`;
+      multa8Base   = `${fmt(rem)} × ${mesesNRDisplay} mes(es) × 25%${art11 ? ' × 2' : ''}`;
     }
 
     let multa9 = 0, multa9Base = '', multa9Label = '';
     if (art9) {
-      multa9 = rem * mesesArt9 * 0.25 * mult;
-      multa9Label = `Art. 9 — Subregistro fecha de ingreso${art11 ? ' (×2 art. 11)' : ''}`;
-      multa9Base  = `${fmt(rem)} × ${mesesArt9} mes(es) de diferencia × 25%${art11 ? ' × 2' : ''}`;
+      multa9       = rem * mesesArt9 * 0.25 * mult;
+      multa9Label  = `Art. 9 — Subregistro fecha de ingreso${art11 ? ' (×2 art. 11)' : ''}`;
+      multa9Base   = `${fmt(rem)} × ${mesesArt9} mes(es) de diferencia × 25%${art11 ? ' × 2' : ''}`;
     }
 
     let multa10 = 0, multa10Base = '', multa10Label = '';
     if (art10) {
-      const difRem = rem - remConsignada;
-      multa10 = difRem * mesesNRDisplay * 0.25 * mult;
-      multa10Label = `Art. 10 — Remuneración subregistrada${art11 ? ' (×2 art. 11)' : ''}`;
-      multa10Base  = `(${fmt(rem)} − ${fmt(remConsignada)}) × ${mesesNRDisplay} mes(es) × 25%${art11 ? ' × 2' : ''}`;
+      const difRem  = rem - remConsignada;
+      multa10       = difRem * mesesNRDisplay * 0.25 * mult;
+      multa10Label  = `Art. 10 — Remuneración subregistrada${art11 ? ' (×2 art. 11)' : ''}`;
+      multa10Base   = `(${fmt(rem)} − ${fmt(remConsignada)}) × ${mesesNRDisplay} mes(es) × 25%${art11 ? ' × 2' : ''}`;
     }
 
-    const total = multa8 + multa9 + multa10;
+    const total    = multa8 + multa9 + multa10;
+    const conceptos = [
+      { label: multa8Label,  monto: multa8,  base: multa8Base,  activo: art8 },
+      { label: multa9Label,  monto: multa9,  base: multa9Base,  activo: art9 },
+      { label: multa10Label, monto: multa10, base: multa10Base, activo: art10 },
+    ];
 
-    // ── RENDER ─────────────────────────────────────────────────────────────
     if (regularizo) {
       resultDiv.innerHTML = `
         <div class="l24-aviso-noprocede">
@@ -258,19 +264,14 @@ export function initLey24013(container) {
       return;
     }
 
-    const headerInfo = (nombre || caratula)
+    const headerInfo = (nombre || empleador)
       ? `<div class="stats-row" style="margin-bottom:.8rem;">
            ${nombre   ? `<span class="stat-chip">${nombre}</span>`   : ''}
-           ${caratula ? `<span class="stat-chip">${caratula}</span>` : ''}
+           ${empleador ? `<span class="stat-chip">${empleador}</span>` : ''}
          </div>`
       : '';
 
     let filas = '';
-    const conceptos = [
-      { label: multa8Label,  monto: multa8,  base: multa8Base,  activo: art8 },
-      { label: multa9Label,  monto: multa9,  base: multa9Base,  activo: art9 },
-      { label: multa10Label, monto: multa10, base: multa10Base, activo: art10 },
-    ];
     for (const c of conceptos) {
       if (!c.activo) continue;
       filas += `
@@ -283,6 +284,7 @@ export function initLey24013(container) {
 
     resultDiv.innerHTML = `
       ${headerInfo}
+      ${autoCaratula ? `<div style="font-size:.85rem;color:var(--color-muted);margin-bottom:.8rem;font-style:italic;">${autoCaratula}</div>` : ''}
       <div class="display-box" style="margin-bottom:1rem;">
         <strong>Período no registrado:</strong> ${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')} (${mesesNRDisplay} mes(es))<br>
         <strong>Remuneración real:</strong> ${fmt(rem)}<br>
@@ -313,20 +315,24 @@ export function initLey24013(container) {
         <strong style="color:rgba(255,200,50,.9);">Notas:</strong><br>
         • Las multas no proceden si el empleador regularizó dentro de los 30 días de la intimación fehaciente.<br>
         • Se requiere intimación previa al empleador (art. 11 Ley 24013) y al AFIP (art. 47 dec. 1043/2001).<br>
-        • Arts. 8, 9 y 10: no acumulables entre sí por el mismo período cuando encubren el mismo incumplimiento (verificar doctrina y jurisprudencia local).
+        • Arts. 8, 9 y 10: no acumulables entre sí por el mismo período cuando encubren el mismo incumplimiento.
       </div>
 
-      <div style="margin-top:1rem;">
-        <button class="btn btn-ghost" id="l24-copiar">Copiar resumen</button>
+      <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:10px;">
+        <button class="btn btn-ghost" id="l24-copiar">📋 Copiar resumen</button>
+        <button class="btn btn-ghost" id="l24-pdf">📄 Exportar PDF</button>
+        <button class="btn btn-ghost" id="l24-csv">📊 Exportar CSV</button>
       </div>
     `;
     resultDiv.style.display = 'block';
 
+    // — Copiar resumen
     container.querySelector('#l24-copiar').addEventListener('click', () => {
       let texto = `LEY 24013 — EMPLEO NO REGISTRADO\n`;
       texto += `${'='.repeat(50)}\n`;
-      if (nombre)   texto += `Trabajador: ${nombre}\n`;
-      if (caratula) texto += `Carátula:   ${caratula}\n`;
+      if (nombre)       texto += `Trabajador: ${nombre}\n`;
+      if (empleador)    texto += `Empleador:  ${empleador}\n`;
+      if (autoCaratula) texto += `Carátula:   ${autoCaratula}\n`;
       texto += `Período no registrado: ${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')} (${mesesNRDisplay} mes(es))\n`;
       texto += `Remuneración real: ${fmt(rem)}\n`;
       if (art11) texto += `Art. 11: ACTIVO (multas duplicadas)\n`;
@@ -341,8 +347,54 @@ export function initLey24013(container) {
       navigator.clipboard.writeText(texto).then(() => {
         const b = container.querySelector('#l24-copiar');
         b.textContent = 'Copiado!';
-        setTimeout(() => { b.textContent = 'Copiar resumen'; }, 2000);
+        setTimeout(() => { b.textContent = '📋 Copiar resumen'; }, 2000);
       });
+    });
+
+    // — Exportar PDF
+    container.querySelector('#l24-pdf').addEventListener('click', () => {
+      const filasHtml = conceptos.filter(c => c.activo).map(c => `
+        <tr>
+          <td>${c.label}</td>
+          <td class="monto">${fmt(c.monto)}</td>
+          <td style="font-size:11px;color:#777">${c.base}</td>
+        </tr>`).join('') + `
+        <tr class="total-row">
+          <td>TOTAL MULTAS LEY 24013</td>
+          <td class="monto">${fmt(total)}</td>
+          <td></td>
+        </tr>`;
+      const html = `
+        ${autoCaratula ? `<div class="info-box"><strong>Carátula:</strong> ${autoCaratula}</div>` : ''}
+        <div class="info-box">
+          ${nombre   ? `<strong>Trabajador:</strong> ${nombre}<br>` : ''}
+          ${empleador ? `<strong>Empleador:</strong> ${empleador}<br>` : ''}
+          <strong>Período no registrado:</strong> ${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')} (${mesesNRDisplay} mes(es))<br>
+          <strong>Remuneración real:</strong> ${fmt(rem)}
+          ${art11 ? '<br><strong>Art. 11 activo: multas duplicadas</strong>' : ''}
+        </div>
+        <table>
+          <thead><tr><th>Concepto</th><th>Multa</th><th>Base de cálculo</th></tr></thead>
+          <tbody>${filasHtml}</tbody>
+        </table>
+        <div class="result-big">TOTAL: ${fmt(total)}</div>`;
+      exportarPDF('Ley 24013 — Empleo No Registrado', html);
+    });
+
+    // — Exportar CSV
+    container.querySelector('#l24-csv').addEventListener('click', () => {
+      const csvFilas = [
+        ['Concepto', 'Multa ($)', 'Base de cálculo'],
+        ...conceptos.filter(c => c.activo).map(c => [c.label, c.monto.toFixed(2), c.base]),
+        ['TOTAL MULTAS LEY 24013', total.toFixed(2), ''],
+        ['', '', ''],
+        ['Trabajador', nombre, ''],
+        ['Empleador', empleador, ''],
+        ['Carátula', autoCaratula, ''],
+        ['Remuneración real', rem.toFixed(2), ''],
+        ['Período no registrado', `${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')}`, `${mesesNRDisplay} mes(es)`],
+      ];
+      exportarCSV('Ley24013' + (nombre ? '_' + nombre : ''), csvFilas);
     });
   }
 }
