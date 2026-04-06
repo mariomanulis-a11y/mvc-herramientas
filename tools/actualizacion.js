@@ -1,10 +1,12 @@
 // Calculadora de Actualización Monetaria — IPC / CER / RIPTE
+import { exportarPDF, exportarCSV } from './exportar.js';
+
 export function initActualizacion(container) {
 
   const INDICES = {
     ipc:   { label: 'IPC (Índice de Precios al Consumidor)',            id: '148.3_INIVELNAL_DICI_M_26', freq: 'mensual' },
-    cer:   { label: 'CER (Coeficiente de Estabilización de Referencia)', id: '174.1_CER_0_D_20',         freq: 'diario'  },
-    ripte: { label: 'RIPTE (Rem. Imponible Prom. Trab. Estables)',      id: '117.3_RIPTE_0_M_17',       freq: 'mensual' },
+    cer:   { label: 'CER (Coeficiente de Estabilización de Referencia)', id: '94.2_CD_D_0_0_10',          freq: 'diario'  },
+    ripte: { label: 'RIPTE (Rem. Imponible Prom. Trab. Estables)',      id: '158.1_REPTE_0_0_5',         freq: 'mensual' },
   };
 
   // ── HTML ───────────────────────────────────────────────────────────────────
@@ -231,9 +233,11 @@ export function initActualizacion(container) {
       </div>`;
     }
 
-    // Botón copiar
-    html += `<div style="margin-top:16px">
-      <button class="btn btn-ghost" id="act-copiar-res">Copiar resumen</button>
+    // Botones exportar
+    html += `<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px">
+      <button class="btn btn-ghost" id="act-copiar-res">📋 Copiar resumen</button>
+      <button class="btn btn-ghost" id="act-pdf-res">📄 Exportar PDF</button>
+      <button class="btn btn-ghost" id="act-csv-res">📊 Exportar CSV</button>
     </div>`;
 
     divRes.innerHTML = html;
@@ -247,6 +251,55 @@ export function initActualizacion(container) {
       navigator.clipboard.writeText(divRes._resumen).catch(() => {
         prompt('Copie el texto:', divRes._resumen);
       });
+    });
+
+    // — Exportar PDF
+    container.querySelector('#act-pdf-res').addEventListener('click', () => {
+      const filasHtml = resultados.map(r => r.error
+        ? `<tr style="color:#c00"><td>${r.label}</td><td colspan="4">ERROR: ${r.error}</td></tr>`
+        : `<tr>
+            <td>${r.label}</td>
+            <td style="text-align:right">${fmtCoef(r.vInicio)}</td>
+            <td style="text-align:right">${fmtCoef(r.vFin)}</td>
+            <td style="text-align:right">${fmtCoef(r.coef)}</td>
+            <td style="text-align:right;font-weight:700">$ ${fmt(r.montoActualizado)}</td>
+           </tr>`
+      ).join('');
+      const promHtml = exitosos.length >= 2
+        ? `<div class="result-big">Promedio: $ ${fmt(exitosos.reduce((s, r) => s + r.montoActualizado, 0) / exitosos.length)}</div>` : '';
+      const html = `
+        ${caratula ? `<div class="info-box"><strong>Carátula:</strong> ${caratula}</div>` : ''}
+        <div class="info-box">
+          <strong>Monto original:</strong> $ ${fmt(monto)}<br>
+          <strong>Período:</strong> ${inDesde.value} → ${inHasta.value}
+        </div>
+        <table>
+          <thead><tr><th>Índice</th><th>Valor inicio</th><th>Valor fin</th><th>Coeficiente</th><th>Monto actualizado</th></tr></thead>
+          <tbody>${filasHtml}</tbody>
+        </table>
+        ${promHtml}`;
+      exportarPDF('Actualización Monetaria', html);
+    });
+
+    // — Exportar CSV
+    container.querySelector('#act-csv-res').addEventListener('click', () => {
+      const csvFilas = [
+        ['Índice', 'Valor inicio', 'Valor fin', 'Coeficiente', 'Monto actualizado ($)'],
+        ...resultados.map(r => r.error
+          ? [r.label, 'ERROR', r.error, '', '']
+          : [r.label, fmtCoef(r.vInicio), fmtCoef(r.vFin), fmtCoef(r.coef), r.montoActualizado.toFixed(2)]
+        ),
+        ['', '', '', '', ''],
+        ['Monto original ($)', monto.toFixed(2), '', '', ''],
+        ['Período desde', inDesde.value, '', '', ''],
+        ['Período hasta', inHasta.value, '', '', ''],
+        ['Carátula', caratula, '', '', ''],
+      ];
+      if (exitosos.length >= 2) {
+        const prom = exitosos.reduce((s, r) => s + r.montoActualizado, 0) / exitosos.length;
+        csvFilas.push(['Promedio actualizado ($)', prom.toFixed(2), '', '', '']);
+      }
+      exportarCSV('Actualizacion_Monetaria', csvFilas);
     });
   });
 
