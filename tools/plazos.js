@@ -1,4 +1,6 @@
 // Calculadora de Plazos Procesales — CPCC Buenos Aires
+import { exportarPDF, exportarCSV } from './exportar.js';
+
 export function initPlazos(container) {
   // ── Feriados nacionales fijos (MM-DD) ──────────────────────────────────────
   const FERIADOS_FIJOS = new Set([
@@ -58,7 +60,11 @@ export function initPlazos(container) {
       <div id="pl-sesion-wrapper" style="display:none;margin-top:32px">
         <h3>Plazos de la sesión</h3>
         <div id="pl-sesion-lista"></div>
-        <button class="btn btn-ghost" id="pl-sesion-copiar" style="margin-top:10px">Copiar resumen</button>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">
+          <button class="btn btn-ghost" id="pl-sesion-copiar">📋 Copiar resumen</button>
+          <button class="btn btn-ghost" id="pl-sesion-pdf">📄 Exportar PDF</button>
+          <button class="btn btn-ghost" id="pl-sesion-csv">📊 Exportar CSV</button>
+        </div>
       </div>
     </div>`;
 
@@ -303,5 +309,35 @@ export function initPlazos(container) {
     navigator.clipboard.writeText('PLAZOS PROCESALES\n\n' + texto).catch(() => {
       prompt('Copie el texto:', 'PLAZOS PROCESALES\n\n' + texto);
     });
+  });
+
+  container.querySelector('#pl-sesion-pdf').addEventListener('click', () => {
+    if (!sesionPlazos.length) return;
+    const filasHtml = sesionPlazos.map((p, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${p.desc}</td>
+        <td>${p.fechaInicio}</td>
+        <td>${p.cantidad} ${p.tipo}</td>
+        <td style="font-weight:700">${p.vencimiento} (${p.dow})</td>
+        <td style="color:#856404;font-size:11px">${p.advertencia || ''}</td>
+      </tr>`).join('');
+    const html = `
+      <table>
+        <thead><tr><th>#</th><th>Descripción</th><th>Inicio</th><th>Plazo</th><th>Vencimiento</th><th>Aviso</th></tr></thead>
+        <tbody>${filasHtml}</tbody>
+      </table>`;
+    exportarPDF('Plazos Procesales — CPCC Buenos Aires', html);
+  });
+
+  container.querySelector('#pl-sesion-csv').addEventListener('click', () => {
+    if (!sesionPlazos.length) return;
+    const csvFilas = [
+      ['#', 'Descripción', 'Fecha inicio', 'Cantidad', 'Tipo', 'Vencimiento', 'Día semana', 'Advertencia'],
+      ...sesionPlazos.map((p, i) => [
+        i + 1, p.desc, p.fechaInicio, p.cantidad, p.tipo, p.vencimiento, p.dow, p.advertencia || '',
+      ]),
+    ];
+    exportarCSV('Plazos_Procesales', csvFilas);
   });
 }
