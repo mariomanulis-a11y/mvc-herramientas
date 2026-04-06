@@ -1,6 +1,7 @@
 // Calculadora de Intereses Judiciales — Tasas BPBA (Provincia de Buenos Aires)
 // Período 1: 6% anual (fallo Vera/doctrina civil)
 // Período 2: Tasa pasiva digital plazo fijo 30 días BPBA
+import { exportarPDF, exportarCSV } from './exportar.js';
 
 export function initIntereses(container) {
   // ─── Tabla de tasas BPBA ────────────────────────────────────────────────────
@@ -355,12 +356,12 @@ export function initIntereses(container) {
         <div style="overflow-x:auto;margin-top:.75rem">
           <table style="width:100%;border-collapse:collapse;font-size:.875rem">
             <thead>
-              <tr style="background:var(--color-surface-2,#f0f0f0)">
-                <th style="text-align:left;padding:.4rem .6rem">Sub-período</th>
-                <th style="padding:.4rem .6rem">Tasa anual</th>
-                <th style="padding:.4rem .6rem">Días</th>
-                <th style="text-align:right;padding:.4rem .6rem">Monto base</th>
-                <th style="text-align:right;padding:.4rem .6rem">Interés</th>
+              <tr style="background:var(--color-card,#162030)">
+                <th style="text-align:left;padding:.4rem .6rem;color:var(--color-accent,#c9a84c);border-bottom:2px solid var(--color-accent,#c9a84c);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em">Sub-período</th>
+                <th style="padding:.4rem .6rem;color:var(--color-accent,#c9a84c);border-bottom:2px solid var(--color-accent,#c9a84c);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em">Tasa anual</th>
+                <th style="padding:.4rem .6rem;color:var(--color-accent,#c9a84c);border-bottom:2px solid var(--color-accent,#c9a84c);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em">Días</th>
+                <th style="text-align:right;padding:.4rem .6rem;color:var(--color-accent,#c9a84c);border-bottom:2px solid var(--color-accent,#c9a84c);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em">Monto base</th>
+                <th style="text-align:right;padding:.4rem .6rem;color:var(--color-accent,#c9a84c);border-bottom:2px solid var(--color-accent,#c9a84c);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em">Interés</th>
               </tr>
             </thead>
             <tbody>${filasTabla}</tbody>
@@ -377,12 +378,61 @@ export function initIntereses(container) {
         </div>
       </div>
 
-      <div class="form-row">
-        <button class="btn btn-success" id="int-btn-copiar">Copiar resumen</button>
+      <div class="form-row" style="flex-wrap:wrap;gap:10px">
+        <button class="btn btn-success" id="int-btn-copiar">📋 Copiar resumen</button>
+        <button class="btn btn-ghost"   id="int-btn-pdf">📄 Exportar PDF</button>
+        <button class="btn btn-ghost"   id="int-btn-csv">📊 Exportar CSV</button>
       </div>
     `;
 
-    // Copiar resumen
+    // — Exportar PDF
+    container.querySelector('#int-btn-pdf').addEventListener('click', () => {
+      const filasHtml = subperiodos.map(sp => `
+        <tr>
+          <td>${fmtDate(sp.desde)} — ${fmtDate(sp.hasta)}</td>
+          <td style="text-align:center">${sp.tasa.toFixed(2)}%</td>
+          <td style="text-align:center">${sp.dias}</td>
+          <td class="monto">$ ${fmt(sp.montoBase)}</td>
+          <td class="monto">$ ${fmt(sp.interes)}</td>
+        </tr>`).join('');
+      const html = `
+        ${caratula ? `<div class="info-box"><strong>Carátula:</strong> ${caratula}</div>` : ''}
+        <div class="info-box">
+          <strong>Capital original:</strong> $ ${fmt(capital)}<br>
+          <strong>Período 1 (6% anual, fallo Vera):</strong> ${fmtDate(fechaHecho)} → ${fmtDate(fechaDet)} (${diasP1} días)<br>
+          <strong>Intereses Período 1:</strong> $ ${fmt(interesP1)}<br>
+          <strong>Monto capitalizado:</strong> $ ${fmt(montoCapitalizado)}
+        </div>
+        <p style="font-weight:700;margin:14px 0 6px">Período 2 — Tasa pasiva digital BPBA</p>
+        <table>
+          <thead><tr>
+            <th>Sub-período</th><th>Tasa anual</th><th>Días</th><th>Monto base</th><th>Interés</th>
+          </tr></thead>
+          <tbody>${filasHtml}</tbody>
+        </table>
+        <div class="info-box"><strong>Intereses Período 2:</strong> $ ${fmt(interesP2)}</div>
+        <div class="result-big">TOTAL: $ ${fmt(totalReclamar)}</div>`;
+      exportarPDF('Liquidación de Intereses Judiciales — BPBA', html);
+    });
+
+    // — Exportar CSV
+    container.querySelector('#int-btn-csv').addEventListener('click', () => {
+      const filas = [
+        ['Sub-período (desde)', 'Sub-período (hasta)', 'Tasa anual (%)', 'Días', 'Monto base ($)', 'Interés ($)'],
+        ...subperiodos.map(sp => [
+          fmtDate(sp.desde), fmtDate(sp.hasta),
+          sp.tasa.toFixed(2), sp.dias,
+          sp.montoBase.toFixed(2), sp.interes.toFixed(2),
+        ]),
+        ['', '', '', '', 'Capital original', capital.toFixed(2)],
+        ['', '', '', '', 'Intereses P1 (6% anual)', interesP1.toFixed(2)],
+        ['', '', '', '', 'Intereses P2 (BPBA)', interesP2.toFixed(2)],
+        ['', '', '', '', 'TOTAL', totalReclamar.toFixed(2)],
+      ];
+      exportarCSV('Intereses_BPBA' + (caratula ? '_' + caratula : ''), filas);
+    });
+
+    // — Copiar resumen
     container.querySelector('#int-btn-copiar').addEventListener('click', () => {
       const lineasTabla = subperiodos.map(sp =>
         `  ${fmtDate(sp.desde)} – ${fmtDate(sp.hasta)} | ${sp.tasa.toFixed(2)}% anual | ${sp.dias} días | $ ${fmt(sp.interes)}`
