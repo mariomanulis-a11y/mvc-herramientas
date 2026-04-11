@@ -436,26 +436,41 @@ export async function callApi(userMessage, previousMessages = [], attachments = 
     messages
   };
 
-  const response = await fetch(CONFIG.API_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type":    "application/json",
-      "x-api-key":       apiKey,
-      "anthropic-version": CONFIG.ANTHROPIC_VERSION,
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify(body)
-  });
+  const MAX_RETRIES = 3;
+  let lastError;
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, err?.error?.message || response.statusText);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const response = await fetch(CONFIG.API_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type":    "application/json",
+        "x-api-key":       apiKey,
+        "anthropic-version": CONFIG.ANTHROPIC_VERSION,
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (response.status === 429 && attempt < MAX_RETRIES) {
+      // Retry-After header or exponential backoff: 5s, 10s, 20s
+      const retryAfter = parseInt(response.headers.get("retry-after") || "0", 10);
+      const waitMs = retryAfter > 0 ? retryAfter * 1000 : (5000 * Math.pow(2, attempt));
+      await new Promise(r => setTimeout(r, waitMs));
+      continue;
+    }
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new ApiError(response.status, err?.error?.message || response.statusText);
+    }
+
+    const data = await response.json();
+    const text = data?.content?.[0]?.text;
+    if (!text) throw new Error("La API no retornó contenido válido.");
+    return text;
   }
 
-  const data = await response.json();
-  const text = data?.content?.[0]?.text;
-  if (!text) throw new Error("La API no retornó contenido válido.");
-  return text;
+  throw lastError || new ApiError(429, "Límite de solicitudes alcanzado tras varios reintentos.");
 }
 
 // ─── Errores ──────────────────────────────────────────────────────────────────
@@ -472,7 +487,7 @@ function getFriendlyError(error) {
   if (error instanceof ApiError) {
     switch (error.status) {
       case 401: return "API key inválida. Verificá la configuración (⚙).";
-      case 429: return "Límite de solicitudes alcanzado. Esperá un momento.";
+      case 429: return "Límite de solicitudes de Anthropic alcanzado. Se reintentó automáticamente. Si el problema persiste, esperá unos minutos o considerá aumentar el tier de tu cuenta en console.anthropic.com.";
       case 500: return "Error en los servidores de Anthropic. Reintentá en unos minutos.";
       case 529: return "Servidores de Anthropic sobrecargados. Reintentá más tarde.";
       default:  return `Error de API (${error.status}): ${error.message}`;

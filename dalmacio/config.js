@@ -18,7 +18,7 @@ export const CONFIG = {
   ANTHROPIC_VERSION: "2023-06-01",
 
   // Tokens máximos en la respuesta
-  MAX_TOKENS: 4096,
+  MAX_TOKENS: 8192,
 
   // Temperatura (0 = determinístico, 1 = creativo)
   // Para redacción legal preferimos baja temperatura
