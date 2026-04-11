@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dalmacio — Asistente Jurídico | Estudio Manulis</title>
+  <meta name="description" content="Asistente jurídico inteligente del Estudio Jurídico Manulis, San Isidro." />
+
+  <!-- Google Fonts: Cormorant Garamond (títulos) + Inter (interfaz) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Marked.js para renderizar Markdown en el chat -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- docx.js (opcional, para exportación Word) -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       VARIABLES Y RESET
+    ═══════════════════════════════════════════════ */
+    :root {
+      --bg-primary:    #08101e;
+      --bg-secondary:  #0d1a2e;
+      --bg-tertiary:   #112240;
+      --bg-surface:    #162a45;
+      --bg-hover:      #1c3357;
+
+      --gold:          #c9a84c;
+      --gold-light:    #e0c070;
+      --gold-dim:      #8a6d2a;
+
+      --text-primary:  #e8eaf0;
+      --text-secondary:#9aa8be;
+      --text-muted:    #5a6a82;
+
+      --border:        #1e3050;
+      --border-light:  #2a4570;
+
+      --error:         #e05555;
+      --success:       #4caf7a;
+      --warning:       #e0a020;
+
+      --radius-sm:     6px;
+      --radius-md:     10px;
+      --radius-lg:     16px;
+
+      --font-serif:    'Cormorant Garamond', Georgia, serif;
+      --font-sans:     'Inter', system-ui, sans-serif;
+
+      --sidebar-width: 300px;
+      --toolbar-height: 58px;
+      --transition:    0.2s ease;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════
+       LAYOUT PRINCIPAL
+    ═══════════════════════════════════════════════ */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* HEADER */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: var(--toolbar-height);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .header__brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .header__logo {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+
+    .header__subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    /* TOOLBAR — módulos */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .toolbar__btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .toolbar__btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .toolbar__btn.active {
+      background: var(--bg-tertiary);
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    .toolbar__btn .btn-icon {
+      font-size: 14px;
+    }
+
+    /* ACCIONES DE HEADER */
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .btn-icon-header:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* MÓDULO ACTIVO BADGE */
+    .module-badge {
+      font-size: 11px;
+      color: var(--gold);
+      background: rgba(201, 168, 76, 0.1);
+      border: 1px solid var(--gold-dim);
+      border-radius: 20px;
+      padding: 2px 10px;
+      white-space: nowrap;
+    }
+
+    /* BODY DE LA APP */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: width var(--transition);
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+    }
+
+    .sidebar__header {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar__title {
+      font-family: var(--font-serif);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .sidebar__actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Formulario del caso */
+    .sidebar__form {
+      padding: 12px 14px;
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color var(--transition);
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      line-height: 1.5;
+    }
+
+    .form-group select option {
+      background: var(--bg-tertiary);
+    }
+
+    /* Lista de casos */
+    .sidebar__cases {
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar__cases-header {
+      padding: 10px 14px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    #case-list {
+      list-style: none;
+      max-height: 180px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .case-list__empty {
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .case-list__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .case-list__item:hover {
+      background: var(--bg-hover);
+    }
+
+    .case-list__item.active {
+      background: var(--bg-tertiary);
+      border-left: 2px solid var(--gold);
+    }
+
+    .case-list__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .case-list__name {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .case-list__meta {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .case-list__actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .btn-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* ═══════════════════════════════════════════════
+       PANEL PRINCIPAL DE CHAT
+    ═══════════════════════════════════════════════ */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-primary);
+    }
+
+    /* Subheader del chat */
+    .chat-subheader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-subheader__case {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .chat-subheader__case strong {
+      color: var(--text-primary);
+    }
+
+    .chat-subheader__actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Mensajes */
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .message {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      grid-template-rows: auto auto;
+      column-gap: 12px;
+      row-gap: 2px;
+      max-width: 860px;
+    }
+
+    .message--user {
+      margin-left: auto;
+      grid-template-columns: 1fr 32px;
+      direction: rtl;
+    }
+
+    .message--user > * {
+      direction: ltr;
+    }
+
+    .message__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      align-self: start;
+    }
+
+    .message--user .message__avatar {
+      background: var(--bg-surface);
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+    }
+
+    .message--assistant .message__avatar {
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      color: var(--bg-primary);
+    }
+
+    .message--error .message__avatar {
+      background: var(--error);
+      color: white;
+    }
+
+    .message--system .message__avatar {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+    }
+
+    .message__content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+
+    .message--user .message__content {
+      background: var(--bg-tertiary);
+      border-color: var(--border-light);
+    }
+
+    .message--error .message__content {
+      background: rgba(224, 85, 85, 0.08);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .message__timestamp {
+      grid-column: 2;
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    .message--user .message__timestamp {
+      text-align: right;
+    }
+
+    /* Contenido Markdown en mensajes */
+    .message__content h1,
+    .message__content h2,
+    .message__content h3 {
+      font-family: var(--font-serif);
+      color: var(--gold-light);
+      margin: 12px 0 6px;
+    }
+
+    .message__content h1 { font-size: 18px; }
+    .message__content h2 { font-size: 16px; }
+    .message__content h3 { font-size: 14px; }
+
+    .message__content p { margin-bottom: 8px; }
+
+    .message__content strong {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    .message__content ul, .message__content ol {
+      margin: 6px 0 8px 20px;
+    }
+
+    .message__content li { margin-bottom: 4px; }
+
+    .message__content code {
+      background: var(--bg-tertiary);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .message__content pre {
+      background: var(--bg-tertiary);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      font-size: 12px;
+      margin: 8px 0;
+    }
+
+    .message__content blockquote {
+      border-left: 3px solid var(--gold-dim);
+      padding-left: 12px;
+      margin: 8px 0;
+      color: var(--text-secondary);
+    }
+
+    .message__content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 12px 0;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .typing-indicator span {
+      width: 7px;
+      height: 7px;
+      background: var(--gold-dim);
+      border-radius: 50%;
+      animation: typing-bounce 1.2s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing-bounce {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+      40%            { transform: scale(1.0); opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       INPUT DEL CHAT
+    ═══════════════════════════════════════════════ */
+    .chat-input-area {
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      transition: border-color var(--transition);
+    }
+
+    .chat-input-wrapper:focus-within {
+      border-color: var(--gold-dim);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      line-height: 1.5;
+      resize: none;
+      min-height: 22px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #chat-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    #chat-input:disabled {
+      opacity: 0.6;
+    }
+
+    #send-btn {
+      width: 34px;
+      height: 34px;
+      background: var(--gold);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--bg-primary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--transition);
+      font-weight: bold;
+    }
+
+    #send-btn:hover { background: var(--gold-light); }
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .chat-input-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      padding-left: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       BOTONES GENERALES
+    ═══════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all var(--transition);
+    }
+
+    .btn--primary {
+      background: var(--gold);
+      color: var(--bg-primary);
+      border-color: var(--gold);
+    }
+
+    .btn--primary:hover { background: var(--gold-light); }
+
+    .btn--secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border-color: var(--border);
+    }
+
+    .btn--secondary:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border-color: transparent;
+    }
+
+    .btn--ghost:hover {
+      color: var(--text-secondary);
+    }
+
+    .btn--success {
+      border-color: var(--success) !important;
+      color: var(--success) !important;
+    }
+
+    .btn--danger {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .btn--danger:hover {
+      background: rgba(224, 85, 85, 0.1);
+    }
+
+    /* ═══════════════════════════════════════════════
+       MODAL — API KEY
+    ═══════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 16, 30, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal__title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .modal__subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .modal__subtitle a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .modal__field {
+      margin-bottom: 16px;
+    }
+
+    .modal__field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 6px;
+    }
+
+    .modal__field input {
+      width: 100%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color var(--transition);
+      letter-spacing: 1px;
+    }
+
+    .modal__field input:focus { border-color: var(--gold-dim); }
+    .modal__field input.input--error { border-color: var(--error); }
+
+    .modal__note {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
+      border-left: 2px solid var(--gold-dim);
+    }
+
+    .modal__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       DROPDOWN DE EXPORTACIÓN
+    ═══════════════════════════════════════════════ */
+    .export-dropdown {
+      position: relative;
+    }
+
+    .export-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      min-width: 160px;
+      z-index: 100;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .export-menu.open { display: block; }
+
+    .export-menu button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: left;
+    }
+
+    .export-menu button:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* ═══════════════════════════════════════════════
+       TOGGLE DEL SIDEBAR
+    ═══════════════════════════════════════════════ */
+    #sidebar-toggle {
+      display: none;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SCROLLBAR PERSONALIZADA
+    ═══════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+    /* ═══════════════════════════════════════════════
+       RESPONSIVE — MOBILE
+    ═══════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 100%; }
+
+      .app-header { padding: 0 12px; }
+
+      .toolbar { gap: 2px; }
+      .toolbar__btn span:not(.btn-icon) { display: none; }
+      .toolbar__btn { padding: 6px 10px; }
+
+      .header__subtitle { display: none; }
+      .module-badge { display: none; }
+
+      .sidebar {
+        position: absolute;
+        top: var(--toolbar-height);
+        left: 0;
+        bottom: 0;
+        z-index: 200;
+        width: 85%;
+        transform: translateX(-100%);
+        transition: transform var(--transition);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      #sidebar-toggle { display: flex; }
+
+      #chat-messages { padding: 12px; }
+      .chat-input-area { padding: 10px 12px; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       DISCLAIMER EN MENSAJES
+    ═══════════════════════════════════════════════ */
+    .message__content p:last-child:has(> strong) {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--warning);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ════════════════════════════════════════
+       HEADER / TOOLBAR
+  ════════════════════════════════════════ -->
+  <header class="app-header">
+
+    <!-- Marca -->
+    <div class="header__brand">
+      <button id="sidebar-toggle" class="btn-icon-header" title="Mostrar/ocultar panel de caso" aria-label="Toggle sidebar">☰</button>
+      <span class="header__logo">Dalmacio</span>
+      <span class="header__subtitle">Asistente Jurídico</span>
+    </div>
+
+    <!-- Toolbar de módulos -->
+    <nav class="toolbar" role="toolbar" aria-label="Módulos de Dalmacio">
+      <button class="toolbar__btn" id="btn-mod-redactar" title="Redactar escritos judiciales">
+        <span class="btn-icon">📝</span>
+        <span>Redactar</span>
+      </button>
+      <button class="toolbar__btn" id="btn-mod-analizar" title="Analizar hechos jurídicamente">
+        <span class="btn-icon">🔍</span>
+        <span>Analizar</span>
+      </button>
+      <button class="toolbar__btn" id="btn-mod-estrategia" title="Diseñar estrategia procesal">
+        <span class="btn-icon">⚖️</span>
+        <span>Estrategia</span>
+      </button>
+      <button class="toolbar__btn" id="btn-mod-normativa" title="Consultar normativa y jurisprudencia">
+        <span class="btn-icon">📚</span>
+        <span>Normativa</span>
+      </button>
+      <button class="toolbar__btn" id="btn-mod-checklist" title="Generar checklist por tipo de acción">
+        <span class="btn-icon">✅</span>
+        <span>Checklist</span>
+      </button>
+    </nav>
+
+    <!-- Acciones del header -->
+    <div class="header__actions">
+      <span class="module-badge" id="active-module-label">Chat libre</span>
+
+      <!-- Exportar -->
+      <div class="export-dropdown">
+        <button class="btn-icon-header" id="btn-export-toggle" title="Exportar último output" aria-label="Exportar">📥</button>
+        <div class="export-menu" id="export-menu">
+          <button id="btn-export-txt">📄 Exportar como .txt</button>
+          <button id="btn-export-docx">📝 Exportar como .docx</button>
+        </div>
+      </div>
+
+      <!-- Configuración API -->
+      <button class="btn-icon-header" id="btn-open-api-config" title="Configurar API key" aria-label="Configurar">⚙</button>
+    </div>
+
+  </header>
+
+  <!-- BODY -->
+  <div class="app-body">
+
+    <!-- ════════════════════════════════════════
+         SIDEBAR — GESTIÓN DE CASOS
+    ════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar" aria-label="Panel de caso activo">
+
+      <!-- Header del sidebar -->
+      <div class="sidebar__header">
+        <div class="sidebar__title">Caso activo</div>
+        <div id="active-case-label" style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Sin caso seleccionado</div>
+        <div class="sidebar__actions">
+          <button class="btn btn--secondary" id="btn-new-case" style="flex:1">+ Nuevo caso</button>
+          <button class="btn btn--ghost" id="btn-load-demo" title="Cargar caso de demostración">Demo</button>
+        </div>
+      </div>
+
+      <!-- Formulario del caso -->
+      <div class="sidebar__form">
+        <form id="case-form" autocomplete="off" novalidate>
+
+          <!-- ID oculto del caso -->
+          <input type="hidden" id="case-id" />
+
+          <div class="form-group">
+            <label for="case-cliente">Cliente</label>
+            <input type="text" id="case-cliente" placeholder="Nombre del cliente" />
+          </div>
+
+          <div class="form-group">
+            <label for="case-expediente">N° Expediente</label>
+            <input type="text" id="case-expediente" placeholder="PL-XXXX-2025" />
+          </div>
+
+          <div class="form-group">
+            <label for="case-juzgado">Juzgado / Tribunal</label>
+            <input type="text" id="case-juzgado" placeholder="Tribunal de Trabajo N°3..." />
+          </div>
+
+          <div class="form-group">
+            <label for="case-fuero">Fuero</label>
+            <select id="case-fuero">
+              <option value="laboral">Laboral</option>
+              <option value="civil">Civil</option>
+              <option value="comercial">Comercial</option>
+              <option value="consumidor">Defensa del Consumidor</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="case-jurisdiccion">Jurisdicción</label>
+            <input type="text" id="case-jurisdiccion" value="Departamento Judicial San Isidro" />
+          </div>
+
+          <div class="form-group">
+            <label for="case-materia">Materia</label>
+            <input type="text" id="case-materia" placeholder="Despido sin causa — diferencias salariales" />
+          </div>
+
+          <div class="form-group">
+            <label for="case-hechos">Hechos del caso</label>
+            <textarea id="case-hechos" placeholder="Describí los hechos relevantes del caso..."></textarea>
+          </div>
+
+          <button type="button" class="btn btn--primary" id="btn-save-case" style="width:100%">
+            Guardar caso
+          </button>
+
+        </form>
+      </div>
+
+      <!-- Lista de casos guardados -->
+      <div class="sidebar__cases">
+        <div class="sidebar__cases-header">Casos guardados</div>
+        <ul id="case-list"></ul>
+      </div>
+
+    </aside>
+
+    <!-- ════════════════════════════════════════
+         PANEL CENTRAL — CHAT
+    ════════════════════════════════════════ -->
+    <main class="chat-panel" role="main">
+
+      <!-- Subheader del chat -->
+      <div class="chat-subheader">
+        <div class="chat-subheader__case">
+          <strong id="chat-case-display">Sin caso activo</strong>
+        </div>
+        <div class="chat-subheader__actions">
+          <button class="btn btn--ghost" id="btn-clear-chat" title="Limpiar conversación" style="font-size:11px">
+            🗑 Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Historial de mensajes -->
+      <div id="chat-messages" role="log" aria-live="polite" aria-label="Conversación con Dalmacio">
+        <!-- Los mensajes se insertan dinámicamente aquí -->
+      </div>
+
+      <!-- Input del chat -->
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Escribí tu consulta a Dalmacio... (Enter para enviar, Shift+Enter para nueva línea)"
+            aria-label="Mensaje para Dalmacio"
+          ></textarea>
+          <button id="send-btn" title="Enviar mensaje" aria-label="Enviar">↑</button>
+        </div>
+        <p class="chat-input-hint">
+          Enter para enviar · Shift+Enter para nueva línea · Seleccioná un módulo en la barra superior para tareas específicas
+        </p>
+      </div>
+
+    </main>
+
+  </div><!-- /app-body -->
+
+</div><!-- /app -->
+
+<!-- ════════════════════════════════════════
+     MODAL — CONFIGURACIÓN DE API KEY
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="api-key-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <h2 class="modal__title" id="modal-title">Configurar Dalmacio</h2>
+    <p class="modal__subtitle">
+      Ingresá tu API key de Anthropic para activar el asistente.<br />
+      Podés obtenerla en <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.
+    </p>
+
+    <div class="modal__note">
+      🔒 La API key se almacena únicamente en tu navegador (sessionStorage) y nunca se envía a servidores intermedios. Se borra al cerrar la pestaña.
+    </div>
+
+    <div class="modal__field">
+      <label for="api-key-input">Anthropic API Key</label>
+      <input
+        type="password"
+        id="api-key-input"
+        placeholder="sk-ant-api03-..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="modal__actions">
+      <button class="btn btn--ghost" onclick="document.getElementById('api-key-modal').classList.remove('visible')">
+        Cancelar
+      </button>
+      <button class="btn btn--primary" id="btn-save-api-key">
+        Guardar y conectar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
+<script>
+  // Configurar marked.js para renderizado seguro
+  if (window.marked) {
+    window.marked.setOptions({
+      breaks: true,        // \n → <br>
+      gfm: true,           // GitHub Flavored Markdown
+      sanitize: false      // Confiamos en el contenido del LLM (no es input de usuarios externos)
+    });
+  }
+
+  // Toggle del sidebar en mobile
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const sidebar = document.getElementById("sidebar");
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("mobile-open");
+    });
+  }
+
+  // Toggle del dropdown de exportación
+  const exportToggle = document.getElementById("btn-export-toggle");
+  const exportMenu = document.getElementById("export-menu");
+  if (exportToggle && exportMenu) {
+    exportToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      exportMenu.classList.toggle("open");
+    });
+    document.addEventListener("click", () => {
+      exportMenu.classList.remove("open");
+    });
+  }
+</script>
+
+<!-- Módulo principal de Dalmacio (ES Module) -->
+<script type="module" src="./dalmacio.js"></script>
+
+</body>
+</html>
