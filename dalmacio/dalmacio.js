@@ -2,8 +2,8 @@
  * dalmacio.js — Orquestador central del agente jurídico Dalmacio
  * Estudio Jurídico Manulis — San Isidro, Provincia de Buenos Aires
  *
- * Coordina el flujo entre: UI ↔ Módulos ↔ API de Anthropic ↔ Contexto.
- * Es el punto de entrada principal de la aplicación.
+ * Coordina: UI ↔ Módulos ↔ API de Anthropic ↔ Contexto
+ * Soporta: texto, archivos PDF/Word/imágenes, bases de datos externas
  */
 
 import { CONFIG, getApiKey, setApiKey } from "./config.js";
@@ -13,7 +13,7 @@ import {
   appendToHistory,
   buildMessagesFromHistory
 } from "./context.js";
-import { initSidebar, loadCaseIntoForm, renderCaseList } from "./ui/sidebar.js";
+import { initSidebar, loadCaseIntoForm } from "./ui/sidebar.js";
 import {
   appendMessage,
   updateMessage,
@@ -21,122 +21,99 @@ import {
   showError,
   showWelcome,
   setupChatInput,
-  setChatInputDisabled
+  setChatInputDisabled,
+  appendAttachmentChip,
+  clearAttachmentChips
 } from "./ui/chat.js";
 import { exportTxt, exportDocx, suggestFilename } from "./ui/export.js";
-import { redactar } from "./modules/redaccion.js";
-import { analizar } from "./modules/analisis.js";
+import { redactar }   from "./modules/redaccion.js";
+import { analizar }   from "./modules/analisis.js";
 import { estrategia } from "./modules/estrategia.js";
-import { normativa } from "./modules/normativa.js";
-import { checklist } from "./modules/checklist.js";
+import { normativa }  from "./modules/normativa.js";
+import { checklist }  from "./modules/checklist.js";
+import { procesarArchivo, formatearComoTexto } from "./modules/archivos.js";
+import { buscarEnBaseDatos }  from "./modules/buscador.js";
 
-// ─── Estado global del orquestador ─────────────────────────────────────────
+// ─── Estado global ───────────────────────────────────────────────────────────
 
-/** Contexto del caso actualmente activo */
-let activeCaseContext = null;
+let activeCaseContext  = null;
+let lastOutput         = { content: "", modulo: "output" };
+let activeModule       = "chat";
+/** Archivos adjuntos pendientes de enviar con el próximo mensaje */
+let pendingAttachments = [];
 
-/** Último output generado (para exportación) */
-let lastOutput = { content: "", modulo: "output" };
+// ─── Inicialización ──────────────────────────────────────────────────────────
 
-/** Módulo activo en la toolbar */
-let activeModule = "chat";
-
-// ─── Inicialización ─────────────────────────────────────────────────────────
-
-/**
- * Punto de entrada principal. Se llama desde index.html al cargar la página.
- */
 export function init() {
-  // Verificar que la API key esté configurada
   checkApiKeySetup();
-
-  // Inicializar el sidebar con callback de cambio de caso
   initSidebar(onCaseChange);
-
-  // Inicializar el chat input
   setupChatInput(handleUserInput);
-
-  // Configurar botones de módulos en la toolbar
   setupModuleButtons();
-
-  // Configurar botón de exportación
   setupExportButton();
-
-  // Configurar botón de limpiar chat
   setupClearButton();
-
-  // Configurar el modal de API key
   setupApiKeyModal();
-
-  // Mostrar bienvenida
+  setupFileUpload();
+  setupBuscadorPanel();
   showWelcome(null);
 }
 
-// ─── Gestión de API key ─────────────────────────────────────────────────────
+// ─── API Key ─────────────────────────────────────────────────────────────────
 
 function checkApiKeySetup() {
-  if (!getApiKey()) {
-    // Mostrar el modal de configuración si no hay key
-    setTimeout(() => showApiKeyModal(), 500);
-  }
+  if (!getApiKey()) setTimeout(() => showApiKeyModal(), 400);
 }
 
 function showApiKeyModal() {
-  const modal = document.getElementById("api-key-modal");
-  if (modal) modal.classList.add("visible");
+  document.getElementById("api-key-modal")?.classList.add("visible");
 }
 
 function hideApiKeyModal() {
-  const modal = document.getElementById("api-key-modal");
-  if (modal) modal.classList.remove("visible");
+  document.getElementById("api-key-modal")?.classList.remove("visible");
 }
 
 function setupApiKeyModal() {
-  const modal = document.getElementById("api-key-modal");
-  const input = document.getElementById("api-key-input");
+  const input   = document.getElementById("api-key-input");
   const saveBtn = document.getElementById("btn-save-api-key");
   const openBtn = document.getElementById("btn-open-api-config");
 
-  if (saveBtn && input) {
-    saveBtn.addEventListener("click", () => {
-      const key = input.value.trim();
-      if (key.startsWith("sk-ant-")) {
-        setApiKey(key);
-        input.value = "";
-        hideApiKeyModal();
-        showWelcome(activeCaseContext?.cliente || null);
-      } else {
-        input.classList.add("input--error");
-        setTimeout(() => input.classList.remove("input--error"), 1500);
-      }
-    });
-  }
+  saveBtn?.addEventListener("click", () => {
+    const key = input?.value?.trim();
+    if (key?.startsWith("sk-ant-")) {
+      setApiKey(key);
+      if (input) input.value = "";
+      hideApiKeyModal();
+      showWelcome(activeCaseContext?.cliente || null);
+    } else {
+      input?.classList.add("input--error");
+      setTimeout(() => input?.classList.remove("input--error"), 1500);
+    }
+  });
 
-  if (openBtn) {
-    openBtn.addEventListener("click", showApiKeyModal);
-  }
+  openBtn?.addEventListener("click", showApiKeyModal);
 
-  // Cerrar modal con Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") hideApiKeyModal();
   });
 
-  // Cerrar modal al hacer click fuera
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) hideApiKeyModal();
-    });
-  }
+  document.getElementById("api-key-modal")?.addEventListener("click", (e) => {
+    if (e.target.id === "api-key-modal") hideApiKeyModal();
+  });
 }
 
-// ─── Cambio de caso activo ──────────────────────────────────────────────────
+// ─── Cambio de caso ──────────────────────────────────────────────────────────
 
-/**
- * Callback invocado por el sidebar cuando el caso activo cambia.
- * @param {Object|null} caseContext
- */
 function onCaseChange(caseContext) {
   activeCaseContext = caseContext;
+  pendingAttachments = [];
+  clearAttachmentChips();
+
+  // Actualizar subheader
+  const display = document.getElementById("chat-case-display");
+  if (display) {
+    display.textContent = caseContext
+      ? `${caseContext.cliente || caseContext.caseId}  ·  ${caseContext.materia || ""}`.trim().replace(/·\s*$/, "")
+      : "Sin caso activo";
+  }
 
   if (caseContext) {
     clearChat();
@@ -144,265 +121,344 @@ function onCaseChange(caseContext) {
   }
 }
 
-// ─── Módulos — Toolbar ──────────────────────────────────────────────────────
+// ─── Módulos ─────────────────────────────────────────────────────────────────
 
-/**
- * Configura los botones de la toolbar para cada módulo.
- */
 function setupModuleButtons() {
   const moduleMap = {
     "btn-mod-redactar":   "redaccion",
     "btn-mod-analizar":   "analisis",
     "btn-mod-estrategia": "estrategia",
     "btn-mod-normativa":  "normativa",
-    "btn-mod-checklist":  "checklist"
+    "btn-mod-checklist":  "checklist",
+    "btn-mod-buscador":   "buscador"
   };
 
   for (const [btnId, mod] of Object.entries(moduleMap)) {
-    const btn = document.getElementById(btnId);
-    if (!btn) continue;
-
-    btn.addEventListener("click", () => {
+    document.getElementById(btnId)?.addEventListener("click", () => {
       setActiveModule(mod);
-      // Mostrar prompt de contexto al usuario
+      // Para el buscador, mostrar/ocultar el panel lateral
+      if (mod === "buscador") {
+        document.getElementById("buscador-panel")?.classList.toggle("visible");
+        return;
+      }
       appendMessage("assistant", getModulePrompt(mod));
     });
   }
 }
 
-/**
- * Establece el módulo activo y actualiza la UI.
- * @param {string} mod
- */
 function setActiveModule(mod) {
   activeModule = mod;
-
-  // Actualizar estado visual de los botones
-  document.querySelectorAll(".toolbar__btn").forEach(btn => btn.classList.remove("active"));
-  const activeBtn = document.getElementById(`btn-mod-${mod}`);
-  if (activeBtn) activeBtn.classList.add("active");
-
-  // Actualizar el label del módulo activo
+  document.querySelectorAll(".toolbar__btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(`btn-mod-${mod}`)?.classList.add("active");
   const label = document.getElementById("active-module-label");
   if (label) label.textContent = getModuleLabel(mod);
 }
 
-/**
- * Retorna el texto de prompt que se muestra al activar un módulo.
- * @param {string} mod
- * @returns {string}
- */
 function getModulePrompt(mod) {
   const prompts = {
-    redaccion:  "Módulo **Redacción** activado. ¿Qué escrito necesitás? Indicame el tipo (demanda, carta documento, recurso, etc.) y las instrucciones específicas.",
-    analisis:   "Módulo **Análisis** activado. Describí los hechos del caso o confirmá que analizo los hechos cargados en el contexto activo.",
-    estrategia: "Módulo **Estrategia** activado. Indicame el objetivo del cliente y diseñaré la hoja de ruta procesal.",
+    redaccion:  "Módulo **Redacción** activado. ¿Qué escrito necesitás? Podés adjuntar un archivo de referencia con el botón 📎.",
+    analisis:   "Módulo **Análisis** activado. Describí los hechos o confirmá que analizo los del caso activo. También podés adjuntar documentos relevantes.",
+    estrategia: "Módulo **Estrategia** activado. Indicame el objetivo del cliente.",
     normativa:  "Módulo **Normativa** activado. ¿Qué ley, artículo o tema jurídico querés consultar?",
-    checklist:  "Módulo **Checklist** activado. ¿Para qué tipo de acción legal necesitás el checklist? (ej: despido sin causa, accidente de trabajo, etc.)"
+    checklist:  "Módulo **Checklist** activado. ¿Para qué tipo de acción legal?"
   };
   return prompts[mod] || "¿En qué puedo asistirte?";
 }
 
 function getModuleLabel(mod) {
   const labels = {
-    chat:       "Chat libre",
-    redaccion:  "Redacción",
-    analisis:   "Análisis",
-    estrategia: "Estrategia",
-    normativa:  "Normativa",
-    checklist:  "Checklist"
+    chat: "Chat libre", redaccion: "Redacción", analisis: "Análisis",
+    estrategia: "Estrategia", normativa: "Normativa", checklist: "Checklist",
+    buscador: "Bases de Datos"
   };
   return labels[mod] || "Chat";
 }
 
-// ─── Manejo del input del usuario ───────────────────────────────────────────
+// ─── Carga de archivos ───────────────────────────────────────────────────────
+
+function setupFileUpload() {
+  const fileInput  = document.getElementById("file-input");
+  const fileBtn    = document.getElementById("btn-attach-file");
+  const dropZone   = document.getElementById("chat-messages");
+
+  // Botón de adjuntar
+  fileBtn?.addEventListener("click", () => fileInput?.click());
+
+  // Input oculto
+  fileInput?.addEventListener("change", (e) => {
+    handleFiles(Array.from(e.target.files));
+    e.target.value = "";            // permitir re-seleccionar el mismo archivo
+  });
+
+  // Drag & drop sobre el área de mensajes
+  dropZone?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("drag-over");
+  });
+
+  dropZone?.addEventListener("dragleave", () => {
+    dropZone.classList.remove("drag-over");
+  });
+
+  dropZone?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("drag-over");
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length) handleFiles(files);
+  });
+}
 
 /**
- * Procesa el texto ingresado por el usuario y lo envía al módulo correcto.
- * @param {string} userText
+ * Procesa los archivos seleccionados y los agrega a la cola de adjuntos.
+ * @param {File[]} files
  */
-async function handleUserInput(userText) {
-  if (!userText?.trim()) return;
+async function handleFiles(files) {
+  for (const file of files) {
+    try {
+      setChatInputDisabled(true);
+      const loadingChip = appendAttachmentChip(file.name, null, true);
 
-  // Verificar API key
-  if (!getApiKey()) {
-    showApiKeyModal();
-    return;
+      const procesado = await procesarArchivo(file);
+
+      pendingAttachments.push(procesado);
+      loadingChip?.remove();
+      appendAttachmentChip(
+        file.name,
+        procesado.type === 'imagen' ? procesado.previewUrl : null,
+        false,
+        () => removeAttachment(procesado)
+      );
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setChatInputDisabled(false);
+    }
   }
+  document.getElementById("chat-input")?.focus();
+}
 
-  // Mostrar el mensaje del usuario en el chat
-  appendMessage("user", userText);
+/**
+ * Elimina un adjunto de la cola.
+ */
+function removeAttachment(archivoProcesado) {
+  const idx = pendingAttachments.indexOf(archivoProcesado);
+  if (idx !== -1) pendingAttachments.splice(idx, 1);
+}
 
-  // Deshabilitar input mientras se procesa
+// ─── Panel de buscador ───────────────────────────────────────────────────────
+
+function setupBuscadorPanel() {
+  const panel   = document.getElementById("buscador-panel");
+  const input   = document.getElementById("buscador-input");
+  const btnBusc = document.getElementById("btn-buscador-search");
+  const btnClose= document.getElementById("btn-buscador-close");
+
+  btnClose?.addEventListener("click", () => panel?.classList.remove("visible"));
+
+  btnBusc?.addEventListener("click", () => {
+    const q = input?.value?.trim();
+    if (!q) return;
+    panel?.classList.remove("visible");
+    setActiveModule("buscador");
+    handleUserInput(q);     // procesa como si fuera mensaje normal
+  });
+
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") btnBusc?.click();
+  });
+}
+
+// ─── Procesamiento del mensaje del usuario ───────────────────────────────────
+
+async function handleUserInput(userText) {
+  if (!userText?.trim() && pendingAttachments.length === 0) return;
+
+  if (!getApiKey()) { showApiKeyModal(); return; }
+
+  const texto = userText?.trim() || "(Analizá el/los documento(s) adjunto(s) en el contexto del caso activo)";
+
+  // Mostrar mensaje del usuario con chips de adjuntos
+  appendMessage("user", texto, false, pendingAttachments.map(a => ({
+    name: a.filename,
+    previewUrl: a.previewUrl || null
+  })));
+
   setChatInputDisabled(true);
-
-  // Mostrar indicador de carga
   const loadingMsg = appendMessage("assistant", "", true);
 
+  // Copiar adjuntos actuales y limpiar la cola
+  const attachments = [...pendingAttachments];
+  pendingAttachments = [];
+  clearAttachmentChips();
+
   try {
-    // Guardar en historial del caso activo
     if (activeCaseContext?.caseId) {
-      appendToHistory(activeCaseContext.caseId, "user", userText);
+      appendToHistory(activeCaseContext.caseId, "user", texto);
     }
 
-    // Construir el historial para la API
     const ctx = activeCaseContext
       ? getCaseContext(activeCaseContext.caseId) || activeCaseContext
       : null;
 
     const contextMessage = ctx ? buildCaseContextMessage(ctx) : "";
-    const historialApi = buildMessagesFromHistory(ctx, contextMessage);
+    const historialApi   = buildMessagesFromHistory(ctx, contextMessage);
 
-    // Rutear al módulo correcto
     let respuesta;
     switch (activeModule) {
       case "redaccion":
-        respuesta = await redactar(userText, ctx, historialApi);
+        respuesta = await redactar(texto, ctx, historialApi, attachments);
         break;
       case "analisis":
-        respuesta = await analizar(userText, ctx, historialApi);
+        respuesta = await analizar(texto, ctx, historialApi, attachments);
         break;
       case "estrategia":
-        respuesta = await estrategia(userText, ctx, historialApi);
+        respuesta = await estrategia(texto, ctx, historialApi);
         break;
       case "normativa":
-        respuesta = await normativa(userText, ctx, historialApi);
+        respuesta = await normativa(texto, ctx, historialApi);
         break;
       case "checklist":
-        respuesta = await checklist(userText, ctx, historialApi);
+        respuesta = await checklist(texto, ctx, historialApi);
+        break;
+      case "buscador":
+        respuesta = await buscarEnBaseDatos(texto, ctx, historialApi);
         break;
       default:
-        // Chat libre — llamada directa a la API
-        respuesta = await callApi(userText, historialApi);
+        respuesta = await callApi(texto, historialApi, attachments);
     }
 
-    // Actualizar el mensaje de carga con la respuesta
     updateMessage(loadingMsg, respuesta);
 
-    // Guardar respuesta en el historial del caso
     if (activeCaseContext?.caseId) {
       appendToHistory(activeCaseContext.caseId, "assistant", respuesta);
     }
 
-    // Guardar para exportación
-    lastOutput = {
-      content: respuesta,
-      modulo: activeModule
-    };
+    lastOutput = { content: respuesta, modulo: activeModule };
 
   } catch (error) {
-    console.error("[Dalmacio] Error al procesar mensaje:", error);
-    if (loadingMsg) loadingMsg.remove();
+    console.error("[Dalmacio]", error);
+    loadingMsg?.remove();
     showError(getFriendlyError(error));
   } finally {
     setChatInputDisabled(false);
-    // Foco de vuelta al input
     document.getElementById("chat-input")?.focus();
   }
 }
 
-// ─── Exportación ────────────────────────────────────────────────────────────
+// ─── Exportación ─────────────────────────────────────────────────────────────
 
 function setupExportButton() {
-  const exportTxtBtn = document.getElementById("btn-export-txt");
-  const exportDocxBtn = document.getElementById("btn-export-docx");
+  document.getElementById("btn-export-txt")?.addEventListener("click", () => {
+    if (!lastOutput.content) { showError("No hay contenido para exportar."); return; }
+    exportTxt(lastOutput.content, suggestFilename(activeCaseContext, lastOutput.modulo));
+  });
 
-  if (exportTxtBtn) {
-    exportTxtBtn.addEventListener("click", () => {
-      if (!lastOutput.content) {
-        showError("No hay contenido para exportar. Generá un documento primero.");
-        return;
-      }
-      const filename = suggestFilename(activeCaseContext, lastOutput.modulo);
-      exportTxt(lastOutput.content, filename);
-    });
-  }
-
-  if (exportDocxBtn) {
-    exportDocxBtn.addEventListener("click", async () => {
-      if (!lastOutput.content) {
-        showError("No hay contenido para exportar. Generá un documento primero.");
-        return;
-      }
-      const filename = suggestFilename(activeCaseContext, lastOutput.modulo);
-      await exportDocx(lastOutput.content, filename, activeCaseContext);
-    });
-  }
+  document.getElementById("btn-export-docx")?.addEventListener("click", async () => {
+    if (!lastOutput.content) { showError("No hay contenido para exportar."); return; }
+    await exportDocx(lastOutput.content, suggestFilename(activeCaseContext, lastOutput.modulo), activeCaseContext);
+  });
 }
 
-// ─── Limpiar chat ────────────────────────────────────────────────────────────
+// ─── Limpiar chat ─────────────────────────────────────────────────────────────
 
 function setupClearButton() {
-  const btn = document.getElementById("btn-clear-chat");
-  if (!btn) return;
-
-  btn.addEventListener("click", () => {
-    if (confirm("¿Limpiar el historial de conversación visible? Los datos del caso se mantienen.")) {
+  document.getElementById("btn-clear-chat")?.addEventListener("click", () => {
+    if (confirm("¿Limpiar el historial de conversación?")) {
+      pendingAttachments = [];
+      clearAttachmentChips();
       clearChat();
       showWelcome(activeCaseContext?.cliente || null);
     }
   });
 }
 
-// ─── Llamada a la API de Anthropic ──────────────────────────────────────────
+// ─── API de Anthropic ─────────────────────────────────────────────────────────
 
 /**
- * Realiza una llamada a la API de Anthropic Claude.
- * Función exportada para uso desde los módulos.
+ * Llama a la API de Anthropic Claude con soporte multimodal (texto + imágenes).
  *
- * @param {string} userMessage — mensaje del usuario a enviar
- * @param {Array} previousMessages — historial previo de mensajes [{ role, content }]
- * @returns {Promise<string>} — respuesta del modelo
+ * @param {string} userMessage
+ * @param {Array}  previousMessages — historial [{ role, content }]
+ * @param {Array}  attachments      — archivos procesados por archivos.js
+ * @returns {Promise<string>}
  */
-export async function callApi(userMessage, previousMessages = []) {
+export async function callApi(userMessage, previousMessages = [], attachments = []) {
   const apiKey = getApiKey();
   if (!apiKey) {
     throw new Error("API key no configurada. Hacé click en ⚙ para configurarla.");
   }
 
-  // Construir el array de mensajes: historial + mensaje actual
+  // Construir el contenido del mensaje del usuario
+  let userContent;
+
+  if (attachments.length > 0) {
+    // Mensaje multimodal: array de content blocks
+    const blocks = [];
+
+    for (const att of attachments) {
+      if (att.type === "imagen") {
+        // Bloque de imagen para visión de Claude
+        blocks.push({
+          type: "image",
+          source: {
+            type:       "base64",
+            media_type: att.mimeType,
+            data:       att.content
+          }
+        });
+      } else if (att.type === "texto") {
+        // Texto extraído (PDF/Word/TXT) como bloque de texto
+        blocks.push({
+          type: "text",
+          text: formatearComoTexto(att)
+        });
+      }
+    }
+
+    // Agregar el mensaje del usuario al final
+    blocks.push({ type: "text", text: userMessage });
+    userContent = blocks;
+
+  } else {
+    userContent = userMessage;
+  }
+
   const messages = [
     ...previousMessages,
-    { role: "user", content: userMessage }
+    { role: "user", content: userContent }
   ];
 
-  const requestBody = {
-    model: CONFIG.MODEL,
+  const body = {
+    model:      CONFIG.MODEL,
     max_tokens: CONFIG.MAX_TOKENS,
-    temperature: CONFIG.TEMPERATURE,
-    system: SYSTEM_PROMPT,
+    temperature:CONFIG.TEMPERATURE,
+    system:     SYSTEM_PROMPT,
     messages
   };
 
   const response = await fetch(CONFIG.API_ENDPOINT, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
+      "Content-Type":    "application/json",
+      "x-api-key":       apiKey,
       "anthropic-version": CONFIG.ANTHROPIC_VERSION,
-      // Header requerido para llamadas desde el navegador (CORS)
       "anthropic-dangerous-direct-browser-access": "true"
     },
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, errorBody?.error?.message || response.statusText);
+    const err = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, err?.error?.message || response.statusText);
   }
 
   const data = await response.json();
-
-  // Extraer el texto de la respuesta
   const text = data?.content?.[0]?.text;
-  if (!text) {
-    throw new Error("La API no retornó contenido válido.");
-  }
-
+  if (!text) throw new Error("La API no retornó contenido válido.");
   return text;
 }
 
-// ─── Errores ─────────────────────────────────────────────────────────────────
+// ─── Errores ──────────────────────────────────────────────────────────────────
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -412,18 +468,13 @@ class ApiError extends Error {
   }
 }
 
-/**
- * Convierte un error técnico en un mensaje amigable para el usuario.
- * @param {Error} error
- * @returns {string}
- */
 function getFriendlyError(error) {
   if (error instanceof ApiError) {
     switch (error.status) {
       case 401: return "API key inválida. Verificá la configuración (⚙).";
-      case 429: return "Límite de solicitudes alcanzado. Esperá un momento y reintentá.";
+      case 429: return "Límite de solicitudes alcanzado. Esperá un momento.";
       case 500: return "Error en los servidores de Anthropic. Reintentá en unos minutos.";
-      case 529: return "Los servidores de Anthropic están sobrecargados. Reintentá más tarde.";
+      case 529: return "Servidores de Anthropic sobrecargados. Reintentá más tarde.";
       default:  return `Error de API (${error.status}): ${error.message}`;
     }
   }
@@ -433,9 +484,8 @@ function getFriendlyError(error) {
   return error.message || "Ocurrió un error inesperado.";
 }
 
-// ─── Auto-inicio ─────────────────────────────────────────────────────────────
+// ─── Auto-inicio ──────────────────────────────────────────────────────────────
 
-// Inicializar cuando el DOM esté listo
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {

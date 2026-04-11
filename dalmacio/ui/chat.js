@@ -2,190 +2,262 @@
  * ui/chat.js — Interfaz de conversación de Dalmacio
  * Estudio Jurídico Manulis — San Isidro, Provincia de Buenos Aires
  *
- * Maneja el renderizado del historial de chat, el indicador de carga
- * y las interacciones del usuario con el panel de conversación.
+ * Maneja: mensajes, indicador de carga, adjuntos (chips), drag & drop.
  */
+
+// ─── Mensajes ─────────────────────────────────────────────────────────────────
 
 /**
  * Agrega un mensaje al panel de chat.
- * @param {string} role — "user" | "assistant" | "system"
- * @param {string} content — contenido del mensaje (puede incluir Markdown)
- * @param {boolean} isStreaming — si es true, agrega un indicador de escritura
- * @returns {HTMLElement} — el elemento de mensaje creado
+ * @param {"user"|"assistant"|"system"|"error"} role
+ * @param {string} content
+ * @param {boolean} isLoading — muestra el indicador de escritura
+ * @param {Array}  attachmentPreviews — [{ name, previewUrl }] para el mensaje del usuario
+ * @returns {HTMLElement}
  */
-export function appendMessage(role, content, isStreaming = false) {
-  const chatMessages = document.getElementById("chat-messages");
-  if (!chatMessages) return null;
+export function appendMessage(role, content, isLoading = false, attachmentPreviews = []) {
+  const container = document.getElementById("chat-messages");
+  if (!container) return null;
 
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", `message--${role}`);
+  const wrap = document.createElement("div");
+  wrap.classList.add("message", `message--${role}`);
 
-  // Avatar / label
+  // Avatar
   const avatar = document.createElement("div");
   avatar.classList.add("message__avatar");
-  avatar.textContent = role === "user" ? "U" : role === "assistant" ? "D" : "⚙";
-  messageDiv.appendChild(avatar);
+  avatar.textContent = role === "user" ? "U" : role === "assistant" ? "D" : "!";
+  wrap.appendChild(avatar);
 
-  // Contenido
+  // Cuerpo
+  const body = document.createElement("div");
+  body.classList.add("message__body");
+
+  // Chips de adjuntos (solo para mensajes del usuario)
+  if (attachmentPreviews?.length) {
+    const chips = document.createElement("div");
+    chips.classList.add("message__attachments");
+    for (const att of attachmentPreviews) {
+      chips.appendChild(buildAttachmentBadge(att.name, att.previewUrl));
+    }
+    body.appendChild(chips);
+  }
+
+  // Contenido del mensaje
   const contentDiv = document.createElement("div");
   contentDiv.classList.add("message__content");
 
-  if (isStreaming) {
-    contentDiv.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span>';
-  } else {
-    // Renderizar Markdown si marked.js está disponible
+  if (isLoading) {
+    contentDiv.innerHTML =
+      '<span class="typing-indicator"><span></span><span></span><span></span></span>';
+  } else if (content) {
     contentDiv.innerHTML = renderMarkdown(content);
   }
 
-  messageDiv.appendChild(contentDiv);
+  body.appendChild(contentDiv);
+  wrap.appendChild(body);
 
   // Timestamp
-  const timestamp = document.createElement("div");
-  timestamp.classList.add("message__timestamp");
-  timestamp.textContent = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-  messageDiv.appendChild(timestamp);
+  const ts = document.createElement("div");
+  ts.classList.add("message__timestamp");
+  ts.textContent = new Date().toLocaleTimeString("es-AR", {
+    hour: "2-digit", minute: "2-digit"
+  });
+  wrap.appendChild(ts);
 
-  chatMessages.appendChild(messageDiv);
-
-  // Auto-scroll al último mensaje
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-
-  return messageDiv;
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+  return wrap;
 }
 
 /**
- * Reemplaza el contenido de un mensaje existente.
- * Usado para reemplazar el indicador de carga con la respuesta real.
- * @param {HTMLElement} messageEl — elemento del mensaje a actualizar
- * @param {string} content — contenido nuevo
+ * Reemplaza el contenido de un mensaje (ej: loading → respuesta real).
  */
-export function updateMessage(messageEl, content) {
-  if (!messageEl) return;
-  const contentDiv = messageEl.querySelector(".message__content");
-  if (contentDiv) {
-    contentDiv.innerHTML = renderMarkdown(content);
-  }
-  // Scroll al final
-  const chatMessages = document.getElementById("chat-messages");
-  if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+export function updateMessage(el, content) {
+  if (!el) return;
+  const div = el.querySelector(".message__content");
+  if (div) div.innerHTML = renderMarkdown(content);
+  const container = document.getElementById("chat-messages");
+  if (container) container.scrollTop = container.scrollHeight;
 }
 
-/**
- * Limpia todos los mensajes del panel de chat.
- */
+/** Limpia el historial visible del chat. */
 export function clearChat() {
-  const chatMessages = document.getElementById("chat-messages");
-  if (chatMessages) chatMessages.innerHTML = "";
+  const container = document.getElementById("chat-messages");
+  if (container) container.innerHTML = "";
 }
 
-/**
- * Muestra un mensaje de error en el chat.
- * @param {string} errorText — texto del error
- */
-export function showError(errorText) {
-  const chatMessages = document.getElementById("chat-messages");
-  if (!chatMessages) return;
-
-  const errorDiv = document.createElement("div");
-  errorDiv.classList.add("message", "message--error");
-  errorDiv.innerHTML = `
-    <div class="message__avatar">!</div>
-    <div class="message__content">
-      <strong>Error:</strong> ${escapeHtml(errorText)}
-    </div>
-  `;
-  chatMessages.appendChild(errorDiv);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+/** Muestra un mensaje de error en el chat. */
+export function showError(text) {
+  appendMessage("error", `**Error:** ${escapeHtml(text)}`);
 }
 
-/**
- * Muestra un mensaje de bienvenida en el chat.
- * @param {string} caseName — nombre del caso activo (opcional)
- */
+/** Mensaje de bienvenida. */
 export function showWelcome(caseName) {
   clearChat();
-  const welcome = caseName
-    ? `Caso **${caseName}** cargado. ¿En qué puedo asistirte? Podés usar los botones de la barra superior para acceder a los módulos específicos, o escribirme directamente.`
-    : `Bienvenido a **Dalmacio**, asistente jurídico del Estudio Jurídico Manulis.\n\nCreá o seleccioná un caso en el panel izquierdo para comenzar, o escribí tu consulta directamente.`;
-  appendMessage("assistant", welcome);
+  const msg = caseName
+    ? `Caso **${caseName}** cargado. Usá los botones de la barra superior o escribime directamente.\n\nPodés adjuntar archivos (PDF, Word, imágenes) con el botón **📎**.`
+    : `Bienvenido a **Dalmacio**, asistente jurídico del Estudio Jurídico Manulis.\n\nCreá o seleccioná un caso en el panel izquierdo para comenzar.\n\nSoporta adjuntos: PDF · Word · Imágenes · Documentos escaneados.`;
+  appendMessage("assistant", msg);
 }
 
+// ─── Chips de adjuntos pendientes (debajo del input) ─────────────────────────
+
 /**
- * Renderiza Markdown usando marked.js si está disponible.
- * Si no está disponible, retorna el texto con saltos de línea básicos.
- * @param {string} text
- * @returns {string} — HTML
+ * Agrega un chip de archivo adjunto al área de preview del input.
+ * @param {string}   filename
+ * @param {string}   previewUrl — Data URL de imagen (opcional)
+ * @param {boolean}  isLoading
+ * @param {Function} onRemove  — callback al hacer click en ✕
+ * @returns {HTMLElement} el chip creado
  */
-function renderMarkdown(text) {
-  if (typeof window !== "undefined" && window.marked) {
-    try {
-      return window.marked.parse(text);
-    } catch (e) {
-      console.warn("[Dalmacio] Error al renderizar Markdown:", e);
-    }
+export function appendAttachmentChip(filename, previewUrl, isLoading, onRemove) {
+  const area = document.getElementById("attachment-chips");
+  if (!area) return null;
+
+  area.style.display = "flex";
+
+  const chip = document.createElement("div");
+  chip.classList.add("attachment-chip");
+  if (isLoading) chip.classList.add("attachment-chip--loading");
+
+  // Miniatura de imagen
+  if (previewUrl) {
+    const img = document.createElement("img");
+    img.src = previewUrl;
+    img.alt = filename;
+    img.classList.add("attachment-chip__thumb");
+    chip.appendChild(img);
+  } else {
+    const icon = document.createElement("span");
+    icon.classList.add("attachment-chip__icon");
+    icon.textContent = getFileIcon(filename);
+    chip.appendChild(icon);
   }
-  // Fallback: escapar HTML y convertir saltos de línea
-  return escapeHtml(text).replace(/\n/g, "<br>");
+
+  // Nombre truncado
+  const name = document.createElement("span");
+  name.classList.add("attachment-chip__name");
+  name.textContent = truncate(filename, 22);
+  name.title = filename;
+  chip.appendChild(name);
+
+  // Spinner o botón de eliminar
+  if (isLoading) {
+    const spinner = document.createElement("span");
+    spinner.classList.add("attachment-chip__spinner");
+    chip.appendChild(spinner);
+  } else if (onRemove) {
+    const close = document.createElement("button");
+    close.classList.add("attachment-chip__remove");
+    close.textContent = "✕";
+    close.title = "Quitar adjunto";
+    close.addEventListener("click", () => {
+      chip.remove();
+      onRemove();
+      // Ocultar el área si quedó vacía
+      if (!area.children.length) area.style.display = "none";
+    });
+    chip.appendChild(close);
+  }
+
+  area.appendChild(chip);
+  return chip;
 }
 
-/**
- * Escapa caracteres HTML para prevenir XSS.
- * @param {string} text
- * @returns {string}
- */
-function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.appendChild(document.createTextNode(text));
-  return div.innerHTML;
+/** Limpia todos los chips de adjuntos pendientes. */
+export function clearAttachmentChips() {
+  const area = document.getElementById("attachment-chips");
+  if (area) {
+    area.innerHTML = "";
+    area.style.display = "none";
+  }
 }
 
-/**
- * Configura el textarea de input: envío con Enter (sin Shift).
- * @param {Function} onSubmit — función a llamar con el texto del usuario
- */
+// ─── Input del chat ───────────────────────────────────────────────────────────
+
 export function setupChatInput(onSubmit) {
   const textarea = document.getElementById("chat-input");
-  const sendBtn = document.getElementById("send-btn");
+  const sendBtn  = document.getElementById("send-btn");
 
-  if (!textarea || !sendBtn) return;
+  const submit = () => {
+    const text = textarea?.value?.trim();
+    if (text) {
+      onSubmit(text);
+      textarea.value = "";
+      if (textarea) textarea.style.height = "auto";
+    }
+  };
 
-  // Enter = enviar, Shift+Enter = nueva línea
-  textarea.addEventListener("keydown", (e) => {
+  textarea?.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      const text = textarea.value.trim();
-      if (text) {
-        onSubmit(text);
-        textarea.value = "";
-        textarea.style.height = "auto";
-      }
+      submit();
     }
   });
 
-  // Auto-resize del textarea
-  textarea.addEventListener("input", () => {
+  textarea?.addEventListener("input", () => {
     textarea.style.height = "auto";
     textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
   });
 
-  // Botón de envío
-  sendBtn.addEventListener("click", () => {
-    const text = textarea.value.trim();
-    if (text) {
-      onSubmit(text);
-      textarea.value = "";
-      textarea.style.height = "auto";
-    }
-  });
+  sendBtn?.addEventListener("click", submit);
 }
 
-/**
- * Deshabilita o habilita el input del chat.
- * @param {boolean} disabled
- */
 export function setChatInputDisabled(disabled) {
   const textarea = document.getElementById("chat-input");
-  const sendBtn = document.getElementById("send-btn");
+  const sendBtn  = document.getElementById("send-btn");
+  const fileBtn  = document.getElementById("btn-attach-file");
   if (textarea) textarea.disabled = disabled;
-  if (sendBtn) sendBtn.disabled = disabled;
+  if (sendBtn)  sendBtn.disabled  = disabled;
+  if (fileBtn)  fileBtn.disabled  = disabled;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function renderMarkdown(text) {
+  if (typeof window !== "undefined" && window.marked) {
+    try { return window.marked.parse(text); } catch {}
+  }
+  return escapeHtml(text).replace(/\n/g, "<br>");
+}
+
+function escapeHtml(text) {
+  const d = document.createElement("div");
+  d.appendChild(document.createTextNode(String(text)));
+  return d.innerHTML;
+}
+
+function truncate(str, max) {
+  if (str.length <= max) return str;
+  const ext = str.includes(".") ? "." + str.split(".").pop() : "";
+  return str.substring(0, max - ext.length - 1) + "…" + ext;
+}
+
+function getFileIcon(filename) {
+  const ext = filename.split(".").pop()?.toLowerCase();
+  const icons = {
+    pdf: "📄", docx: "📝", doc: "📝", txt: "📃",
+    jpg: "🖼️", jpeg: "🖼️", png: "🖼️", gif: "🖼️",
+    webp: "🖼️", bmp: "🖼️", tiff: "🖼️"
+  };
+  return icons[ext] || "📎";
+}
+
+function buildAttachmentBadge(name, previewUrl) {
+  const badge = document.createElement("div");
+  badge.classList.add("attachment-badge");
+
+  if (previewUrl) {
+    const img = document.createElement("img");
+    img.src = previewUrl;
+    img.alt = name;
+    img.classList.add("attachment-badge__thumb");
+    badge.appendChild(img);
+  }
+
+  const label = document.createElement("span");
+  label.textContent = getFileIcon(name) + " " + truncate(name, 25);
+  label.title = name;
+  badge.appendChild(label);
+  return badge;
 }
