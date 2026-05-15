@@ -8,6 +8,24 @@
 
 import { CONFIG } from "./config.js";
 
+// ─── Usuario activo (inyectado por dalmacio.js al iniciar) ────────────────────
+let _activeUserId = null;
+
+/**
+ * Establece el usuario activo para que todas las operaciones de casos
+ * queden aisladas por abogado.
+ * @param {string|null} userId
+ */
+export function setContextUser(userId) {
+  _activeUserId = userId || null;
+}
+
+/** Retorna el prefijo de clave localStorage para el usuario activo. */
+function getCaseKey(caseId) {
+  const userSeg = _activeUserId ? _activeUserId + "_" : "";
+  return CONFIG.CASE_PREFIX + userSeg + caseId;
+}
+
 /**
  * Estructura base de un caso vacío.
  * @param {string} caseId
@@ -35,12 +53,13 @@ export function createEmptyCase(caseId) {
  * @param {Object} data — objeto con los campos del caso (parcial o completo)
  */
 export function saveCaseContext(caseId, data) {
-  const key = CONFIG.CASE_PREFIX + caseId;
+  const key = getCaseKey(caseId);
   const existing = getCaseContext(caseId) || createEmptyCase(caseId);
   const updated = {
     ...existing,
     ...data,
     caseId,                                           // asegurar que no se sobreescriba
+    userId: _activeUserId || existing.userId || null, // etiquetar con el usuario activo
     actualizadoEn: new Date().toISOString()
   };
   localStorage.setItem(key, JSON.stringify(updated));
@@ -54,7 +73,7 @@ export function saveCaseContext(caseId, data) {
  * @returns {Object|null}
  */
 export function getCaseContext(caseId) {
-  const key = CONFIG.CASE_PREFIX + caseId;
+  const key = getCaseKey(caseId);
   const raw = localStorage.getItem(key);
   if (!raw) return null;
   try {
@@ -91,10 +110,29 @@ export function appendToHistory(caseId, role, content) {
  */
 export function listCases() {
   const ids = [];
+  // Determinar el prefijo del usuario activo
+  const userPrefix = _activeUserId
+    ? CONFIG.CASE_PREFIX + _activeUserId + "_"
+    : CONFIG.CASE_PREFIX;
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith(CONFIG.CASE_PREFIX)) {
-      ids.push(key.replace(CONFIG.CASE_PREFIX, ""));
+    if (!key) continue;
+
+    if (_activeUserId) {
+      // Con usuario activo: mostrar solo sus casos
+      if (key.startsWith(userPrefix)) {
+        ids.push(key.replace(userPrefix, ""));
+      }
+    } else {
+      // Sin usuario: mostrar todos los casos genéricos (sin segmento de userId)
+      if (key.startsWith(CONFIG.CASE_PREFIX)) {
+        const rest = key.replace(CONFIG.CASE_PREFIX, "");
+        // Excluir claves que pertenecen a un usuario (contienen prefijo "u...+_")
+        if (!/^u[a-z0-9]+_/.test(rest)) {
+          ids.push(rest);
+        }
+      }
     }
   }
   return ids;
@@ -113,7 +151,7 @@ export function getAllCases() {
  * @param {string} caseId
  */
 export function clearCase(caseId) {
-  const key = CONFIG.CASE_PREFIX + caseId;
+  const key = getCaseKey(caseId);
   localStorage.removeItem(key);
 }
 

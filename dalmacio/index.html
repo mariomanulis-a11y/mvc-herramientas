@@ -833,6 +833,184 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--bdl); }
 
   /* ═══════════════════════════════════════════
+     #8 PERFILES DE USUARIO
+  ═══════════════════════════════════════════ */
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    border: 2px solid rgba(255,255,255,.2);
+    transition: border-color var(--transition), transform var(--transition);
+    flex-shrink: 0;
+  }
+  .user-avatar:hover { border-color: var(--gold); transform: scale(1.05); }
+  .user-avatar--sm   { width: 26px; height: 26px; font-size: 10px; flex-shrink: 0; }
+
+  .user-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--bg3);
+    border: 1px solid var(--bdl);
+    border-radius: var(--r-md);
+    min-width: 210px;
+    z-index: 300;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0,0,0,.5);
+  }
+  .user-dropdown.open { display: block; }
+
+  .user-dropdown__header {
+    padding: 8px 12px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--tx2);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+  }
+  .user-dropdown__item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background var(--transition);
+    font-size: 13px;
+  }
+  .user-dropdown__item:hover   { background: var(--bg4); }
+  .user-dropdown__item.active  { background: var(--bg2); }
+  .user-dropdown__name         { flex: 1; }
+  .user-dropdown__check        { color: var(--gold); font-size: 12px; }
+  .user-dropdown__add          { color: var(--tx1); }
+  .user-dropdown__divider      { height: 1px; background: var(--bd); margin: 4px 0; }
+
+  .user-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .user-list__item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--bd);
+    border-radius: var(--r-sm);
+    transition: border-color var(--transition);
+  }
+  .user-list__item.active { border-color: var(--goldd); }
+  .user-list__name  { flex: 1; font-size: 13px; }
+  .user-list__actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .user-list-empty { font-size: 12px; color: var(--tx2); font-style: italic; text-align: center; padding: 10px 0; }
+
+  /* ═══════════════════════════════════════════
+     #7 PANEL PLANTILLAS
+  ═══════════════════════════════════════════ */
+  .plantillas-panel {
+    position: absolute;
+    top: 0; right: 0;
+    width: min(340px, 100vw);
+    height: 100%;
+    background: var(--bg1);
+    border-left: 1px solid var(--bdl);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform var(--transition);
+    box-shadow: -4px 0 20px rgba(0,0,0,.35);
+  }
+  .plantillas-panel.visible { transform: translateX(0); }
+
+  .plantillas-panel__hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--bd);
+    flex-shrink: 0;
+  }
+  .plantillas-panel__title {
+    font-family: var(--serif);
+    font-size: 16px; font-weight: 600;
+    color: var(--gold);
+  }
+  .plantillas-panel__desc {
+    font-size: 11px; color: var(--tx1);
+    padding: 10px 14px 6px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .plantillas-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .plantilla-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg2);
+    border: 1px solid var(--bd);
+    border-radius: var(--r-sm);
+    color: var(--tx1);
+    font-family: var(--sans);
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition);
+    width: 100%;
+  }
+  .plantilla-item:hover { background: var(--bg3); border-color: var(--bdl); color: var(--tx0); }
+  .plantilla-item__icon  { font-size: 16px; flex-shrink: 0; }
+  .plantilla-item__title { flex: 1; line-height: 1.3; }
+
+  /* ═══════════════════════════════════════════
+     #5 IMPRESIÓN / PDF
+  ═══════════════════════════════════════════ */
+  @media print {
+    /* Ocultar todo excepto los mensajes */
+    .app-header, .modules-bar, .sidebar, .sidebar-backdrop,
+    .chat-subheader, .chat-input-area, .buscador-panel,
+    .plantillas-panel, .modal-overlay, .message__timestamp,
+    .message--user .message__avatar, #user-avatar-wrap { display: none !important; }
+
+    /* Hacer visible el área de mensajes completa */
+    html, body { height: auto !important; overflow: visible !important; background: #fff !important; color: #000 !important; }
+    .app       { height: auto !important; }
+    .app-body  { overflow: visible !important; height: auto !important; }
+    .chat-panel{ overflow: visible !important; height: auto !important; }
+    #chat-messages {
+      overflow: visible !important;
+      height: auto !important;
+      padding: 20px !important;
+      gap: 16px !important;
+      align-items: stretch !important;
+    }
+
+    /* Mensajes a blanco y negro */
+    .message { max-width: 100% !important; page-break-inside: avoid; }
+    .message--assistant .message__avatar { background: #333 !important; color: #fff !important; }
+    .message--user .message__content { background: #f0f0f0 !important; color: #000 !important; border-color: #ccc !important; }
+    .message--assistant .message__content { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; }
+    .message__content h1, .message__content h2, .message__content h3 { color: #000 !important; }
+    .message__content strong { color: #000 !important; }
+    .message__content a { color: #000 !important; }
+    .message__content code { background: #f0f0f0 !important; color: #000 !important; }
+
+    /* Encabezado de impresión */
+    #chat-messages::before {
+      content: "Dalmacio — Asistente Jurídico · Estudio Jurídico Manulis";
+      display: block;
+      font-family: Georgia, serif;
+      font-size: 16px;
+      font-weight: bold;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      color: #000;
+    }
+  }
+
+  /* ═══════════════════════════════════════════
      RESPONSIVE — TABLET (>768px)
   ═══════════════════════════════════════════ */
   @media (min-width: 768px) {
@@ -904,15 +1082,23 @@
     <div class="header-actions">
       <span class="module-badge" id="active-module-label">Chat libre</span>
 
+      <!-- #5: Exportar PDF -->
       <div class="export-wrap">
-        <button class="hbtn" id="btn-export-toggle" title="Exportar">📥</button>
+        <button class="hbtn" id="btn-export-toggle" title="Exportar conversación">📥</button>
         <div class="export-menu" id="export-menu">
           <button id="btn-export-txt">📄 Exportar .txt</button>
           <button id="btn-export-docx">📝 Exportar .docx</button>
+          <button id="btn-export-pdf">🖨️ Imprimir / PDF</button>
         </div>
       </div>
 
+      <!-- #7: Plantillas rápidas -->
+      <button class="hbtn" id="btn-plantillas" title="Plantillas de escritos">📋</button>
+
       <button class="hbtn" id="btn-open-api-config" title="Configurar API key">⚙</button>
+
+      <!-- #8: Avatar de usuario -->
+      <div id="user-avatar-wrap" style="position:relative;display:flex;align-items:center;"></div>
     </div>
 
   </header>
@@ -950,7 +1136,7 @@
           <input type="hidden" id="case-id" />
           <div class="fg"><label>Cliente</label><input type="text" id="case-cliente" placeholder="Nombre del cliente" /></div>
           <div class="fg"><label>Expediente</label><input type="text" id="case-expediente" placeholder="PL-XXXX-2025" /></div>
-          <div class="fg"><label>Juzgado / Tribunal</label><input type="text" id="case-juzgado" placeholder="Tribunal de Trabajo N°3..." /></div>
+          <div class="fg"><label>Juzgado / Tribunal</label><input type="text" id="case-juzgado" placeholder="Tribunal de Trabajo N°3..." list="juzgados-list" autocomplete="off" /></div>
           <div class="fg">
             <label>Fuero</label>
             <select id="case-fuero">
@@ -961,7 +1147,7 @@
               <option value="otro">Otro</option>
             </select>
           </div>
-          <div class="fg"><label>Jurisdicción</label><input type="text" id="case-jurisdiccion" value="Departamento Judicial San Isidro" /></div>
+          <div class="fg"><label>Jurisdicción</label><input type="text" id="case-jurisdiccion" value="Departamento Judicial San Isidro" list="jurisdicciones-list" autocomplete="off" /></div>
           <div class="fg"><label>Materia</label><input type="text" id="case-materia" placeholder="Despido sin causa..." /></div>
           <div class="fg"><label>Hechos del caso</label><textarea id="case-hechos" placeholder="Describí los hechos relevantes..."></textarea></div>
           <button type="button" class="btn btn--primary" id="btn-save-case" style="width:100%">Guardar caso</button>
@@ -1081,6 +1267,16 @@
       </div>
     </aside>
 
+    <!-- ══════ #7: PANEL PLANTILLAS ══════ -->
+    <aside class="plantillas-panel" id="plantillas-panel" aria-label="Plantillas de escritos">
+      <div class="plantillas-panel__hdr">
+        <span class="plantillas-panel__title">📋 Plantillas rápidas</span>
+        <button class="hbtn" id="btn-plantillas-close" title="Cerrar">✕</button>
+      </div>
+      <p class="plantillas-panel__desc">Seleccioná una plantilla para pre-cargar el prompt en el chat.</p>
+      <div id="plantillas-list" class="plantillas-list"></div>
+    </aside>
+
   </div><!-- /app-body -->
 </div><!-- /app -->
 
@@ -1105,6 +1301,95 @@
     </div>
   </div>
 </div>
+
+<!-- ══════ #8: MODAL PERFILES DE USUARIO ══════ -->
+<div class="modal-overlay" id="user-modal" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
+  <div class="modal">
+    <h2 class="modal__title" id="user-modal-title">👤 Perfiles del Estudio</h2>
+    <p class="modal__sub">
+      Cada abogado tiene su propio perfil con casos independientes.<br>
+      Seleccioná tu perfil o creá uno nuevo.
+    </p>
+
+    <!-- Lista de usuarios existentes -->
+    <div id="user-list" class="user-list"></div>
+
+    <!-- Crear nuevo perfil -->
+    <div class="modal__field" style="margin-top:14px">
+      <label for="user-name-input">Nuevo abogado / abogada</label>
+      <input type="text" id="user-name-input"
+        placeholder="Ej: Mario Manulis"
+        autocomplete="off" maxlength="50" />
+    </div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="btn-close-user-modal">Cancelar</button>
+      <button class="btn btn--primary" id="btn-save-user">Crear perfil</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ #4: DATALISTS TRIBUNALES Y JURISDICCIONES ══════ -->
+<datalist id="jurisdicciones-list">
+  <option value="Departamento Judicial San Isidro">
+  <option value="Departamento Judicial La Plata">
+  <option value="Departamento Judicial Mercedes">
+  <option value="Departamento Judicial San Nicolás">
+  <option value="Departamento Judicial Junín">
+  <option value="Departamento Judicial Azul">
+  <option value="Departamento Judicial Mar del Plata">
+  <option value="Departamento Judicial Bahía Blanca">
+  <option value="Departamento Judicial Trenque Lauquen">
+  <option value="Departamento Judicial Dolores">
+  <option value="Departamento Judicial Necochea">
+  <option value="Departamento Judicial Zárate-Campana">
+  <option value="Departamento Judicial Morón">
+  <option value="Departamento Judicial La Matanza">
+  <option value="Departamento Judicial Lomas de Zamora">
+  <option value="Departamento Judicial Quilmes">
+  <option value="Departamento Judicial San Martín">
+  <option value="Departamento Judicial Pergamino">
+  <option value="Departamento Judicial Tres Arroyos">
+</datalist>
+
+<datalist id="juzgados-list">
+  <!-- San Isidro -->
+  <option value="Tribunal de Trabajo N°1 de San Isidro">
+  <option value="Tribunal de Trabajo N°2 de San Isidro">
+  <option value="Tribunal de Trabajo N°3 de San Isidro">
+  <option value="Tribunal de Trabajo N°4 de San Isidro">
+  <option value="Cámara de Apelaciones del Trabajo — Dpto. Jud. San Isidro">
+  <option value="Juzgado Civil y Comercial N°1 de San Isidro">
+  <option value="Juzgado Civil y Comercial N°2 de San Isidro">
+  <option value="Juzgado Civil y Comercial N°3 de San Isidro">
+  <option value="Juzgado de Familia N°1 de San Isidro">
+  <option value="Juzgado de Familia N°2 de San Isidro">
+  <!-- La Plata -->
+  <option value="Tribunal de Trabajo N°1 de La Plata">
+  <option value="Tribunal de Trabajo N°2 de La Plata">
+  <option value="Tribunal de Trabajo N°3 de La Plata">
+  <!-- Mar del Plata -->
+  <option value="Tribunal de Trabajo N°1 de Mar del Plata">
+  <option value="Tribunal de Trabajo N°2 de Mar del Plata">
+  <option value="Tribunal de Trabajo N°3 de Mar del Plata">
+  <!-- Morón -->
+  <option value="Tribunal de Trabajo N°1 de Morón">
+  <option value="Tribunal de Trabajo N°2 de Morón">
+  <option value="Tribunal de Trabajo N°3 de Morón">
+  <!-- Lomas de Zamora -->
+  <option value="Tribunal de Trabajo N°1 de Lomas de Zamora">
+  <option value="Tribunal de Trabajo N°2 de Lomas de Zamora">
+  <!-- Quilmes -->
+  <option value="Tribunal de Trabajo N°1 de Quilmes">
+  <option value="Tribunal de Trabajo N°2 de Quilmes">
+  <!-- Bahía Blanca -->
+  <option value="Tribunal de Trabajo N°1 de Bahía Blanca">
+  <option value="Tribunal de Trabajo N°2 de Bahía Blanca">
+  <!-- SCBA -->
+  <option value="Suprema Corte de Justicia de la Provincia de Buenos Aires">
+  <!-- CSJN -->
+  <option value="Cámara Nacional de Apelaciones del Trabajo">
+  <option value="Juzgado Nacional de Primera Instancia del Trabajo">
+</datalist>
 
 <!-- ══════ SCRIPTS DE CONFIGURACIÓN ══════ -->
 <script>

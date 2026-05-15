@@ -11,9 +11,12 @@ import { SYSTEM_PROMPT, buildCaseContextMessage } from "./prompts/system_prompt.
 import {
   getCaseContext,
   appendToHistory,
-  buildMessagesFromHistory
+  buildMessagesFromHistory,
+  clearHistory,
+  setContextUser
 } from "./context.js";
-import { initSidebar, loadCaseIntoForm } from "./ui/sidebar.js";
+import { initSidebar, loadCaseIntoForm, renderCaseList } from "./ui/sidebar.js";
+import { initUsers, renderUserHeader, setActiveUser } from "./ui/users.js";
 import {
   appendMessage,
   updateMessage,
@@ -45,6 +48,10 @@ let pendingAttachments = [];
 // ─── Inicialización ──────────────────────────────────────────────────────────
 
 export function init() {
+  // Inicializar usuarios primero para que context.js use el userId correcto
+  const activeUser = initUsers(onUserChange);
+  if (activeUser) setContextUser(activeUser.id);
+
   checkApiKeySetup();
   initSidebar(onCaseChange);
   setupChatInput(handleUserInput);
@@ -54,6 +61,23 @@ export function init() {
   setupApiKeyModal();
   setupFileUpload();
   setupBuscadorPanel();
+  setupPlantillasPanel();
+  showWelcome(null);
+}
+
+// ─── Cambio de usuario ───────────────────────────────────────────────────────
+
+function onUserChange(user) {
+  // Actualizar namespacing de casos
+  setContextUser(user?.id || null);
+  // Refrescar lista de casos del nuevo usuario
+  renderCaseList();
+  // Limpiar el caso activo actual
+  activeCaseContext = null;
+  pendingAttachments = [];
+  clearAttachmentChips();
+  const display = document.getElementById("chat-case-display");
+  if (display) display.textContent = "Sin caso activo";
   showWelcome(null);
 }
 
@@ -117,7 +141,23 @@ function onCaseChange(caseContext) {
 
   if (caseContext) {
     clearChat();
-    showWelcome(caseContext.cliente || caseContext.caseId);
+
+    // ── #6: Cargar historial persistido ──────────────────────────────────
+    const saved = getCaseContext(caseContext.caseId);
+    const historial = saved?.historial || [];
+
+    if (historial.length > 0) {
+      // Mostrar banner de historial restaurado
+      appendMessage("assistant",
+        `📂 Historial restaurado — **${historial.length / 2 | 0} intercambios** guardados para el caso **${caseContext.cliente || caseContext.caseId}**. Podés continuar donde lo dejaste.`
+      );
+      // Renderizar los mensajes guardados
+      for (const msg of historial) {
+        appendMessage(msg.role, msg.content);
+      }
+    } else {
+      showWelcome(caseContext.cliente || caseContext.caseId);
+    }
   }
 }
 
@@ -268,6 +308,106 @@ function setupBuscadorPanel() {
   });
 }
 
+// ─── #7: Panel de plantillas rápidas ─────────────────────────────────────────
+
+const PLANTILLAS = [
+  {
+    icono: "📋",
+    titulo: "Demanda laboral — Despido sin causa",
+    modulo: "redaccion",
+    texto: "Redactá una demanda laboral por despido sin causa (art. 245 LCT) incluyendo: encabezado con datos del caso, hechos, derecho aplicable (LCT, Ley 25013 si corresponde), liquidación de rubros (indemnización, preaviso, integración mes, vacaciones proporcionales, SAC proporcional, multas Ley 25323 arts. 1 y 2), y petitorio. Usá los datos del caso activo."
+  },
+  {
+    icono: "📨",
+    titulo: "Carta documento — Intimación pago haberes",
+    modulo: "redaccion",
+    texto: "Redactá una carta documento intimando al empleador al pago de haberes adeudados, bajo apercibimiento de considerar el contrato disuelto por culpa del empleador (art. 246 LCT) con las consecuencias indemnizatorias del art. 245 LCT. Incluí plazo de 48 horas hábiles."
+  },
+  {
+    icono: "⚖️",
+    titulo: "Contestación de demanda laboral",
+    modulo: "redaccion",
+    texto: "Redactá una contestación de demanda laboral con negativa general y particular de todos los hechos invocados por la actora, ofrecimiento de prueba (documental, informativa, testimonial), y planteo de defensa de fondo. Basate en los datos del caso activo."
+  },
+  {
+    icono: "📬",
+    titulo: "Telegrama — Parte alícuota Ley 25323",
+    modulo: "redaccion",
+    texto: "Redactá un telegrama intimando el pago de la parte alícuota de SAC y de las multas de la Ley 25323 arts. 1 y 2. Incluí los montos según la liquidación del caso activo y el plazo de intimación correspondiente."
+  },
+  {
+    icono: "📝",
+    titulo: "Recurso de apelación laboral",
+    modulo: "redaccion",
+    texto: "Redactá un recurso de apelación ordinario ante la Cámara de Apelación del Trabajo, fundando el agravio en los hechos del caso activo. Incluí encabezado, relación de hechos, agravios numerados, derecho aplicable y petitorio."
+  },
+  {
+    icono: "📄",
+    titulo: "Oficio al juzgado — Solicitud de certificados",
+    modulo: "redaccion",
+    texto: "Redactá un oficio judicial solicitando al empleador la entrega del certificado de trabajo (art. 80 LCT), recibos de haberes y constancia de depósitos previsionales. Incluí encabezado formal y plazo de cumplimiento."
+  },
+  {
+    icono: "🔍",
+    titulo: "Análisis de hechos — Rubros procedentes",
+    modulo: "analisis",
+    texto: "Analizá los hechos del caso activo y determiná: rubros indemnizatorios procedentes, montos estimados según la remuneración informada, plazo de prescripción, y estrategia de acción recomendada. Indicá si corresponden multas de la Ley 25323."
+  },
+  {
+    icono: "✅",
+    titulo: "Checklist — Despido sin causa",
+    modulo: "checklist",
+    texto: "Generá un checklist completo para un juicio laboral por despido sin causa: documentación a reunir, plazos procesales clave, prueba a ofrecer, peritos a solicitar, y acciones previas al inicio de la demanda."
+  }
+];
+
+function setupPlantillasPanel() {
+  const btnToggle = document.getElementById("btn-plantillas");
+  const panel     = document.getElementById("plantillas-panel");
+  const btnClose  = document.getElementById("btn-plantillas-close");
+
+  btnToggle?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    panel?.classList.toggle("visible");
+  });
+
+  btnClose?.addEventListener("click", () => panel?.classList.remove("visible"));
+
+  document.addEventListener("click", (e) => {
+    if (panel?.classList.contains("visible") && !panel.contains(e.target) && e.target !== btnToggle) {
+      panel.classList.remove("visible");
+    }
+  });
+
+  // Renderizar la lista de plantillas
+  const list = document.getElementById("plantillas-list");
+  if (!list) return;
+
+  list.innerHTML = PLANTILLAS.map((p, i) => `
+    <button class="plantilla-item" data-idx="${i}" title="${p.titulo}">
+      <span class="plantilla-item__icon">${p.icono}</span>
+      <span class="plantilla-item__title">${p.titulo}</span>
+    </button>
+  `).join("");
+
+  list.addEventListener("click", (e) => {
+    const btn = e.target.closest(".plantilla-item");
+    if (!btn) return;
+    const plantilla = PLANTILLAS[parseInt(btn.dataset.idx)];
+    if (!plantilla) return;
+
+    panel?.classList.remove("visible");
+    setActiveModule(plantilla.modulo);
+    // Insertar el texto en el input y disparar envío
+    const input = document.getElementById("chat-input");
+    if (input) {
+      input.value = plantilla.texto;
+      input.dispatchEvent(new Event("input")); // ajustar altura
+      input.focus();
+    }
+  });
+}
+
 // ─── Procesamiento del mensaje del usuario ───────────────────────────────────
 
 async function handleUserInput(userText) {
@@ -348,24 +488,60 @@ async function handleUserInput(userText) {
 // ─── Exportación ─────────────────────────────────────────────────────────────
 
 function setupExportButton() {
+  // Toggle del menú de exportación
+  const toggleBtn = document.getElementById("btn-export-toggle");
+  const menu      = document.getElementById("export-menu");
+  toggleBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu?.classList.toggle("open");
+  });
+  document.addEventListener("click", () => menu?.classList.remove("open"));
+
   document.getElementById("btn-export-txt")?.addEventListener("click", () => {
+    menu?.classList.remove("open");
     if (!lastOutput.content) { showError("No hay contenido para exportar."); return; }
     exportTxt(lastOutput.content, suggestFilename(activeCaseContext, lastOutput.modulo));
   });
 
   document.getElementById("btn-export-docx")?.addEventListener("click", async () => {
+    menu?.classList.remove("open");
     if (!lastOutput.content) { showError("No hay contenido para exportar."); return; }
     await exportDocx(lastOutput.content, suggestFilename(activeCaseContext, lastOutput.modulo), activeCaseContext);
   });
+
+  // ── #5: Exportar PDF ────────────────────────────────────────────────────────
+  document.getElementById("btn-export-pdf")?.addEventListener("click", () => {
+    menu?.classList.remove("open");
+    if (!lastOutput.content) { showError("No hay contenido para exportar."); return; }
+    exportPdf(activeCaseContext);
+  });
+}
+
+/**
+ * #5 — Exporta el chat actual como PDF usando window.print().
+ * El CSS de impresión oculta todo excepto los mensajes del asistente.
+ */
+function exportPdf(caseContext) {
+  // Inyectar título de impresión temporalmente
+  const title = document.title;
+  if (caseContext?.cliente) {
+    document.title = `Dalmacio — ${caseContext.cliente} — ${caseContext.expediente || caseContext.caseId}`;
+  }
+  window.print();
+  document.title = title;
 }
 
 // ─── Limpiar chat ─────────────────────────────────────────────────────────────
 
 function setupClearButton() {
   document.getElementById("btn-clear-chat")?.addEventListener("click", () => {
-    if (confirm("¿Limpiar el historial de conversación?")) {
+    if (confirm("¿Limpiar el historial de conversación? Se borrará también el historial guardado del caso.")) {
       pendingAttachments = [];
       clearAttachmentChips();
+      // Limpiar historial persistido también
+      if (activeCaseContext?.caseId) {
+        clearHistory(activeCaseContext.caseId);
+      }
       clearChat();
       showWelcome(activeCaseContext?.cliente || null);
     }
