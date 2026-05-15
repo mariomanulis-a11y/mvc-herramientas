@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manual de Uso — Dalmacio · Estudio Jurídico Manulis</title>
+  <title>Manual de Uso — Herramientas MVC Abogados</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -54,7 +54,7 @@
     }
     .cover__title {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 52pt;
+      font-size: 40pt;
       font-weight: 700;
       color: var(--gold);
       letter-spacing: 2px;
@@ -62,7 +62,7 @@
     }
     .cover__subtitle {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 18pt;
+      font-size: 16pt;
       font-weight: 400;
       font-style: italic;
       color: #9aaac0;
@@ -79,874 +79,1485 @@
       color: #c8d4e8;
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .cover__sede {
-      font-size: 10pt;
-      color: #6a7a98;
-      margin-bottom: 60px;
-    }
-    .cover__footer {
-      margin-top: auto;
-      padding-top: 40px;
+    .cover__lugar {
       font-size: 9pt;
-      color: #3a4a62;
-      border-top: 1px solid #1c3050;
-      width: 100%;
-      text-align: center;
+      color: #7a91a8;
+      letter-spacing: 1px;
     }
-    .cover__version {
-      display: inline-block;
-      background: rgba(201,168,76,.15);
-      border: 1px solid var(--goldd);
-      border-radius: 20px;
-      padding: 4px 16px;
+    .cover__url {
+      margin-top: 48px;
       font-size: 9pt;
       color: var(--gold);
-      margin-bottom: 12px;
+      opacity: .7;
+      letter-spacing: 1px;
+    }
+    .cover__version {
+      margin-top: 16px;
+      font-size: 8pt;
+      color: #4a6070;
     }
 
     /* ── Contenido ── */
     .content {
-      padding: 40px 48px;
+      padding: 48px 52px;
+    }
+
+    /* ── Sección ── */
+    .section {
+      page-break-inside: avoid;
+      margin-bottom: 40px;
+    }
+    .section + .section {
+      border-top: 1px solid var(--border);
+      padding-top: 36px;
+    }
+
+    /* ── Parte (grupo de secciones) ── */
+    .part-header {
+      background: var(--navy);
+      color: #fff;
+      padding: 28px 52px;
+      page-break-before: always;
+      page-break-after: avoid;
+      margin-bottom: 0;
+    }
+    .part-header__number {
+      font-size: 8pt;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 6px;
+    }
+    .part-header__title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26pt;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .part-header__desc {
+      font-size: 10pt;
+      color: #7a91a8;
+      font-style: italic;
     }
 
     /* ── Índice ── */
     .toc {
+      padding: 48px 52px;
       page-break-after: always;
-      padding: 40px 48px;
     }
-    .toc h1 {
+    .toc__title {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 26pt;
+      font-size: 24pt;
+      font-weight: 700;
       color: var(--navy);
-      margin-bottom: 6px;
-    }
-    .toc__divider {
-      height: 2px;
-      background: linear-gradient(to right, var(--gold), transparent);
       margin-bottom: 28px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--gold);
+    }
+    .toc__group {
+      margin-bottom: 18px;
+    }
+    .toc__group-label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 6px;
     }
     .toc__item {
       display: flex;
+      justify-content: space-between;
       align-items: baseline;
-      gap: 6px;
-      padding: 7px 0;
+      padding: 4px 0;
       border-bottom: 1px dotted var(--border);
-      font-size: 10.5pt;
+      font-size: 10pt;
     }
-    .toc__num  { color: var(--gold); font-weight: 600; min-width: 26px; font-size: 10pt; }
-    .toc__name { flex: 1; color: #2d3748; }
-    .toc__sub  { font-size: 9.5pt; color: var(--gray); margin-left: 26px; padding: 3px 0; }
-    .toc__sub::before { content: "→ "; color: var(--goldd); }
-
-    /* ── Secciones ── */
-    .section {
-      page-break-before: always;
-      padding: 40px 48px;
+    .toc__item--sub {
+      padding-left: 18px;
+      font-size: 9.5pt;
+      color: var(--gray);
     }
-    .section:first-child { page-break-before: avoid; }
-
-    .section-header {
-      margin-bottom: 24px;
-    }
-    .section-num {
-      font-size: 9pt;
-      font-weight: 700;
+    .toc__num {
       color: var(--gold);
-      letter-spacing: 2px;
+      font-weight: 600;
+      min-width: 28px;
+    }
+    .toc__dots { flex: 1; border-bottom: 1px dotted var(--border); margin: 0 8px; }
+
+    /* ── Tipografía de contenido ── */
+    h1.sec-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 20pt;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .sec-num {
+      font-size: 8pt;
+      color: var(--gold);
       text-transform: uppercase;
+      letter-spacing: 2px;
       display: block;
       margin-bottom: 4px;
     }
-    h1.section-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 26pt;
-      color: var(--navy);
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .section-divider {
-      height: 2px;
-      background: linear-gradient(to right, var(--gold), transparent);
-      margin-top: 10px;
-    }
-
     h2 {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 16pt;
-      color: var(--navy);
+      font-size: 15pt;
       font-weight: 600;
-      margin: 28px 0 10px;
-      border-left: 3px solid var(--gold);
-      padding-left: 12px;
+      color: var(--navy);
+      margin: 22px 0 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
     }
     h3 {
-      font-size: 11pt;
+      font-size: 10.5pt;
       font-weight: 600;
-      color: #2d3748;
-      margin: 18px 0 6px;
+      color: var(--navy);
+      margin: 16px 0 6px;
     }
-    p  { margin-bottom: 10px; }
-    ul, ol { margin: 8px 0 12px 22px; }
-    li { margin-bottom: 5px; }
-    strong { color: var(--navy); }
+    p { margin-bottom: 10px; }
+    ul, ol {
+      margin: 8px 0 12px 20px;
+    }
+    li { margin-bottom: 4px; }
+    strong { font-weight: 600; }
 
-    /* ── Cajas de aviso ── */
-    .callout {
-      border-radius: 6px;
+    /* ── Cajas ── */
+    .box {
+      background: var(--light);
+      border-left: 3px solid var(--gold);
       padding: 12px 16px;
       margin: 14px 0;
-      font-size: 10pt;
-      line-height: 1.5;
+      border-radius: 0 4px 4px 0;
     }
-    .callout--tip {
-      background: #fffbf0;
-      border-left: 3px solid var(--gold);
+    .box--tip {
+      border-color: #4caf7a;
+      background: #f0faf4;
     }
-    .callout--note {
+    .box--warning {
+      border-color: #e07a55;
+      background: #fff6f2;
+    }
+    .box--info {
+      border-color: #5580ff;
       background: #f0f4ff;
-      border-left: 3px solid #5580ff;
     }
-    .callout--warn {
-      background: #fff8f0;
-      border-left: 3px solid #e07a55;
-    }
-    .callout__label {
+    .box__label {
+      font-size: 7.5pt;
       font-weight: 700;
-      font-size: 9.5pt;
       text-transform: uppercase;
-      letter-spacing: .5px;
-      display: block;
+      letter-spacing: 1.5px;
+      color: var(--goldd);
       margin-bottom: 4px;
     }
-    .callout--tip  .callout__label { color: var(--goldd); }
-    .callout--note .callout__label { color: #5580ff; }
-    .callout--warn .callout__label { color: #e07a55; }
+    .box--tip .box__label   { color: #2d7a50; }
+    .box--warning .box__label { color: #a0491a; }
+    .box--info .box__label  { color: #2244aa; }
 
-    /* ── Pasos numerados ── */
-    .steps { counter-reset: step; list-style: none; margin: 12px 0; padding: 0; }
-    .steps li {
-      counter-increment: step;
-      display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
-      align-items: flex-start;
-    }
-    .steps li::before {
-      content: counter(step);
-      background: var(--navy);
-      color: var(--gold);
-      font-weight: 700;
-      font-size: 9.5pt;
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    /* ── Tabla de módulos ── */
-    .module-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 14px 0;
-    }
-    .module-card {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      background: var(--light);
-    }
-    .module-card__icon { font-size: 20pt; margin-bottom: 6px; display: block; }
-    .module-card__name { font-weight: 700; font-size: 10.5pt; color: var(--navy); display: block; margin-bottom: 4px; }
-    .module-card__desc { font-size: 9.5pt; color: var(--gray); line-height: 1.4; }
-
-    /* ── Tabla de plantillas ── */
-    .plantilla-list { list-style: none; margin: 0; padding: 0; }
-    .plantilla-list li {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border);
-      font-size: 10pt;
-    }
-    .plantilla-list li:last-child { border-bottom: none; }
-    .plantilla-list .icon { flex-shrink: 0; font-size: 14pt; }
-
-    /* ── Tabla de bases de datos ── */
-    table {
+    /* ── Tabla de campos ── */
+    .fields-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 14px 0;
-      font-size: 10pt;
+      margin: 12px 0;
+      font-size: 9.5pt;
     }
-    th {
+    .fields-table th {
       background: var(--navy);
       color: var(--gold);
-      font-size: 9.5pt;
-      font-weight: 600;
-      letter-spacing: .5px;
-      padding: 8px 12px;
       text-align: left;
+      padding: 6px 10px;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    td {
-      padding: 8px 12px;
+    .fields-table td {
+      padding: 6px 10px;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
     }
-    tr:nth-child(even) td { background: var(--light); }
+    .fields-table tr:last-child td { border-bottom: none; }
+    .fields-table tr:nth-child(even) td { background: var(--light); }
 
-    /* ── Teclas ── */
-    kbd {
-      display: inline-block;
-      background: #edf2f7;
-      border: 1px solid #cbd5e0;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-family: monospace;
-      font-size: 9.5pt;
-      color: #2d3748;
+    /* ── Pasos numerados ── */
+    .steps { margin: 14px 0; }
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .step__n {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--gold);
+      font-size: 9pt;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step__text { flex: 1; }
+
+    /* ── Chips de módulos ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .chip {
+      background: var(--navy);
+      color: var(--goldl);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 8.5pt;
+      font-weight: 500;
     }
 
-    /* ── Captura de pantalla simulada ── */
-    .screenshot {
+    /* ── Badge resultado ── */
+    .result-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--goldd), var(--gold));
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 10px;
+      font-size: 9pt;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    /* ── Grid de herramientas ── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .tool-card {
       border: 1px solid var(--border);
       border-radius: 8px;
-      overflow: hidden;
-      margin: 14px 0;
+      padding: 14px 16px;
     }
-    .screenshot__bar {
-      background: var(--navy2);
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .screenshot__dot { width: 8px; height: 8px; border-radius: 50%; }
-    .screenshot__bar span { color: #9aaac0; font-size: 8.5pt; margin-left: 8px; }
-    .screenshot__body {
-      background: #0c1828;
-      padding: 14px;
-      color: #eef0f5;
-      font-size: 9.5pt;
-      font-family: 'Inter', monospace;
-      line-height: 1.5;
-    }
-
-    /* ── FAQ ── */
-    .faq { margin: 14px 0; }
-    .faq__q {
+    .tool-card__icon { font-size: 20px; margin-bottom: 6px; }
+    .tool-card__name {
+      font-size: 10pt;
       font-weight: 600;
       color: var(--navy);
-      margin: 16px 0 4px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
+      margin-bottom: 4px;
     }
-    .faq__q::before { content: "P:"; color: var(--gold); font-size: 10pt; flex-shrink: 0; font-weight: 700; }
-    .faq__a {
-      padding-left: 24px;
-      color: #4a5568;
+    .tool-card__desc {
+      font-size: 8.5pt;
+      color: var(--gray);
+      line-height: 1.5;
     }
-    .faq__a::before { content: "R: "; font-weight: 600; color: var(--navy); }
+    .tool-card__badge {
+      display: inline-block;
+      font-size: 7.5pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      border-radius: 3px;
+      padding: 1px 6px;
+      margin-top: 6px;
+    }
 
-    /* ── Pie de página ── */
+    /* ── Footer de página ── */
+    .page-footer {
+      margin-top: 60px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 8pt;
+      color: #aab;
+      text-align: center;
+    }
+
+    /* ── Print ── */
     @page {
-      margin: 18mm 16mm 18mm;
+      size: A4;
+      margin: 18mm 16mm;
     }
-
     @media print {
+      body { max-width: 100%; }
       .cover { min-height: 100vh; }
-      .section, .toc { padding: 0; }
-      h2 { page-break-after: avoid; }
-      .module-grid { page-break-inside: avoid; }
-      .callout { page-break-inside: avoid; }
+      .part-header { page-break-before: always; }
+      .section { page-break-inside: avoid; }
+      h1.sec-title, h2, h3 { page-break-after: avoid; }
+      .tools-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════ PORTADA ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     PORTADA
+══════════════════════════════════════════════════════════ -->
 <div class="cover">
   <div class="cover__seal">⚖️</div>
-  <div class="cover__title">Dalmacio</div>
-  <div class="cover__subtitle">Asistente Jurídico con Inteligencia Artificial</div>
+  <div class="cover__title">MVC Abogados</div>
+  <div class="cover__subtitle">Manual de Herramientas Digitales</div>
   <div class="cover__divider"></div>
   <div class="cover__estudio">Estudio Jurídico Manulis</div>
-  <div class="cover__sede">San Isidro · Provincia de Buenos Aires · Argentina</div>
-  <div class="cover__version">Versión 1.0 — Mayo 2026</div>
-  <div class="cover__footer">
-    Manual de Uso Interno · Confidencial<br>
-    herramientas.mvcabogados.com.ar
-  </div>
+  <div class="cover__lugar">San Isidro — Provincia de Buenos Aires</div>
+  <div class="cover__url">herramientas.mvcabogados.com.ar</div>
+  <div class="cover__version">Versión 2.0 · Mayo 2026</div>
 </div>
 
-<!-- ══════════════ ÍNDICE ══════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     ÍNDICE
+══════════════════════════════════════════════════════════ -->
 <div class="toc">
-  <h1>Índice</h1>
-  <div class="toc__divider"></div>
+  <div class="toc__title">Índice</div>
 
-  <div class="toc__item"><span class="toc__num">1</span><span class="toc__name">¿Qué es Dalmacio?</span></div>
-  <div class="toc__sub">Propósito, límites y consideraciones éticas</div>
-
-  <div class="toc__item"><span class="toc__num">2</span><span class="toc__name">Primeros pasos</span></div>
-  <div class="toc__sub">Acceso · Crear perfil de usuario · Configurar API key</div>
-
-  <div class="toc__item"><span class="toc__num">3</span><span class="toc__name">Gestión de casos</span></div>
-  <div class="toc__sub">Crear caso · Formulario · Cargar caso demo · Casos guardados</div>
-
-  <div class="toc__item"><span class="toc__num">4</span><span class="toc__name">Los seis módulos de trabajo</span></div>
-  <div class="toc__sub">Redactar · Analizar · Estrategia · Normativa · Checklist · Bases de Datos</div>
-
-  <div class="toc__item"><span class="toc__num">5</span><span class="toc__name">Plantillas rápidas</span></div>
-  <div class="toc__sub">Cómo usar las plantillas · Lista de modelos disponibles</div>
-
-  <div class="toc__item"><span class="toc__num">6</span><span class="toc__name">Adjuntar archivos</span></div>
-  <div class="toc__sub">PDF · Word · Imágenes · Documentos escaneados</div>
-
-  <div class="toc__item"><span class="toc__num">7</span><span class="toc__name">Historial persistente</span></div>
-  <div class="toc__sub">Restaurar conversación · Limpiar historial</div>
-
-  <div class="toc__item"><span class="toc__num">8</span><span class="toc__name">Exportar resultados</span></div>
-  <div class="toc__sub">Exportar .txt · Exportar .docx · Imprimir / PDF</div>
-
-  <div class="toc__item"><span class="toc__num">9</span><span class="toc__name">Búsqueda en bases de datos jurídicas</span></div>
-  <div class="toc__sub">SAIJ · InfoJus · CSJN · SCBA · PJN · InfoLEG</div>
-
-  <div class="toc__item"><span class="toc__num">10</span><span class="toc__name">Perfiles multi-usuario</span></div>
-  <div class="toc__sub">Crear perfiles · Cambiar de abogado · Casos independientes</div>
-
-  <div class="toc__item"><span class="toc__num">11</span><span class="toc__name">Preguntas frecuentes</span></div>
-
-  <div class="toc__item"><span class="toc__num">12</span><span class="toc__name">Referencia rápida</span></div>
-  <div class="toc__sub">Atajos de teclado · Límites del sistema</div>
-</div>
-
-<!-- ══════════════ 1. QUÉ ES DALMACIO ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 1</span>
-  <h1 class="section-title">¿Qué es Dalmacio?</h1>
-  <div class="section-divider"></div>
-</div>
-
-<p><strong>Dalmacio</strong> es el asistente jurídico con inteligencia artificial del Estudio Jurídico Manulis, desarrollado especialmente para la práctica del derecho laboral en la Provincia de Buenos Aires. Su nombre rinde homenaje a <em>Dalmacio Vélez Sársfield</em>, codificador del derecho civil argentino.</p>
-
-<p>Funciona directamente en el navegador en <strong>herramientas.mvcabogados.com.ar</strong>, sin necesidad de instalar ningún programa. Utiliza el modelo de inteligencia artificial <strong>Claude Sonnet de Anthropic</strong> para generar respuestas, redactar documentos y analizar situaciones jurídicas.</p>
-
-<h2>¿Para qué sirve?</h2>
-<ul>
-  <li>Redactar escritos judiciales y extrajudiciales (demandas, cartas documento, recursos, oficios)</li>
-  <li>Analizar los hechos de un caso y determinar los rubros indemnizatorios procedentes</li>
-  <li>Diseñar estrategias procesales basadas en el fuero y la jurisdicción</li>
-  <li>Consultar normativa laboral vigente (LCT, Ley 24013, Ley 25323, CCyCN, Ley 15057)</li>
-  <li>Generar checklists de documentación y pasos procesales</li>
-  <li>Buscar jurisprudencia y legislación en bases de datos oficiales</li>
-  <li>Procesar documentos adjuntos: contratos, recibos, telegramas, imágenes</li>
-</ul>
-
-<h2>Marco legal aplicable</h2>
-<p>Dalmacio está configurado para trabajar con el derecho laboral argentino, con énfasis en la Provincia de Buenos Aires:</p>
-<ul>
-  <li><strong>LCT</strong> — Ley de Contrato de Trabajo (Ley 20744)</li>
-  <li><strong>Ley 24013</strong> — Empleo no registrado y multas</li>
-  <li><strong>Ley 25323</strong> — Incremento de indemnizaciones</li>
-  <li><strong>CCyCN</strong> — Código Civil y Comercial de la Nación</li>
-  <li><strong>Ley 24240</strong> — Defensa del Consumidor</li>
-  <li><strong>CPCC PBA</strong> — Código Procesal Civil y Comercial de Buenos Aires</li>
-  <li><strong>Ley 15057</strong> — Procedimiento Laboral de la Provincia de Buenos Aires</li>
-</ul>
-
-<div class="callout callout--warn">
-  <span class="callout__label">⚠ Importante — Verificación profesional obligatoria</span>
-  Dalmacio es una herramienta de asistencia, no reemplaza el criterio profesional del abogado. Todo documento generado debe ser revisado y validado antes de su presentación judicial. La IA puede cometer errores, en especial en citas de jurisprudencia — siempre verificar en las fuentes oficiales.
-</div>
-
-<div class="callout callout--note">
-  <span class="callout__label">🔒 Privacidad y seguridad</span>
-  Los datos de los casos se almacenan únicamente en el navegador del usuario (localStorage). La API key de Anthropic se guarda en sessionStorage y se borra automáticamente al cerrar la pestaña. Ningún dato del estudio se envía a servidores intermedios.
-</div>
-</div>
-
-<!-- ══════════════ 2. PRIMEROS PASOS ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 2</span>
-  <h1 class="section-title">Primeros pasos</h1>
-  <div class="section-divider"></div>
-</div>
-
-<h2>Acceso</h2>
-<p>Dalmacio está disponible en:</p>
-<div class="callout callout--tip">
-  <span class="callout__label">🌐 URL de acceso</span>
-  <strong>herramientas.mvcabogados.com.ar</strong> → hacer click en la herramienta <em>"Dalmacio — Asistente Jurídico IA"</em>
-</div>
-
-<h2>Crear un perfil de usuario</h2>
-<p>La primera vez que accedés a Dalmacio, el sistema te pedirá crear un perfil personal. Cada abogado del estudio tiene su propio perfil con casos independientes.</p>
-
-<ol class="steps">
-  <li>Al abrir Dalmacio por primera vez, aparece el modal <strong>"Perfiles del Estudio"</strong></li>
-  <li>Escribí tu nombre completo en el campo <em>"Nuevo abogado / abogada"</em></li>
-  <li>Hacé click en <strong>"Crear perfil"</strong></li>
-  <li>Tu avatar con las iniciales aparecerá en el ángulo superior derecho del header</li>
-</ol>
-
-<p>Para cambiar de perfil o agregar un nuevo abogado: hacé click en tu avatar (ángulo superior derecho) y seleccioná el perfil deseado o creá uno nuevo.</p>
-
-<h2>Configurar la API key de Anthropic</h2>
-<p>Dalmacio requiere una API key personal de Anthropic para funcionar. Esta clave permite el acceso al modelo de IA Claude Sonnet.</p>
-
-<ol class="steps">
-  <li>Accedé a <strong>console.anthropic.com</strong> e iniciá sesión con tu cuenta</li>
-  <li>En el menú lateral, seleccioná <em>"API Keys"</em></li>
-  <li>Creá una nueva clave o copiá una existente</li>
-  <li>En Dalmacio, hacé click en el botón <kbd>⚙</kbd> del header</li>
-  <li>Pegá la API key en el campo correspondiente (comienza con <code>sk-ant-api03-...</code>)</li>
-  <li>Hacé click en <strong>"Guardar y conectar"</strong></li>
-</ol>
-
-<div class="callout callout--warn">
-  <span class="callout__label">⚠ La API key expira al cerrar la pestaña</span>
-  Por seguridad, la clave se almacena en sessionStorage y se borra automáticamente al cerrar el navegador. Debés ingresarla de nuevo en cada sesión de trabajo.
-</div>
-
-<div class="callout callout--tip">
-  <span class="callout__label">💡 Límites de solicitudes (rate limiting)</span>
-  Si aparece el mensaje <em>"Límite de solicitudes alcanzado"</em>, el sistema reintenta automáticamente hasta 3 veces. Si persiste, esperá unos minutos. Para un uso intensivo del estudio, se recomienda contar con un plan pago en Anthropic.
-</div>
-</div>
-
-<!-- ══════════════ 3. GESTIÓN DE CASOS ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 3</span>
-  <h1 class="section-title">Gestión de casos</h1>
-  <div class="section-divider"></div>
-</div>
-
-<p>El panel lateral izquierdo es el <strong>centro de gestión de casos</strong>. Para abrirlo en el celular, tocá el botón <kbd>☰</kbd> en el ángulo superior izquierdo.</p>
-
-<h2>Crear un nuevo caso</h2>
-<ol class="steps">
-  <li>Hacé click en el botón <strong>"+ Nuevo"</strong> en la parte superior del panel lateral</li>
-  <li>Se crea automáticamente un caso en blanco con un ID único</li>
-  <li>Completá los campos del formulario</li>
-</ol>
-
-<h2>Formulario del caso</h2>
-<table>
-  <tr><th>Campo</th><th>Descripción</th><th>Ejemplo</th></tr>
-  <tr><td><strong>Cliente</strong></td><td>Nombre completo del cliente</td><td>Juan Pérez</td></tr>
-  <tr><td><strong>Expediente</strong></td><td>Número de expediente judicial</td><td>PL-1234-2025</td></tr>
-  <tr><td><strong>Juzgado / Tribunal</strong></td><td>Órgano judicial interviniente (con autocompletado)</td><td>Tribunal de Trabajo N°3 de San Isidro</td></tr>
-  <tr><td><strong>Fuero</strong></td><td>Laboral, Civil, Comercial, Consumidor u Otro</td><td>Laboral</td></tr>
-  <tr><td><strong>Jurisdicción</strong></td><td>Departamento Judicial (con autocompletado de los 19 DJ de PBA)</td><td>Departamento Judicial San Isidro</td></tr>
-  <tr><td><strong>Materia</strong></td><td>Descripción breve del objeto del caso</td><td>Despido sin causa — Diferencias salariales</td></tr>
-  <tr><td><strong>Hechos del caso</strong></td><td>Relación de hechos relevantes que guiará a Dalmacio</td><td>Ingreso 01/03/2018, remuneración $850.000...</td></tr>
-</table>
-
-<p>El formulario <strong>se guarda automáticamente</strong> mientras escribís (con un retardo de 800ms). También podés hacer click en <strong>"Guardar caso"</strong> para guardar de inmediato.</p>
-
-<h2>Caso demo</h2>
-<p>Para familiarizarte con el sistema, hacé click en el botón <strong>"Demo"</strong>. Se cargará un caso de ejemplo completo (Juan Pérez, despido sin causa, Tribunal N°3 San Isidro) con todos los campos completados.</p>
-
-<h2>Casos guardados</h2>
-<p>En la parte inferior del panel lateral se muestra la lista de todos tus casos guardados, ordenados por fecha de última modificación. Desde allí podés:</p>
-<ul>
-  <li><strong>↗ Cargar</strong> — carga el caso en el formulario y restaura el historial de conversación</li>
-  <li><strong>✕ Eliminar</strong> — borra el caso definitivamente (se pide confirmación)</li>
-</ul>
-
-<div class="callout callout--note">
-  <span class="callout__label">💾 Almacenamiento local</span>
-  Los casos se guardan en el navegador del dispositivo. Si cambiás de equipo o borrás los datos del navegador, los casos no estarán disponibles. Se recomienda exportar los documentos importantes como .docx.
-</div>
-</div>
-
-<!-- ══════════════ 4. LOS SEIS MÓDULOS ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 4</span>
-  <h1 class="section-title">Los seis módulos de trabajo</h1>
-  <div class="section-divider"></div>
-</div>
-
-<p>Dalmacio está organizado en <strong>seis módulos especializados</strong>, accesibles desde la barra horizontal debajo del header. En pantallas pequeñas podés deslizar la barra horizontalmente para ver todos los botones.</p>
-
-<div class="module-grid">
-  <div class="module-card">
-    <span class="module-card__icon">📝</span>
-    <span class="module-card__name">Redactar escritos</span>
-    <span class="module-card__desc">Genera demandas, cartas documento, telegramas, recursos y oficios. Detecta automáticamente el tipo de escrito según las palabras usadas.</span>
+  <div class="toc__group">
+    <div class="toc__group-label">Introducción</div>
+    <div class="toc__item">
+      <span><span class="toc__num">1.</span> La plataforma — qué es y cómo acceder</span>
+      <span class="toc__dots"></span><span>3</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">2.</span> Navegación y exportación</span>
+      <span class="toc__dots"></span><span>4</span>
+    </div>
   </div>
-  <div class="module-card">
-    <span class="module-card__icon">🔍</span>
-    <span class="module-card__name">Analizar hechos</span>
-    <span class="module-card__desc">Analiza los hechos del caso activo, determina rubros procedentes y calcula montos estimados con las fórmulas legales vigentes.</span>
+
+  <div class="toc__group">
+    <div class="toc__group-label">Derecho Laboral</div>
+    <div class="toc__item">
+      <span><span class="toc__num">3.</span> Liquidación LCT (Ley 20744)</span>
+      <span class="toc__dots"></span><span>5</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">4.</span> Ley 24.013 — Empleo No Registrado</span>
+      <span class="toc__dots"></span><span>7</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">5.</span> Ley 25.323 — Recargos Indemnizatorios</span>
+      <span class="toc__dots"></span><span>9</span>
+    </div>
   </div>
-  <div class="module-card">
-    <span class="module-card__icon">⚖️</span>
-    <span class="module-card__name">Estrategia procesal</span>
-    <span class="module-card__desc">Diseña la estrategia de litigio según el fuero, la jurisdicción y el objetivo del cliente. Evalúa riesgos y alternativas.</span>
+
+  <div class="toc__group">
+    <div class="toc__group-label">Cálculos Judiciales</div>
+    <div class="toc__item">
+      <span><span class="toc__num">6.</span> Intereses BPBA</span>
+      <span class="toc__dots"></span><span>11</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">7.</span> Actualización Monetaria (IPC / CER / RIPTE)</span>
+      <span class="toc__dots"></span><span>13</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">8.</span> Plazos Procesales</span>
+      <span class="toc__dots"></span><span>14</span>
+    </div>
   </div>
-  <div class="module-card">
-    <span class="module-card__icon">📚</span>
-    <span class="module-card__name">Consultar normativa</span>
-    <span class="module-card__desc">Responde consultas sobre artículos de la LCT, CCyCN, Ley 24013, Ley 25323, Ley 15057 y demás normativa aplicable.</span>
+
+  <div class="toc__group">
+    <div class="toc__group-label">Indemnizaciones</div>
+    <div class="toc__item">
+      <span><span class="toc__num">9.</span> Incapacidad Física</span>
+      <span class="toc__dots"></span><span>16</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">10.</span> Daño Punitivo (Art. 52 bis Ley 24.240)</span>
+      <span class="toc__dots"></span><span>17</span>
+    </div>
   </div>
-  <div class="module-card">
-    <span class="module-card__icon">✅</span>
-    <span class="module-card__name">Checklist</span>
-    <span class="module-card__desc">Genera listas de verificación con la documentación necesaria, los pasos procesales y los plazos clave para cada tipo de acción legal.</span>
+
+  <div class="toc__group">
+    <div class="toc__group-label">Documentos</div>
+    <div class="toc__item">
+      <span><span class="toc__num">11.</span> Carta Documento / Telegrama Laboral</span>
+      <span class="toc__dots"></span><span>19</span>
+    </div>
   </div>
-  <div class="module-card">
-    <span class="module-card__icon">🗄️</span>
-    <span class="module-card__name">Bases de Datos</span>
-    <span class="module-card__desc">Abre el panel de búsqueda jurídica con acceso directo a SAIJ, InfoJus, CSJN, SCBA (JUBA), PJN e InfoLEG.</span>
+
+  <div class="toc__group">
+    <div class="toc__group-label">Asistente IA — Dalmacio</div>
+    <div class="toc__item">
+      <span><span class="toc__num">12.</span> Qué es Dalmacio y primeros pasos</span>
+      <span class="toc__dots"></span><span>21</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">13.</span> Gestión de casos y perfiles de abogado</span>
+      <span class="toc__dots"></span><span>22</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">14.</span> Los 6 módulos de asistencia</span>
+      <span class="toc__dots"></span><span>23</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">15.</span> Plantillas rápidas, adjuntos y exportación</span>
+      <span class="toc__dots"></span><span>25</span>
+    </div>
+    <div class="toc__item">
+      <span><span class="toc__num">16.</span> FAQ y referencia rápida general</span>
+      <span class="toc__dots"></span><span>27</span>
+    </div>
   </div>
 </div>
 
-<h2>Cómo usar un módulo</h2>
-<ol class="steps">
-  <li>Asegurate de tener un caso activo cargado en el panel lateral</li>
-  <li>Hacé click en el botón del módulo deseado en la barra de navegación</li>
-  <li>Dalmacio enviará un mensaje de activación indicando qué información necesita</li>
-  <li>Respondé con tu consulta o instrucción específica</li>
-  <li>También podés escribir directamente en el chat sin activar un módulo (<em>Chat libre</em>)</li>
-</ol>
 
-<div class="callout callout--tip">
-  <span class="callout__label">💡 Contexto del caso</span>
-  Cuando hay un caso activo, Dalmacio utiliza automáticamente los datos del formulario (cliente, hechos, juzgado, etc.) como contexto para todas sus respuestas. No es necesario repetir la información del caso en cada consulta.
+<!-- ══════════════════════════════════════════════════════════
+     PARTE 1 — INTRODUCCIÓN
+══════════════════════════════════════════════════════════ -->
+<div class="part-header">
+  <div class="part-header__number">Parte 1</div>
+  <div class="part-header__title">La Plataforma</div>
+  <div class="part-header__desc">Acceso, navegación y características comunes a todas las herramientas</div>
 </div>
 
-<h2>Módulo Redactar — Tipos de escritos reconocidos</h2>
-<p>Al redactar, Dalmacio detecta automáticamente el tipo de escrito según las palabras clave que uses:</p>
-<table>
-  <tr><th>Si escribís…</th><th>Genera…</th></tr>
-  <tr><td>"demanda", "iniciar juicio", "reclamar"</td><td>Demanda judicial completa con encabezado y petitorio</td></tr>
-  <tr><td>"carta documento", "cd", "intimación"</td><td>Carta documento formal con plazos de intimación</td></tr>
-  <tr><td>"telegrama", "TCP"</td><td>Telegrama colacionado con formato postal</td></tr>
-  <tr><td>"recurso", "apelar", "apelación"</td><td>Recurso de apelación con agravios</td></tr>
-  <tr><td>"oficio", "solicitar al juzgado"</td><td>Oficio judicial con encabezado formal</td></tr>
-  <tr><td>"contestación", "contesta"</td><td>Contestación de demanda con negativas</td></tr>
-</table>
+<div class="content">
+
+  <!-- Sección 1 -->
+  <div class="section">
+    <span class="sec-num">Sección 1</span>
+    <h1 class="sec-title">La plataforma — qué es y cómo acceder</h1>
+
+    <p><strong>herramientas.mvcabogados.com.ar</strong> es la plataforma de herramientas digitales del Estudio Jurídico Manulis para la práctica profesional de la abogacía bonaerense. Reúne diez utilidades especializadas en derecho laboral, cálculos judiciales, indemnizaciones, documentos e inteligencia artificial.</p>
+
+    <div class="box">
+      <div class="box__label">URL de acceso</div>
+      <strong>https://herramientas.mvcabogados.com.ar</strong><br>
+      Compatible con Chrome, Edge, Firefox y Safari. No requiere instalación ni cuenta de usuario para las herramientas de cálculo.
+    </div>
+
+    <h2>Las diez herramientas disponibles</h2>
+
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-card__icon">⚖️</div>
+        <div class="tool-card__name">Liquidación LCT</div>
+        <div class="tool-card__desc">Liquidación final de haberes e indemnizaciones por despido, renuncia o mutuo acuerdo según la Ley 20744.</div>
+        <div class="tool-card__badge">Derecho Laboral</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">📋</div>
+        <div class="tool-card__name">Ley 24.013</div>
+        <div class="tool-card__desc">Multas por empleo no registrado (Arts. 8, 9, 10 y 11). Calcula automáticamente el monto según período y remuneración.</div>
+        <div class="tool-card__badge">Derecho Laboral</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">➕</div>
+        <div class="tool-card__name">Ley 25.323</div>
+        <div class="tool-card__desc">Recargos del 50% sobre indemnizaciones por mora en el pago o relación deficientemente registrada.</div>
+        <div class="tool-card__badge">Derecho Laboral</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">📈</div>
+        <div class="tool-card__name">Intereses BPBA</div>
+        <div class="tool-card__desc">Liquidación de intereses judiciales en dos períodos: 6% anual (fallo Vera) y tasa pasiva digital del BPBA desde 2008.</div>
+        <div class="tool-card__badge">Cálculos Judiciales</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">💹</div>
+        <div class="tool-card__name">Actualización Monetaria</div>
+        <div class="tool-card__desc">Actualiza montos por IPC, CER o RIPTE con datos en tiempo real del API del Ministerio de Hacienda.</div>
+        <div class="tool-card__badge">Cálculos Judiciales</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">📅</div>
+        <div class="tool-card__name">Plazos Procesales</div>
+        <div class="tool-card__desc">Calcula vencimientos en días hábiles judiciales, corridos o meses conforme el CPCC Buenos Aires. Gestiona múltiples plazos en sesión.</div>
+        <div class="tool-card__badge">Cálculos Judiciales</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">🩺</div>
+        <div class="tool-card__name">Incapacidad Física</div>
+        <div class="tool-card__desc">Indemnización por daño a la persona mediante la fórmula actuarial de renta constante no perpetua.</div>
+        <div class="tool-card__badge">Indemnizaciones</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">⚠️</div>
+        <div class="tool-card__name">Daño Punitivo</div>
+        <div class="tool-card__desc">Estimación de daños punitivos (Art. 52 bis Ley 24.240) con sistema de ponderación de factores y tope por canastas básicas.</div>
+        <div class="tool-card__badge">Indemnizaciones</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">✉️</div>
+        <div class="tool-card__name">Carta Documento</div>
+        <div class="tool-card__desc">Generador de cartas documento y telegramas laborales con seis plantillas predefinidas (LCT, Ley 24.013, Ley 25.323).</div>
+        <div class="tool-card__badge">Documentos</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__icon">⚖️</div>
+        <div class="tool-card__name">Dalmacio</div>
+        <div class="tool-card__desc">Asistente jurídico con inteligencia artificial. Análisis de casos, redacción, estrategia procesal, normativa y más.</div>
+        <div class="tool-card__badge">Asistente IA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 2 -->
+  <div class="section">
+    <span class="sec-num">Sección 2</span>
+    <h1 class="sec-title">Navegación y exportación</h1>
+
+    <h2>Cómo navegar entre herramientas</h2>
+    <p>La barra lateral izquierda de la plataforma lista todas las herramientas agrupadas por categoría. Hacé clic en cualquier nombre para cargar la herramienta sin recargar la página.</p>
+
+    <h2>Funciones de exportación comunes</h2>
+    <p>Todas las calculadoras (excepto Dalmacio, que tiene su propio sistema) ofrecen tres modalidades de exportación una vez calculado el resultado:</p>
+
+    <table class="fields-table">
+      <thead>
+        <tr><th>Botón</th><th>Formato</th><th>Uso recomendado</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>📋 Copiar resumen</td>
+          <td>Texto plano</td>
+          <td>Pegar en chats, correos electrónicos o escritos procesales</td>
+        </tr>
+        <tr>
+          <td>📄 Exportar PDF</td>
+          <td>PDF (ventana emergente)</td>
+          <td>Adjuntar al expediente digital o imprimir para el juzgado</td>
+        </tr>
+        <tr>
+          <td>📊 Exportar CSV</td>
+          <td>Hoja de cálculo</td>
+          <td>Importar en Excel o Google Sheets para análisis adicional</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box--tip box">
+      <div class="box__label">Consejo</div>
+      El campo <strong>Carátula</strong> disponible en la mayoría de las herramientas se incluye automáticamente en los encabezados de los PDF y CSV exportados, identificando el expediente sin necesidad de edición posterior.
+    </div>
+
+    <div class="box--info box">
+      <div class="box__label">Compatibilidad</div>
+      La plataforma funciona íntegramente en el navegador, sin servidores intermedios para los cálculos. Los datos ingresados no salen de tu dispositivo, salvo cuando usás Dalmacio (que envía los mensajes a la API de Anthropic).
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PARTE 2 — DERECHO LABORAL
+══════════════════════════════════════════════════════════ -->
+<div class="part-header">
+  <div class="part-header__number">Parte 2</div>
+  <div class="part-header__title">Derecho Laboral</div>
+  <div class="part-header__desc">Liquidación LCT · Ley 24.013 · Ley 25.323</div>
 </div>
 
-<!-- ══════════════ 5. PLANTILLAS RÁPIDAS ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 5</span>
-  <h1 class="section-title">Plantillas rápidas</h1>
-  <div class="section-divider"></div>
+<div class="content">
+
+  <!-- Sección 3 -->
+  <div class="section">
+    <span class="sec-num">Sección 3</span>
+    <h1 class="sec-title">Liquidación LCT (Ley 20744)</h1>
+
+    <p>Calcula la liquidación final de haberes e indemnizaciones para toda causa de egreso contemplada en la Ley de Contrato de Trabajo. El resultado muestra cada rubro con su base de cálculo y genera la carátula automáticamente.</p>
+
+    <h2>Campos de entrada</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th><th>Obs.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nombre del trabajador</td><td>Nombre y apellido completo</td><td>Opcional, aparece en carátula</td></tr>
+        <tr><td>Empleador / Demandada</td><td>Razón social o nombre del empleador</td><td>Opcional, aparece en carátula</td></tr>
+        <tr><td>Fecha de ingreso</td><td>Fecha de inicio de la relación laboral</td><td>Requerido</td></tr>
+        <tr><td>Fecha de egreso</td><td>Fecha de extinción de la relación</td><td>Requerido</td></tr>
+        <tr><td>Mejor remuneración mensual normal y habitual</td><td>Monto en pesos (sin deducciones)</td><td>Requerido</td></tr>
+        <tr><td>Causa del egreso</td><td>Ver tabla de causas abajo</td><td>Requerido</td></tr>
+        <tr><td>Preaviso ya recibido</td><td>Marcar si el trabajador recibió preaviso en término</td><td>Opcional</td></tr>
+        <tr><td>SAC del semestre ya cobrado</td><td>Excluye el SAC proporcional del resultado</td><td>Opcional</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Causas de egreso disponibles</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Causa</th><th>Rubros que incluye</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Despido sin causa (Art. 245)</td>
+          <td>Ind. Art. 245 + Preaviso + Integración mes de despido + SAC s/preaviso + SAC prop. + Vacaciones prop.</td>
+        </tr>
+        <tr>
+          <td>Despido indirecto (Art. 246)</td>
+          <td>Idéntico al anterior (Art. 246 remite al 245)</td>
+        </tr>
+        <tr>
+          <td>Renuncia</td>
+          <td>SAC prop. + Vacaciones prop. — descuenta preaviso omitido (15 días, Art. 231)</td>
+        </tr>
+        <tr>
+          <td>Mutuo acuerdo (Art. 241)</td>
+          <td>SAC prop. + Vacaciones prop.</td>
+        </tr>
+        <tr>
+          <td>Vencimiento de plazo fijo (Art. 95)</td>
+          <td>50% de la ind. del Art. 245 + SAC prop. + Vacaciones prop.</td>
+        </tr>
+        <tr>
+          <td>Fuerza mayor / falta de trabajo (Art. 247)</td>
+          <td>50% de la ind. del Art. 245 + SAC prop. + Vacaciones prop.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Cómo se calcula la antigüedad</h2>
+    <p>La herramienta computa años completos y meses. Si los meses fraccionarios son más de 3 (Art. 255 LCT), la fracción se cuenta como año adicional. El período mínimo es siempre 1 año. La fórmula del Art. 245 aplica el mínimo de 2 remuneraciones cuando el resultado aritmético es inferior.</p>
+
+    <h2>Rubros del resultado</h2>
+    <ul>
+      <li><strong>Indemnización por antigüedad (Art. 245):</strong> remuneración × años de antigüedad (con fracción)</li>
+      <li><strong>Indemnización sustitutiva de preaviso (Art. 232):</strong> 15 días si antigüedad &lt; 3 meses; 1 mes hasta 5 años; 2 meses más de 5 años</li>
+      <li><strong>Integración mes de despido (Art. 233):</strong> días restantes del mes al momento del despido</li>
+      <li><strong>SAC sobre preaviso:</strong> 1/12 del monto de preaviso</li>
+      <li><strong>SAC proporcional:</strong> días trabajados en el semestre en curso</li>
+      <li><strong>Vacaciones proporcionales (Art. 156):</strong> días según antigüedad × meses del año trabajados / 25</li>
+    </ul>
+
+    <div class="box--warning box">
+      <div class="box__label">Atención — Topes del Art. 245</div>
+      La herramienta calcula sobre la remuneración ingresada sin aplicar el tope del Art. 245 vinculado al convenio colectivo de trabajo. Si el caso está regido por un CCT con tope de remuneración distinto al sueldo real, ajustá el monto ingresado al tope correspondiente antes de calcular, o tomá el resultado como referencia.
+    </div>
+
+    <div class="steps">
+      <h3>Paso a paso</h3>
+      <div class="step"><div class="step__n">1</div><div class="step__text">Completar nombre del trabajador y empleador (opcionales pero recomendados para la carátula automática).</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Ingresar fechas de ingreso y egreso.</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">Ingresar la mejor remuneración mensual normal y habitual.</div></div>
+      <div class="step"><div class="step__n">4</div><div class="step__text">Seleccionar la causa de egreso.</div></div>
+      <div class="step"><div class="step__n">5</div><div class="step__text">Marcar los tildados opcionales si corresponden (preaviso recibido / SAC cobrado).</div></div>
+      <div class="step"><div class="step__n">6</div><div class="step__text">Hacer clic en <strong>Calcular liquidación</strong>.</div></div>
+      <div class="step"><div class="step__n">7</div><div class="step__text">Revisar cada rubro con su base, y exportar o copiar el resultado.</div></div>
+    </div>
+  </div>
+
+  <!-- Sección 4 -->
+  <div class="section">
+    <span class="sec-num">Sección 4</span>
+    <h1 class="sec-title">Ley 24.013 — Empleo No Registrado</h1>
+
+    <p>Calcula las multas de los Arts. 8, 9 y 10 de la Ley 24.013 por trabajo no registrado o deficientemente registrado. Permite seleccionar los artículos aplicables al caso y duplica los montos ante la presencia del Art. 11 (obstaculización de inspección).</p>
+
+    <h2>Campos de entrada</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Empleador / Demandada</td><td>Nombre o razón social</td></tr>
+        <tr><td>Nombre del trabajador</td><td>Para la carátula automática</td></tr>
+        <tr><td>Fecha de inicio real</td><td>Fecha verdadera de inicio de la relación laboral</td></tr>
+        <tr><td>Fecha de envío del telegrama</td><td>Fecha de la intimación fehaciente al empleador</td></tr>
+        <tr><td>Remuneración mensual real</td><td>Remuneración efectivamente percibida (no la del recibo)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Artículos seleccionables</h2>
+
+    <table class="fields-table">
+      <thead>
+        <tr><th>Artículo</th><th>Supuesto</th><th>Fórmula</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Art. 8</strong></td>
+          <td>Relación laboral no registrada en absoluto</td>
+          <td>Remuneración × meses no registrados × 25%</td>
+        </tr>
+        <tr>
+          <td><strong>Art. 9</strong></td>
+          <td>Fecha de ingreso registrada posterior a la real</td>
+          <td>Remuneración × meses de diferencia × 25%</td>
+        </tr>
+        <tr>
+          <td><strong>Art. 10</strong></td>
+          <td>Remuneración registrada inferior a la real</td>
+          <td>(Rem. real − Rem. registrada) × meses × 25%</td>
+        </tr>
+        <tr>
+          <td><strong>Art. 11</strong></td>
+          <td>Obstaculización de inspección laboral</td>
+          <td>Duplica (×2) todas las multas seleccionadas</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box--warning box">
+      <div class="box__label">Requisitos formales — no omitir</div>
+      <ul>
+        <li>Intimación fehaciente al empleador (Art. 11 Ley 24.013)</li>
+        <li>Intimación al AFIP (Art. 47 Dec. 1043/2001)</li>
+        <li>Si el empleador <strong>regularizó dentro de los 30 días</strong> de la intimación, las multas no proceden. La herramienta tiene un tildado para este caso que muestra el aviso correspondiente.</li>
+      </ul>
+    </div>
+
+    <div class="box box--info">
+      <div class="box__label">Acumulación con Ley 25.323</div>
+      Los Arts. 8, 9 y 10 no son acumulables con el Art. 1 de la Ley 25.323 por el mismo período y el mismo incumplimiento, salvo por el excedente que pudiera corresponder. Usá la herramienta de Ley 25.323 en conjunto para verificar la conveniencia de cada pretensión.
+    </div>
+
+    <div class="steps">
+      <h3>Paso a paso</h3>
+      <div class="step"><div class="step__n">1</div><div class="step__text">Ingresar datos del trabajador y empleador.</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Ingresar la fecha de inicio real y la fecha del telegrama de intimación.</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">Ingresar la remuneración real mensual.</div></div>
+      <div class="step"><div class="step__n">4</div><div class="step__text">Tildar los artículos que aplican (Arts. 8, 9, 10, 11). Para el Art. 9, ingresar los meses de diferencia entre la fecha real y la registrada. Para el Art. 10, ingresar la remuneración del recibo.</div></div>
+      <div class="step"><div class="step__n">5</div><div class="step__text">Si el empleador regularizó, tildar la casilla correspondiente antes de calcular.</div></div>
+      <div class="step"><div class="step__n">6</div><div class="step__text">Hacer clic en <strong>Calcular multas</strong> y revisar el desglose por artículo.</div></div>
+    </div>
+  </div>
+
+  <!-- Sección 5 -->
+  <div class="section">
+    <span class="sec-num">Sección 5</span>
+    <h1 class="sec-title">Ley 25.323 — Recargos Indemnizatorios</h1>
+
+    <p>Aplica los recargos del 50% previstos en los Arts. 1 y 2 de la Ley 25.323 sobre los montos indemnizatorios ya calculados. Esta herramienta es complementaria de la Liquidación LCT: primero calculás la liquidación y luego volcás los rubros aquí.</p>
+
+    <h2>Conceptos base que acepta</h2>
+    <ul>
+      <li>Indemnización Art. 245 LCT</li>
+      <li>Preaviso (Art. 232 LCT)</li>
+      <li>Integración mes de despido (Art. 233 LCT)</li>
+      <li>SAC sobre preaviso</li>
+    </ul>
+    <p>Todos los campos son opcionales entre sí: podés ingresar solo los montos que apliquen al caso.</p>
+
+    <h2>Recargos disponibles</h2>
+
+    <table class="fields-table">
+      <thead>
+        <tr><th>Artículo</th><th>Supuesto</th><th>Base del recargo</th><th>Porcentaje</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Art. 1</strong></td>
+          <td>Relación no registrada o registrada deficientemente</td>
+          <td>Solo sobre Ind. Art. 245</td>
+          <td>+50%</td>
+        </tr>
+        <tr>
+          <td><strong>Art. 2</strong></td>
+          <td>Mora en el pago de indemnizaciones tras intimación fehaciente</td>
+          <td>Ind. 245 + Preaviso + Integración + SAC s/Preaviso</td>
+          <td>+50%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box">
+      <div class="box__label">Flujo de trabajo recomendado</div>
+      <strong>Paso 1:</strong> Calculá la liquidación en la herramienta <em>Liquidación LCT</em> y copiá los montos de cada rubro.<br>
+      <strong>Paso 2:</strong> Pegá esos montos en los campos correspondientes de esta herramienta.<br>
+      <strong>Paso 3:</strong> Seleccioná los artículos aplicables y calculá los recargos.
+    </div>
+
+    <div class="box--warning box">
+      <div class="box__label">Importante — Art. 2</div>
+      El Art. 2 requiere <strong>intimación fehaciente previa</strong> del trabajador al empleador. El juez puede reducir o eximir el recargo si el empleador acredita causa justificada para la mora en el pago.
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PARTE 3 — CÁLCULOS JUDICIALES
+══════════════════════════════════════════════════════════ -->
+<div class="part-header">
+  <div class="part-header__number">Parte 3</div>
+  <div class="part-header__title">Cálculos Judiciales</div>
+  <div class="part-header__desc">Intereses BPBA · Actualización Monetaria · Plazos Procesales</div>
 </div>
 
-<p>El botón <kbd>📋</kbd> del header abre el panel de <strong>Plantillas rápidas</strong>. Cada plantilla pre-carga un prompt optimizado en el campo de chat, listo para enviar.</p>
+<div class="content">
 
-<h2>Cómo usar una plantilla</h2>
-<ol class="steps">
-  <li>Asegurate de tener un caso activo cargado</li>
-  <li>Hacé click en el botón <kbd>📋</kbd> en el header</li>
-  <li>El panel de plantillas se abre desde la derecha</li>
-  <li>Hacé click en la plantilla que necesitás</li>
-  <li>El prompt se carga automáticamente en el campo de texto</li>
-  <li>Podés editarlo antes de enviar o enviarlo directamente con <kbd>Enter</kbd></li>
-</ol>
+  <!-- Sección 6 -->
+  <div class="section">
+    <span class="sec-num">Sección 6</span>
+    <h1 class="sec-title">Intereses BPBA</h1>
 
-<h2>Plantillas disponibles</h2>
-<ul class="plantilla-list">
-  <li><span class="icon">📋</span><div><strong>Demanda laboral — Despido sin causa (art. 245 LCT)</strong><br>Genera una demanda completa con liquidación de rubros, derecho aplicable y petitorio.</div></li>
-  <li><span class="icon">📨</span><div><strong>Carta documento — Intimación pago de haberes</strong><br>Intima al empleador al pago de haberes adeudados, con apercibimiento de resolución del contrato.</div></li>
-  <li><span class="icon">⚖️</span><div><strong>Contestación de demanda laboral</strong><br>Negativa general y particular, ofrecimiento de prueba y planteo de defensa de fondo.</div></li>
-  <li><span class="icon">📬</span><div><strong>Telegrama — Parte alícuota Ley 25323</strong><br>Intimación de pago de SAC proporcional y multas de la Ley 25323 arts. 1 y 2.</div></li>
-  <li><span class="icon">📝</span><div><strong>Recurso de apelación laboral</strong><br>Recurso ordinario ante la Cámara, con agravios numerados y petitorio.</div></li>
-  <li><span class="icon">📄</span><div><strong>Oficio al juzgado — Solicitud de certificados</strong><br>Solicita certificado de trabajo (art. 80 LCT), recibos y constancias previsionales.</div></li>
-  <li><span class="icon">🔍</span><div><strong>Análisis de hechos — Rubros procedentes</strong><br>Analiza el caso activo y determina los rubros, montos estimados y plazos de prescripción.</div></li>
-  <li><span class="icon">✅</span><div><strong>Checklist — Despido sin causa</strong><br>Lista completa de documentación, prueba, pasos procesales y acciones previas.</div></li>
-</ul>
+    <p>Liquida intereses judiciales en el sistema de dos períodos adoptado por la jurisprudencia bonaerense: un primer período con tasa fija del 6% anual (doctrina del fallo Vera) y un segundo período con la tasa pasiva digital a plazo fijo 30 días del Banco de la Provincia de Buenos Aires (BPBA).</p>
+
+    <h2>Campos de entrada</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Carátula</td><td>Identificación del expediente (opcional, aparece en PDF)</td></tr>
+        <tr><td>Capital base ($)</td><td>Monto sobre el cual se calculan los intereses</td></tr>
+        <tr><td>Fecha hecho dañoso / mora</td><td>Inicio del Período 1 (6% anual)</td></tr>
+        <tr><td>Fecha determinación / sentencia</td><td>Fin del Período 1 e inicio del Período 2 (BPBA)</td></tr>
+        <tr><td>Fecha de pago / liquidación</td><td>Fecha hasta la cual se calculan los intereses del Período 2</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Metodología de cálculo</h2>
+
+    <h3>Período 1 — 6% anual</h3>
+    <p>Intereses simples desde la fecha del hecho dañoso hasta la fecha de determinación del crédito (sentencia o liquidación firme). Fórmula: <strong>Capital × 0,06 × (días / 365)</strong>. Al finalizar el Período 1, los intereses se capitalizan sumándolos al capital original.</p>
+
+    <h3>Período 2 — Tasa pasiva BPBA</h3>
+    <p>Intereses sobre el monto capitalizado, aplicando la tasa del BPBA vigente en cada sub-período. La base de datos interna contiene más de 150 registros de tasas desde agosto de 2008 hasta la fecha, actualizados en cada nueva publicación del banco.</p>
+    <p>El cálculo se presenta en una tabla desaglosada por sub-período, con la tasa aplicada, días y monto de interés de cada tramo. El resultado final es el total a reclamar: <strong>Capital + Intereses P1 + Intereses P2</strong>.</p>
+
+    <div class="box--tip box">
+      <div class="box__label">Consejo — Expedientes laborales</div>
+      En causas laborales bonaerenses el <em>hecho dañoso</em> suele ser la fecha de despido o la fecha de exigibilidad del crédito (Art. 128/255 LCT), mientras que la <em>fecha de determinación</em> coincide con la sentencia de primera instancia. Para intereses de condena en ejecución, la fecha de sentencia es el inicio del Período 2.
+    </div>
+
+    <div class="box--info box">
+      <div class="box__label">Tasas actualizadas hasta</div>
+      La base de datos incorporada cubre tasas hasta el primer trimestre de 2026. Si la fecha de pago ingresada supera el último registro, la herramienta aplica automáticamente la última tasa disponible.
+    </div>
+
+    <div class="steps">
+      <h3>Paso a paso</h3>
+      <div class="step"><div class="step__n">1</div><div class="step__text">Ingresar el capital base (monto de condena o crédito reclamado).</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Ingresar la fecha del hecho / mora (inicio del cómputo).</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">Ingresar la fecha de sentencia o determinación del crédito.</div></div>
+      <div class="step"><div class="step__n">4</div><div class="step__text">Ingresar la fecha hasta la cual se liquida (fecha de pago proyectada).</div></div>
+      <div class="step"><div class="step__n">5</div><div class="step__text">Hacer clic en <strong>Calcular</strong> y revisar el desglose por sub-período.</div></div>
+    </div>
+  </div>
+
+  <!-- Sección 7 -->
+  <div class="section">
+    <span class="sec-num">Sección 7</span>
+    <h1 class="sec-title">Actualización Monetaria (IPC / CER / RIPTE)</h1>
+
+    <p>Actualiza un monto histórico a valores actuales aplicando índices oficiales obtenidos en tiempo real del API del Ministerio de Hacienda de la Nación.</p>
+
+    <h2>Índices disponibles</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Índice</th><th>Nombre completo</th><th>Frecuencia</th><th>Uso típico</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>IPC</strong></td>
+          <td>Índice de Precios al Consumidor</td>
+          <td>Mensual</td>
+          <td>Actualización de daños, honorarios y deudas civiles</td>
+        </tr>
+        <tr>
+          <td><strong>CER</strong></td>
+          <td>Coeficiente de Estabilización de Referencia</td>
+          <td>Diario</td>
+          <td>Actualización de créditos hipotecarios y préstamos UVA</td>
+        </tr>
+        <tr>
+          <td><strong>RIPTE</strong></td>
+          <td>Remuneración Imponible Promedio de Trabajadores Estables</td>
+          <td>Mensual</td>
+          <td>Actualización de créditos laborales y ART</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Cómo funciona</h2>
+    <p>Al presionar <strong>Calcular</strong>, la herramienta consulta el API público del Ministerio de Hacienda para obtener los valores del índice seleccionado en el período indicado. Luego divide el índice de la fecha de fin por el índice de la fecha de inicio para obtener el coeficiente de actualización, y multiplica ese coeficiente por el monto original.</p>
+
+    <div class="box--warning box">
+      <div class="box__label">Requiere conexión a internet</div>
+      Esta herramienta obtiene los índices en tiempo real. Si no hay conexión, o si el API del Ministerio está temporalmente no disponible, el cálculo no se puede completar. En ese caso, intentar nuevamente en unos minutos.
+    </div>
+
+    <div class="box box--tip">
+      <div class="box__label">Podés seleccionar varios índices a la vez</div>
+      Si tildás IPC, CER y RIPTE simultáneamente, la herramienta muestra los tres resultados en paralelo para facilitar la comparación.
+    </div>
+  </div>
+
+  <!-- Sección 8 -->
+  <div class="section">
+    <span class="sec-num">Sección 8</span>
+    <h1 class="sec-title">Plazos Procesales</h1>
+
+    <p>Calcula la fecha de vencimiento de un plazo procesal conforme el CPCC Buenos Aires. Maneja correctamente feriados nacionales, ferias judiciales y fines de semana. Permite gestionar múltiples plazos en una misma sesión y exportarlos juntos.</p>
+
+    <h2>Tipos de plazo</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Tipo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Días hábiles judiciales</strong></td>
+          <td>Excluye sábados, domingos, feriados nacionales y feria judicial. Es el tipo de plazo más frecuente en el fuero bonaerense.</td>
+        </tr>
+        <tr>
+          <td><strong>Días corridos</strong></td>
+          <td>Incluye todos los días del calendario sin excepción.</td>
+        </tr>
+        <tr>
+          <td><strong>Meses</strong></td>
+          <td>Suma meses calendario completos a la fecha de inicio.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Campos de entrada</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Tipo de plazo</td><td>Días hábiles / corridos / meses</td></tr>
+        <tr><td>Fecha de inicio</td><td>Fecha del acto procesal que abre el plazo (notificación, audiencia, etc.)</td></tr>
+        <tr><td>Cantidad</td><td>Número de días o meses del plazo</td></tr>
+        <tr><td>Descripción</td><td>Identificación del plazo (p. ej. "Contestación de demanda"). Aparece en el resumen de sesión.</td></tr>
+        <tr><td>Saltar feria judicial</td><td>Si está tildado, los días de feria no se cuentan como hábiles (solo aplica a días hábiles judiciales).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Feriados nacionales incluidos</h2>
+    <div class="chips">
+      <span class="chip">1° Enero</span>
+      <span class="chip">24 Marzo</span>
+      <span class="chip">2 Abril</span>
+      <span class="chip">1° Mayo</span>
+      <span class="chip">25 Mayo</span>
+      <span class="chip">17 Junio</span>
+      <span class="chip">20 Junio</span>
+      <span class="chip">9 Julio</span>
+      <span class="chip">17 Agosto</span>
+      <span class="chip">12 Octubre</span>
+      <span class="chip">20 Noviembre</span>
+      <span class="chip">8 Diciembre</span>
+      <span class="chip">25 Diciembre</span>
+    </div>
+
+    <h2>Gestión de múltiples plazos en sesión</h2>
+    <p>Cada plazo calculado se agrega automáticamente al panel <strong>Plazos de la sesión</strong>, donde se puede visualizar, ordenar y exportar en conjunto (PDF o CSV). Esto es especialmente útil al recibir una providencia con varios plazos simultáneos.</p>
+
+    <div class="steps">
+      <h3>Paso a paso</h3>
+      <div class="step"><div class="step__n">1</div><div class="step__text">Seleccionar el tipo de plazo.</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Ingresar la fecha del acto procesal (día de la notificación o audiencia).</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">Ingresar la cantidad de días o meses.</div></div>
+      <div class="step"><div class="step__n">4</div><div class="step__text">Ingresar una descripción breve del plazo.</div></div>
+      <div class="step"><div class="step__n">5</div><div class="step__text">Hacer clic en <strong>Calcular</strong>. El resultado muestra la fecha de vencimiento.</div></div>
+      <div class="step"><div class="step__n">6</div><div class="step__text">Repetir para cada plazo adicional. Al terminar, exportar el resumen de sesión.</div></div>
+    </div>
+
+    <div class="box--warning box">
+      <div class="box__label">Feriados puente y trasladables</div>
+      Los feriados con fecha variable (Semana Santa, feriados puente, días no laborables por decreto) no se incorporan automáticamente. Se recomienda verificar el calendario judicial vigente para el año en curso, especialmente en períodos con feriados trasladables.
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PARTE 4 — INDEMNIZACIONES
+══════════════════════════════════════════════════════════ -->
+<div class="part-header">
+  <div class="part-header__number">Parte 4</div>
+  <div class="part-header__title">Indemnizaciones</div>
+  <div class="part-header__desc">Incapacidad Física · Daño Punitivo</div>
 </div>
 
-<!-- ══════════════ 6. ADJUNTAR ARCHIVOS ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 6</span>
-  <h1 class="section-title">Adjuntar archivos</h1>
-  <div class="section-divider"></div>
+<div class="content">
+
+  <!-- Sección 9 -->
+  <div class="section">
+    <span class="sec-num">Sección 9</span>
+    <h1 class="sec-title">Incapacidad Física</h1>
+
+    <p>Calcula la indemnización por daño a la integridad física de la persona mediante la <strong>fórmula de renta constante no perpetua</strong> (también denominada fórmula actuarial), adoptada mayoritariamente por la jurisprudencia civil y laboral bonaerense para la cuantificación del daño.</p>
+
+    <h2>Campos de entrada</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th><th>Obs.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Carátula</td><td>Identificación del expediente</td><td>Opcional</td></tr>
+        <tr><td>Nombre del damnificado</td><td>Aparece en el resultado y exportaciones</td><td>Opcional</td></tr>
+        <tr><td>Edad al momento del accidente</td><td>Entre 1 y 69 años</td><td>Requerido</td></tr>
+        <tr><td>Ingreso mensual acreditado ($)</td><td>Remuneración o ingreso mensual demostrado</td><td>Requerido</td></tr>
+        <tr><td>Porcentaje de incapacidad (%)</td><td>Grado de incapacidad según pericia médica</td><td>Requerido</td></tr>
+        <tr><td>Tasa de descuento (%)</td><td>Tasa anual de descuento del valor presente. Default: 4% (uso jurisprudencial habitual)</td><td>Requerido</td></tr>
+      </tbody>
+    </table>
+
+    <h2>La fórmula actuarial</h2>
+    <p>La herramienta calcula el <strong>valor presente</strong> de una renta mensual equivalente a los ingresos perdidos por la incapacidad, durante un número de años igual a (65 − edad al accidente). La tasa de descuento refleja el rendimiento que obtendría el capital si fuera invertido.</p>
+
+    <p>La fórmula es: <strong>C = a × n × (1 − (1 + i)^−n) / i</strong>, donde:</p>
+    <ul>
+      <li><em>a</em> = ingreso mensual × porcentaje de incapacidad</li>
+      <li><em>n</em> = 65 − edad al momento del hecho (años de vida laboral activa remanentes)</li>
+      <li><em>i</em> = tasa de descuento anual</li>
+    </ul>
+
+    <div class="box box--tip">
+      <div class="box__label">Sobre la tasa de descuento</div>
+      La tasa del 4% es la más frecuentemente aplicada por los tribunales bonaerenses, pero no es universal. Algunos tribunales usan 3% o 6%. La herramienta permite modificar la tasa para adaptar el cálculo a la jurisprudencia del tribunal interviniente.
+    </div>
+
+    <div class="box--warning box">
+      <div class="box__label">Complemento pericial</div>
+      Este cálculo requiere como insumo el porcentaje de incapacidad determinado por pericia médica o junta médica. La herramienta no determina ni sugiere el grado de incapacidad; ese dato debe surgir del expediente o de la pericia incorporada.
+    </div>
+  </div>
+
+  <!-- Sección 10 -->
+  <div class="section">
+    <span class="sec-num">Sección 10</span>
+    <h1 class="sec-title">Daño Punitivo (Art. 52 bis Ley 24.240)</h1>
+
+    <p>Herramienta de estimación de daños punitivos en causas de defensa del consumidor. Combina un sistema de ponderación de factores con el tope legal expresado en canastas básicas totales, según el tamaño de la empresa demandada.</p>
+
+    <h2>Parámetros generales</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Carátula</td><td>Identificación del expediente (opcional)</td></tr>
+        <tr><td>Tamaño de empresa</td><td>Pequeña (tope 100 canastas), Mediana (750), Grande (2100)</td></tr>
+        <tr><td>Valor canasta básica total ($)</td><td>Valor actualizable conforme INDEC. Default: $400.000. Ajustar al valor vigente al momento del cálculo.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Factores de ponderación</h2>
+    <p>La herramienta evalúa ocho factores doctrinarios para estimar un coeficiente entre 0 y 1 (Factor F). Cada factor tiene una ponderación predeterminada sobre el 100%, editable para adaptarse a la doctrina judicial aplicable:</p>
+
+    <table class="fields-table">
+      <thead>
+        <tr><th>Factor</th><th>Ponderación base</th><th>Niveles disponibles</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Gravedad subjetiva</td><td>20%</td><td>Leve / Media / Grave</td></tr>
+        <tr><td>Política vs. hecho aislado</td><td>10%</td><td>Empleado único / Grupo / Política empresarial</td></tr>
+        <tr><td>Conducta posterior</td><td>10%</td><td>Colaborativa / Errática / Justificativa-Negatoria</td></tr>
+        <tr><td>Antecedentes</td><td>10%</td><td>No disponibles / Algunos / Muchos</td></tr>
+        <tr><td>Posición de mercado</td><td>10%</td><td>Competencia / Oligopolio / Monopolio</td></tr>
+        <tr><td>Derecho afectado</td><td>15%</td><td>Leve / Medio / Grave</td></tr>
+        <tr><td>Alcance del daño</td><td>10%</td><td>Caso puntual / Grupo de usuarios / Generalizado</td></tr>
+        <tr><td>Beneficio obtenido</td><td>15%</td><td>Nulo / Bajo / Medio / Alto</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Resultado</h2>
+    <p>La herramienta muestra en tiempo real:</p>
+    <ul>
+      <li><strong>Factor F</strong> (0 a 1): puntaje ponderado de los factores seleccionados</li>
+      <li><strong>Tope máximo</strong>: número de canastas × valor de canasta</li>
+      <li><strong>Estimación</strong>: Factor F × Tope = monto sugerido</li>
+    </ul>
+
+    <div class="box--warning box">
+      <div class="box__label">Herramienta orientativa</div>
+      El daño punitivo es de naturaleza discrecional judicial. El resultado de esta herramienta constituye una estimación fundada en factores doctrinarios pero no determina el monto que fijará el tribunal. Actualizar el valor de la canasta básica antes de cada cálculo.
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PARTE 5 — DOCUMENTOS
+══════════════════════════════════════════════════════════ -->
+<div class="part-header">
+  <div class="part-header__number">Parte 5</div>
+  <div class="part-header__title">Documentos</div>
+  <div class="part-header__desc">Generador de Carta Documento y Telegrama Laboral</div>
 </div>
 
-<p>Dalmacio puede procesar documentos adjuntos y analizarlos en el contexto del caso activo. Es especialmente útil para revisar contratos, recibos de haberes, telegramas y documentación escaneada.</p>
+<div class="content">
 
-<h2>Formatos admitidos</h2>
-<table>
-  <tr><th>Tipo</th><th>Extensiones</th><th>Cómo se procesa</th></tr>
-  <tr><td><strong>PDF</strong></td><td>.pdf</td><td>Extracción de texto completo por página (hasta 15 MB)</td></tr>
-  <tr><td><strong>Word</strong></td><td>.docx, .doc</td><td>Extracción de texto con formato preservado</td></tr>
-  <tr><td><strong>Texto plano</strong></td><td>.txt</td><td>Lectura directa del contenido</td></tr>
-  <tr><td><strong>Imágenes / Escaneados</strong></td><td>.jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff</td><td>Análisis visual directo por Claude Vision (OCR implícito)</td></tr>
-</table>
+  <!-- Sección 11 -->
+  <div class="section">
+    <span class="sec-num">Sección 11</span>
+    <h1 class="sec-title">Carta Documento / Telegrama Laboral</h1>
 
-<h2>Cómo adjuntar</h2>
-<p>Hay tres formas de adjuntar archivos:</p>
-<ol class="steps">
-  <li><strong>Botón 📎</strong> — hacé click en el clip en el área de input y seleccioná el archivo</li>
-  <li><strong>Arrastrar y soltar</strong> — arrastrá el archivo directamente sobre el área de mensajes del chat</li>
-  <li><strong>Múltiples archivos</strong> — podés adjuntar varios archivos a la vez antes de enviar el mensaje</li>
-</ol>
+    <p>Genera el texto de cartas documento y telegramas para las intimaciones laborales más frecuentes. Seleccionás el tipo de documento, completás los datos del remitente y destinatario, y la herramienta produce el texto listo para enviar al correo postal o a la empresa de mensajería.</p>
 
-<p>Cada archivo aparecerá como un <em>chip</em> sobre el campo de texto, indicando que está listo para enviar. Podés eliminarlo con el botón ✕ del chip.</p>
+    <h2>Plantillas disponibles</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Plantilla</th><th>Normativa</th><th>Cuándo usarla</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Intimación registro laboral</strong></td>
+          <td>Arts. 7-11 Ley 24.013 + Dec. 1043/2001</td>
+          <td>Cuando el trabajador está total o parcialmente no registrado y se quiere intimar al empleador a regularizar dentro de los 30 días (requisito de las multas de la Ley 24.013)</td>
+        </tr>
+        <tr>
+          <td><strong>Notificación de despido indirecto</strong></td>
+          <td>Art. 246 LCT</td>
+          <td>Cuando el trabajador se considera injuriado y decide considerarse despedido en forma indirecta, describiendo el incumplimiento del empleador</td>
+        </tr>
+        <tr>
+          <td><strong>Telegrama reserva de acciones</strong></td>
+          <td>Art. 243 LCT</td>
+          <td>Para reservar derechos ante una situación laboral que puede derivar en acciones judiciales</td>
+        </tr>
+        <tr>
+          <td><strong>Intimación pago de haberes</strong></td>
+          <td>Art. 128 LCT + Art. 2 Ley 25.323</td>
+          <td>Cuando el empleador no abona los haberes del mes, bajo apercibimiento de considerarse despedido indirecto</td>
+        </tr>
+        <tr>
+          <td><strong>Intimación entrega de certificados</strong></td>
+          <td>Art. 80 LCT + Dec. 146/2001</td>
+          <td>Cuando el empleador no entrega los certificados de trabajo y aportes dentro del plazo legal de 30 días corridos de la extinción</td>
+        </tr>
+        <tr>
+          <td><strong>Intimación fehaciente Ley 25.323</strong></td>
+          <td>Art. 2 Ley 25.323</td>
+          <td>Requisito previo para reclamar el recargo del 50% sobre indemnizaciones: intima el pago de los rubros en 24 horas</td>
+        </tr>
+      </tbody>
+    </table>
 
-<div class="callout callout--tip">
-  <span class="callout__label">📑 Documentos escaneados</span>
-  Para documentos escaneados o fotografías de telegramas y recibos, adjuntalos como imagen (JPG o PNG). Claude los lee directamente mediante visión artificial sin necesidad de OCR previo.
+    <h2>Campos de datos</h2>
+    <p>La herramienta identifica automáticamente qué campos son necesarios para cada plantilla y los resalta en el formulario:</p>
+
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Grupo</th><th>Uso</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nombre completo (trabajador/a)</td><td>Remitente</td><td>Identificación del firmante</td></tr>
+        <tr><td>DNI</td><td>Remitente</td><td>Identificación del firmante</td></tr>
+        <tr><td>Domicilio (trabajador/a)</td><td>Remitente</td><td>Domicilio de envío</td></tr>
+        <tr><td>Razón social / Nombre (empleador)</td><td>Destinatario</td><td>A quién va dirigida la pieza</td></tr>
+        <tr><td>CUIT</td><td>Destinatario</td><td>Identificación fiscal del empleador</td></tr>
+        <tr><td>Domicilio (empleador)</td><td>Destinatario</td><td>Dirección de envío</td></tr>
+        <tr><td>Fecha de ingreso</td><td>Laboral</td><td>Fecha real de inicio de la relación</td></tr>
+        <tr><td>Remuneración mensual</td><td>Laboral</td><td>Para intimación de registro y haberes</td></tr>
+        <tr><td>Fecha del hecho relevante</td><td>Laboral</td><td>Fecha de despido, hecho, o incumplimiento</td></tr>
+        <tr><td>Descripción del incumplimiento</td><td>Laboral</td><td>Para el despido indirecto</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Resultado</h2>
+    <p>La herramienta genera el texto completo del documento con todos los datos interpolados. Podés:</p>
+    <ul>
+      <li><strong>Copiar el texto</strong> y pegarlo directamente en el formulario de la empresa de correo o en el template de carta documento del estudio.</li>
+      <li><strong>Exportar como PDF</strong> para imprimir o archivar en el expediente digital.</li>
+      <li><strong>Editar el texto generado</strong> antes de copiar, para agregar particularidades del caso.</li>
+    </ul>
+
+    <div class="box box--tip">
+      <div class="box__label">Flujo recomendado al preparar una intimación</div>
+      Completá primero todos los datos del formulario antes de generar el texto. El botón <strong>Generar</strong> toma los datos ingresados en ese momento. Si modificás un campo después, volvé a hacer clic en Generar para actualizar el texto.
+    </div>
+
+    <div class="box--warning box">
+      <div class="box__label">Revisión antes del envío</div>
+      Siempre revisá el texto generado antes de enviarlo. Los campos opcionales no completados aparecen con un marcador entre corchetes <em>[DATO A COMPLETAR]</em> para recordarte que falta información. Asegurate de completar o editar esos marcadores antes del envío.
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PARTE 6 — DALMACIO (ASISTENTE IA)
+══════════════════════════════════════════════════════════ -->
+<div class="part-header">
+  <div class="part-header__number">Parte 6</div>
+  <div class="part-header__title">Dalmacio — Asistente IA</div>
+  <div class="part-header__desc">Asistente jurídico con inteligencia artificial para la práctica laboral bonaerense</div>
 </div>
 
-<div class="callout callout--note">
-  <span class="callout__label">📏 Límite de tamaño</span>
-  El tamaño máximo por archivo es de <strong>15 MB</strong>. Para PDFs muy extensos, se procesarán las primeras páginas disponibles dentro del límite de tokens de la API.
-</div>
-</div>
+<div class="content">
 
-<!-- ══════════════ 7. HISTORIAL PERSISTENTE ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 7</span>
-  <h1 class="section-title">Historial persistente</h1>
-  <div class="section-divider"></div>
-</div>
+  <!-- Sección 12 -->
+  <div class="section">
+    <span class="sec-num">Sección 12</span>
+    <h1 class="sec-title">Qué es Dalmacio y primeros pasos</h1>
 
-<p>Cada conversación que tenés con Dalmacio en el contexto de un caso <strong>se guarda automáticamente</strong> en el navegador. Cuando volvés a cargar ese caso en el futuro, el historial completo se restaura.</p>
+    <p><strong>Dalmacio</strong> es el asistente jurídico con inteligencia artificial del Estudio Manulis. Está especializado en derecho laboral bonaerense y corre sobre el modelo Claude de Anthropic. Su nombre rinde homenaje a <em>Dalmacio Vélez Sársfield</em>, codificador del Código Civil argentino.</p>
 
-<h2>Restaurar una conversación</h2>
-<ol class="steps">
-  <li>En el panel lateral, hacé click en <strong>↗</strong> junto al caso que querés retomar</li>
-  <li>Dalmacio mostrará un banner indicando cuántos intercambios tiene guardados el caso</li>
-  <li>Los mensajes anteriores se cargarán en el chat, pudiendo continuar donde lo dejaste</li>
-  <li>El historial también se envía a la API como contexto, por lo que Dalmacio "recuerda" lo conversado</li>
-</ol>
+    <div class="box">
+      <div class="box__label">Acceso</div>
+      <strong>https://herramientas.mvcabogados.com.ar/dalmacio/</strong><br>
+      Requiere una API key de Anthropic (claude.ai → API keys). La clave se guarda en la sesión del navegador y no se transmite a ningún servidor propio del estudio.
+    </div>
 
-<h2>Limpiar el historial</h2>
-<p>Para borrar el historial de un caso y empezar de cero:</p>
-<ol class="steps">
-  <li>Cargá el caso deseado</li>
-  <li>Hacé click en el botón <kbd>🗑 Limpiar</kbd> en la barra del chat</li>
-  <li>Confirmá la acción en el diálogo de confirmación</li>
-</ol>
+    <h2>Primera vez: configuración de la API key</h2>
+    <div class="steps">
+      <div class="step"><div class="step__n">1</div><div class="step__text">Ingresar a <strong>console.anthropic.com</strong> con tu cuenta de Anthropic.</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Ir a <strong>API Keys → Create Key</strong> y copiar la clave generada (formato <code>sk-ant-...</code>).</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">En Dalmacio, hacer clic en el ícono de llave 🔑 en el encabezado y pegar la clave.</div></div>
+      <div class="step"><div class="step__n">4</div><div class="step__text">La clave queda guardada en la sesión del navegador. No es necesario ingresarla de nuevo hasta que se cierre el navegador.</div></div>
+    </div>
 
-<div class="callout callout--warn">
-  <span class="callout__label">⚠ Esta acción no se puede deshacer</span>
-  Al limpiar el historial se eliminan todos los mensajes guardados del caso, tanto de la vista como del localStorage. Los datos del formulario (cliente, hechos, etc.) no se ven afectados.
-</div>
-</div>
+    <h2>Primera vez: crear un perfil de abogado</h2>
+    <p>Al acceder por primera vez, Dalmacio muestra el panel de configuración de perfiles. La plataforma admite múltiples abogados del estudio con casos completamente aislados entre sí.</p>
+    <div class="steps">
+      <div class="step"><div class="step__n">1</div><div class="step__text">En el modal de bienvenida, ingresar el nombre completo o abreviado del abogado.</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Hacer clic en <strong>Crear perfil</strong>. Dalmacio asigna un color identificatorio automáticamente.</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">Para cambiar de perfil o agregar nuevos abogados, hacer clic en el avatar circular en el encabezado.</div></div>
+    </div>
+  </div>
 
-<!-- ══════════════ 8. EXPORTAR ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 8</span>
-  <h1 class="section-title">Exportar resultados</h1>
-  <div class="section-divider"></div>
-</div>
+  <!-- Sección 13 -->
+  <div class="section">
+    <span class="sec-num">Sección 13</span>
+    <h1 class="sec-title">Gestión de casos y perfiles de abogado</h1>
 
-<p>El botón <kbd>📥</kbd> del header despliega el menú de exportación con tres opciones. El contenido exportado corresponde al <strong>último documento generado</strong> por Dalmacio en la sesión.</p>
+    <h2>Crear un nuevo caso</h2>
+    <div class="steps">
+      <div class="step"><div class="step__n">1</div><div class="step__text">En el panel lateral izquierdo, hacer clic en <strong>+ Nuevo caso</strong>.</div></div>
+      <div class="step"><div class="step__n">2</div><div class="step__text">Completar la ficha del caso en el formulario central: cliente, expediente, juzgado, fuero, jurisdicción, materia y hechos relevantes.</div></div>
+      <div class="step"><div class="step__n">3</div><div class="step__text">Hacer clic en <strong>Guardar caso</strong>. El caso queda registrado en la barra lateral y persistirá entre sesiones.</div></div>
+    </div>
 
-<table>
-  <tr><th>Opción</th><th>Formato</th><th>Ideal para…</th></tr>
-  <tr>
-    <td><strong>📄 Exportar .txt</strong></td>
-    <td>Texto plano</td>
-    <td>Copiar texto rápidamente a otro editor o procesador de textos</td>
-  </tr>
-  <tr>
-    <td><strong>📝 Exportar .docx</strong></td>
-    <td>Word (Microsoft Office)</td>
-    <td>Editar el documento generado con formato y enviarlo como adjunto</td>
-  </tr>
-  <tr>
-    <td><strong>🖨️ Imprimir / PDF</strong></td>
-    <td>PDF (vía impresión del navegador)</td>
-    <td>Guardar una copia del chat completo o imprimir el resultado</td>
-  </tr>
-</table>
+    <h2>Campos de la ficha de caso</h2>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Campo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cliente</td><td>Nombre del cliente o parte representada</td></tr>
+        <tr><td>N° de expediente</td><td>Número de expediente judicial</td></tr>
+        <tr><td>Juzgado</td><td>Tribunal interviniente (con autocompletado para todos los juzgados laborales de PBA)</td></tr>
+        <tr><td>Fuero</td><td>Laboral / Civil / Comercial / Consumidor / Otro</td></tr>
+        <tr><td>Jurisdicción</td><td>Departamento Judicial (19 opciones para toda la PBA)</td></tr>
+        <tr><td>Materia</td><td>Descripción breve del objeto del proceso</td></tr>
+        <tr><td>Hechos</td><td>Descripción de los hechos relevantes. Este campo alimenta el contexto que recibe Dalmacio al consultar.</td></tr>
+      </tbody>
+    </table>
 
-<h2>Cómo guardar como PDF</h2>
-<ol class="steps">
-  <li>Hacé click en <kbd>📥</kbd> → <strong>Imprimir / PDF</strong></li>
-  <li>Se abre el diálogo de impresión del navegador</li>
-  <li>En el selector de impresora, elegí <strong>"Guardar como PDF"</strong> o <strong>"Microsoft Print to PDF"</strong></li>
-  <li>Seleccioná la carpeta de destino y hacé click en <strong>Guardar</strong></li>
-</ol>
+    <h2>Historial persistente</h2>
+    <p>Todas las conversaciones de cada caso se guardan automáticamente. Al reabrir un caso, Dalmacio carga el historial completo y puede continuar el análisis desde donde se dejó. El historial persiste mientras no se limpie manualmente (botón 🗑️ en el encabezado del chat).</p>
 
-<div class="callout callout--tip">
-  <span class="callout__label">💡 Nombre automático del archivo</span>
-  El nombre del archivo exportado se genera automáticamente con el nombre del cliente, el número de expediente y el tipo de módulo activo. Ejemplo: <code>Pérez_Juan_PL-1234-2025_redaccion.docx</code>
-</div>
-</div>
+    <h2>Multi-usuario — aislamiento por abogado</h2>
+    <p>Cada perfil de abogado tiene sus propios casos, completamente separados de los demás perfiles. Al cambiar de perfil desde el avatar del encabezado, el panel lateral muestra solo los casos de ese abogado. Esto permite que varios integrantes del estudio usen la misma instancia de Dalmacio sin mezclar sus casos.</p>
+  </div>
 
-<!-- ══════════════ 9. BASES DE DATOS ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 9</span>
-  <h1 class="section-title">Búsqueda en bases de datos jurídicas</h1>
-  <div class="section-divider"></div>
-</div>
+  <!-- Sección 14 -->
+  <div class="section">
+    <span class="sec-num">Sección 14</span>
+    <h1 class="sec-title">Los 6 módulos de asistencia</h1>
 
-<p>El módulo <strong>🗄️ Bases de Datos</strong> abre un panel lateral de búsqueda jurídica asistida. Funciona de dos maneras complementarias: consulta a Dalmacio con IA y acceso directo a bases oficiales.</p>
+    <p>Dalmacio organiza su asistencia en seis módulos especializados. Cada módulo calibra el comportamiento del asistente para el tipo de tarea específica.</p>
 
-<h2>Cómo buscar</h2>
-<ol class="steps">
-  <li>Hacé click en el botón <kbd>🗄️ Bases de Datos</kbd> en la barra de módulos</li>
-  <li>El panel se desliza desde la derecha</li>
-  <li>Escribí tu búsqueda en el campo de texto (ej: "art. 245 LCT", "Vizzoti", "Ley 24013 art. 8")</li>
-  <li>Hacé click en <strong>"Buscar"</strong></li>
-  <li>Dalmacio responde en el chat con información y links directos a las bases de datos</li>
-</ol>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Módulo</th><th>Ícono</th><th>Para qué sirve</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Análisis</strong></td>
+          <td>🔍</td>
+          <td>Análisis jurídico del caso: viabilidad de la pretensión, riesgos procesales, líneas argumentales, calificación de hechos, encuadre normativo.</td>
+        </tr>
+        <tr>
+          <td><strong>Redacción</strong></td>
+          <td>✍️</td>
+          <td>Asistencia en la redacción de demandas, contestaciones, recursos, oficios, allanamiento, desistimiento y cualquier escrito procesal o extrajudicial.</td>
+        </tr>
+        <tr>
+          <td><strong>Estrategia</strong></td>
+          <td>♟️</td>
+          <td>Planificación de la estrategia procesal: secuencia de pasos, medidas cautelares, opciones de negociación, anticipación de defensas de la contraparte.</td>
+        </tr>
+        <tr>
+          <td><strong>Normativa</strong></td>
+          <td>📚</td>
+          <td>Consulta de legislación, jurisprudencia y doctrina. Explica artículos, interpreta normas, resume fallos y responde preguntas sobre el marco legal aplicable.</td>
+        </tr>
+        <tr>
+          <td><strong>Archivos</strong></td>
+          <td>📎</td>
+          <td>Análisis de documentos adjuntos: contratos, recibos de sueldo, telegramas, pericias, sentencias. Extrae datos relevantes y los incorpora al análisis.</td>
+        </tr>
+        <tr>
+          <td><strong>Checklist</strong></td>
+          <td>✅</td>
+          <td>Genera listas de control para preparar audiencias, presentar demandas, ejecutar sentencias o completar cualquier procedimiento con pasos verificables.</td>
+        </tr>
+      </tbody>
+    </table>
 
-<h2>Bases de datos disponibles</h2>
-<table>
-  <tr><th>Base</th><th>Contenido</th><th>URL</th></tr>
-  <tr><td><strong>SAIJ</strong></td><td>Sistema Argentino de Información Jurídica — legislación y jurisprudencia</td><td>saij.gob.ar</td></tr>
-  <tr><td><strong>InfoJus</strong></td><td>Doctrina jurídica — Ministerio de Justicia</td><td>infojus.gob.ar</td></tr>
-  <tr><td><strong>CSJN Fallos</strong></td><td>Jurisprudencia de la Corte Suprema de Justicia de la Nación</td><td>sj.csjn.gov.ar</td></tr>
-  <tr><td><strong>SCBA — JUBA</strong></td><td>Jurisprudencia de la Suprema Corte de Buenos Aires</td><td>juba.scba.gov.ar</td></tr>
-  <tr><td><strong>PJN</strong></td><td>Poder Judicial de la Nación — consulta de expedientes</td><td>pjn.gov.ar</td></tr>
-  <tr><td><strong>InfoLEG</strong></td><td>Legislación nacional vigente consolidada</td><td>infoleg.gob.ar</td></tr>
-</table>
+    <h2>Cómo cambiar de módulo</h2>
+    <p>Los módulos se seleccionan desde la barra horizontal debajo del encabezado. El módulo activo queda resaltado. Cada módulo tiene su propio sistema de instrucciones interno que orienta las respuestas del asistente.</p>
 
-<div class="callout callout--note">
-  <span class="callout__label">ℹ Verificación en fuentes oficiales</span>
-  Dalmacio siempre indica que la jurisprudencia mencionada debe verificarse en las fuentes oficiales. Nunca inventa fallos ni citas — ante la incertidumbre, informa que no tiene datos confiables sobre un fallo específico.
-</div>
-</div>
+    <div class="box box--tip">
+      <div class="box__label">Consejo de uso</div>
+      Es posible cambiar de módulo en cualquier momento dentro de una misma conversación. Por ejemplo: empezar en <em>Análisis</em> para evaluar el caso, luego pasar a <em>Estrategia</em> para definir el plan, y finalmente usar <em>Redacción</em> para generar el escrito. El historial del caso se mantiene en todos los módulos.
+    </div>
+  </div>
 
-<!-- ══════════════ 10. MULTI-USUARIO ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 10</span>
-  <h1 class="section-title">Perfiles multi-usuario</h1>
-  <div class="section-divider"></div>
-</div>
+  <!-- Sección 15 -->
+  <div class="section">
+    <span class="sec-num">Sección 15</span>
+    <h1 class="sec-title">Plantillas rápidas, adjuntos y exportación</h1>
 
-<p>Dalmacio permite que <strong>múltiples abogados del estudio</strong> usen la misma instalación con perfiles independientes. Cada perfil tiene sus propios casos y no puede ver ni acceder a los casos de otros perfiles.</p>
+    <h2>Plantillas rápidas</h2>
+    <p>El botón 📋 del encabezado abre el panel de plantillas rápidas: textos predefinidos que se insertan directamente en el campo de mensaje para acelerar consultas frecuentes.</p>
 
-<h2>Crear un nuevo perfil</h2>
-<ol class="steps">
-  <li>Hacé click en tu avatar (ángulo superior derecho del header)</li>
-  <li>En el dropdown, seleccioná <strong>"Agregar abogado"</strong></li>
-  <li>Escribí el nombre del nuevo integrante</li>
-  <li>Hacé click en <strong>"Crear perfil"</strong></li>
-</ol>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Plantilla</th><th>Módulo</th><th>Qué hace</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>📄 Redactar demanda laboral</td><td>Redacción</td><td>Solicita la redacción de una demanda laboral completa para el caso activo</td></tr>
+        <tr><td>✉️ Carta documento</td><td>Redacción</td><td>Solicita la redacción de una carta documento de intimación laboral</td></tr>
+        <tr><td>📝 Contestar demanda</td><td>Redacción</td><td>Solicita la redacción de una contestación de demanda</td></tr>
+        <tr><td>📬 Telegrama laboral</td><td>Redacción</td><td>Solicita la redacción de un telegrama laboral específico</td></tr>
+        <tr><td>📋 Recurso de apelación</td><td>Redacción</td><td>Solicita la redacción de un recurso de apelación</td></tr>
+        <tr><td>📑 Oficio judicial</td><td>Redacción</td><td>Solicita la redacción de un oficio</td></tr>
+        <tr><td>🔍 Análisis del caso</td><td>Análisis</td><td>Solicita un análisis jurídico completo del caso</td></tr>
+        <tr><td>✅ Checklist de audiencia</td><td>Checklist</td><td>Genera una lista de control para preparar la próxima audiencia</td></tr>
+      </tbody>
+    </table>
 
-<h2>Cambiar de perfil</h2>
-<ol class="steps">
-  <li>Hacé click en tu avatar en el header</li>
-  <li>El dropdown muestra todos los perfiles del estudio</li>
-  <li>Hacé click en el perfil deseado — el check (✓) indica el perfil activo</li>
-  <li>Los casos del nuevo perfil se cargan automáticamente</li>
-</ol>
+    <h2>Adjuntar archivos al análisis</h2>
+    <p>En el módulo <strong>Archivos</strong>, podés adjuntar documentos para que Dalmacio los analice dentro del contexto del caso. Formatos soportados:</p>
+    <div class="chips">
+      <span class="chip">PDF</span>
+      <span class="chip">Word (.docx)</span>
+      <span class="chip">Texto plano (.txt)</span>
+      <span class="chip">Imágenes (JPG / PNG)</span>
+    </div>
+    <p style="margin-top: 10px;">Dalmacio extrae el texto del documento y puede responder preguntas sobre él, identificar inconsistencias, extraer datos relevantes o compararlo con normativa aplicable.</p>
 
-<div class="callout callout--warn">
-  <span class="callout__label">⚠ Perfiles por dispositivo</span>
-  Los perfiles se guardan en el navegador del dispositivo. Si el Estudio tiene una computadora compartida, todos los perfiles son accesibles desde ese equipo. Para separación total entre dispositivos, cada abogado debería usar su propio equipo o perfil del navegador.
-</div>
-</div>
+    <h2>Exportar el resultado del chat</h2>
+    <p>El botón de exportación (📤 en el encabezado) ofrece tres formatos:</p>
+    <ul>
+      <li><strong>PDF:</strong> activa el diálogo de impresión del navegador. Seleccioná <em>Guardar como PDF</em>. El diseño de impresión oculta la interfaz y muestra solo la conversación con el nombre del estudio.</li>
+      <li><strong>Word (.docx):</strong> descarga la conversación como documento Word editable, útil para incorporar el borrador a un escrito procesal.</li>
+      <li><strong>Texto (.txt):</strong> exporta el texto plano de toda la conversación.</li>
+    </ul>
 
-<!-- ══════════════ 11. FAQ ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 11</span>
-  <h1 class="section-title">Preguntas frecuentes</h1>
-  <div class="section-divider"></div>
-</div>
+    <h2>Buscador de jurisprudencia</h2>
+    <p>La lupa 🔍 abre el buscador integrado de jurisprudencia y doctrina. Permite realizar búsquedas dentro del módulo Normativa sin perder el hilo de la conversación principal del caso.</p>
+  </div>
 
-<div class="faq">
-  <div class="faq__q">¿Dalmacio puede reemplazar la consulta a un abogado especialista?</div>
-  <div class="faq__a">No. Es una herramienta de asistencia para abogados ya formados. Todo documento generado debe ser revisado profesionalmente antes de su uso.</div>
+  <!-- Sección 16 -->
+  <div class="section">
+    <span class="sec-num">Sección 16</span>
+    <h1 class="sec-title">FAQ y referencia rápida general</h1>
 
-  <div class="faq__q">¿Qué pasa si la respuesta de Dalmacio está incompleta o cortada?</div>
-  <div class="faq__a">Podés pedirle que continúe escribiendo: "continuá desde donde lo dejaste" o "completá el documento". El sistema admite respuestas de hasta 8.192 tokens (aproximadamente 6.000 palabras).</div>
+    <h2>Preguntas frecuentes — Plataforma</h2>
 
-  <div class="faq__q">¿Puedo usar Dalmacio desde el celular?</div>
-  <div class="faq__a">Sí, la interfaz es completamente responsive. En el celular, el panel lateral se abre como overlay con el botón ☰, y los módulos de la barra horizontal se deslizan con el dedo.</div>
+    <h3>¿Los cálculos están actualizados?</h3>
+    <p>Las herramientas de cálculo se actualizan periódicamente. Las tasas BPBA y los índices de Actualización Monetaria se obtienen de fuentes oficiales. El valor de la canasta básica para Daño Punitivo debe actualizarse manualmente por el usuario según el valor vigente publicado por INDEC.</p>
 
-  <div class="faq__q">¿Puedo adjuntar más de un archivo a la vez?</div>
-  <div class="faq__a">Sí. Podés seleccionar múltiples archivos al mismo tiempo con el botón 📎 o arrastrar varios archivos al chat. Cada uno aparecerá como un chip antes de enviar.</div>
+    <h3>¿Los datos que ingreso se guardan en algún servidor?</h3>
+    <p>No. Todas las herramientas de cálculo (Liquidación, Intereses, Plazos, etc.) funcionan íntegramente en el navegador. Los datos no salen del dispositivo. Dalmacio envía los mensajes de la conversación a la API de Anthropic para generar las respuestas, pero no guarda ningún dato en servidores propios del estudio.</p>
 
-  <div class="faq__q">¿Qué pasa si aparece el error "API key inválida"?</div>
-  <div class="faq__a">La API key ingresada es incorrecta o fue revocada. Hacé click en ⚙, borrá la clave actual e ingresá una nueva válida desde console.anthropic.com.</div>
+    <h3>¿Puedo usar la plataforma desde el celular?</h3>
+    <p>Sí. La plataforma es totalmente responsive y funciona en dispositivos móviles. Las calculadoras son especialmente útiles en audiencias para verificar montos rápidamente.</p>
 
-  <div class="faq__q">¿Por qué Dalmacio dice que no conoce un fallo específico?</div>
-  <div class="faq__a">Por diseño, Dalmacio no fabrica jurisprudencia. Si no tiene certeza sobre un fallo, lo dice explícitamente y te indica buscar en las bases de datos oficiales.</div>
+    <h3>¿Qué pasa si cierro el navegador?</h3>
+    <p>Las calculadoras no guardan datos entre sesiones: al recargar, los campos quedan vacíos. Dalmacio, en cambio, guarda los casos y el historial de conversación en el localStorage del navegador, por lo que persisten aunque se cierre el navegador (siempre en el mismo dispositivo y navegador).</p>
 
-  <div class="faq__q">¿Los casos se sincronizan entre dispositivos?</div>
-  <div class="faq__a">No. Los casos se almacenan localmente en el navegador de cada dispositivo. Para transferir un caso, exportalo como .docx y guardalo en un repositorio compartido del estudio.</div>
+    <h3>¿Puedo imprimir los resultados?</h3>
+    <p>Sí. Todas las herramientas ofrecen el botón <em>Exportar PDF</em> que abre el diálogo de impresión del navegador. Seleccioná <em>Guardar como PDF</em> y configurá los márgenes y escala según necesites.</p>
 
-  <div class="faq__q">¿Puedo usar Dalmacio sin conexión a internet?</div>
-  <div class="faq__a">No. Dalmacio requiere conexión para comunicarse con la API de Anthropic. Sin conexión, la interfaz carga pero no puede generar respuestas.</div>
-</div>
-</div>
+    <h2>Referencia rápida — Herramientas</h2>
 
-<!-- ══════════════ 12. REFERENCIA RÁPIDA ══════════════ -->
-<div class="section">
-<div class="section-header">
-  <span class="section-num">Sección 12</span>
-  <h1 class="section-title">Referencia rápida</h1>
-  <div class="section-divider"></div>
-</div>
+    <table class="fields-table">
+      <thead>
+        <tr><th>Herramienta</th><th>Input mínimo</th><th>Output principal</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Liquidación LCT</td>
+          <td>Fechas ingreso/egreso + remuneración + causa</td>
+          <td>Tabla de rubros + total</td>
+        </tr>
+        <tr>
+          <td>Ley 24.013</td>
+          <td>Fecha inicio real + fecha telegrama + remuneración + artículos</td>
+          <td>Multa por artículo + total</td>
+        </tr>
+        <tr>
+          <td>Ley 25.323</td>
+          <td>Montos de los rubros indemnizatorios + artículo aplicable</td>
+          <td>Recargos + total con recargos</td>
+        </tr>
+        <tr>
+          <td>Intereses BPBA</td>
+          <td>Capital + fecha hecho + fecha sentencia + fecha pago</td>
+          <td>Intereses P1 + desglose P2 + total</td>
+        </tr>
+        <tr>
+          <td>Actualización</td>
+          <td>Monto + período + índice</td>
+          <td>Coeficiente + monto actualizado</td>
+        </tr>
+        <tr>
+          <td>Plazos Procesales</td>
+          <td>Fecha inicio + tipo + cantidad de días/meses</td>
+          <td>Fecha de vencimiento</td>
+        </tr>
+        <tr>
+          <td>Incapacidad Física</td>
+          <td>Edad + ingreso + % incapacidad + tasa</td>
+          <td>Indemnización por renta futura</td>
+        </tr>
+        <tr>
+          <td>Daño Punitivo</td>
+          <td>Tamaño empresa + valor canasta + factores</td>
+          <td>Factor F + estimación + tope</td>
+        </tr>
+        <tr>
+          <td>Carta Documento</td>
+          <td>Plantilla + datos remitente/destinatario</td>
+          <td>Texto listo para enviar</td>
+        </tr>
+        <tr>
+          <td>Dalmacio</td>
+          <td>API key + caso + consulta</td>
+          <td>Análisis, redacción o estrategia IA</td>
+        </tr>
+      </tbody>
+    </table>
 
-<h2>Atajos de teclado</h2>
-<table>
-  <tr><th>Acción</th><th>Tecla</th></tr>
-  <tr><td>Enviar mensaje</td><td><kbd>Enter</kbd></td></tr>
-  <tr><td>Nueva línea en el mensaje</td><td><kbd>Shift</kbd> + <kbd>Enter</kbd></td></tr>
-  <tr><td>Cerrar modales</td><td><kbd>Escape</kbd></td></tr>
-</table>
+    <h2>Flujos de trabajo combinados</h2>
 
-<h2>Límites del sistema</h2>
-<table>
-  <tr><th>Parámetro</th><th>Valor</th></tr>
-  <tr><td>Tamaño máximo de archivo adjunto</td><td>15 MB por archivo</td></tr>
-  <tr><td>Tokens máximos por respuesta</td><td>8.192 tokens (~6.000 palabras)</td></tr>
-  <tr><td>Reintentos automáticos por rate limit</td><td>3 reintentos con backoff exponencial</td></tr>
-  <tr><td>Almacenamiento de casos</td><td>Limitado por el localStorage del navegador (~5 MB por origen)</td></tr>
-  <tr><td>Duración de la API key en sesión</td><td>Hasta cerrar la pestaña (sessionStorage)</td></tr>
-</table>
+    <h3>Caso de despido sin causa con empleo no registrado</h3>
+    <ol>
+      <li><strong>Liquidación LCT</strong> → Calcular rubros del distracto (Art. 245 + preaviso + SAC + vacaciones)</li>
+      <li><strong>Ley 24.013</strong> → Calcular multa Art. 8 (o 9/10 según corresponda)</li>
+      <li><strong>Ley 25.323</strong> → Aplicar recargo Art. 1 sobre Ind. 245 y/o Art. 2 sobre base total</li>
+      <li><strong>Intereses BPBA</strong> → Liquidar intereses desde la mora hasta la fecha de sentencia/pago</li>
+      <li><strong>Dalmacio</strong> → Redactar la demanda con todos los rubros calculados</li>
+    </ol>
 
-<h2>Departamentos Judiciales de la Provincia de Buenos Aires</h2>
-<p>Todos los departamentos judiciales de PBA están disponibles en el autocompletado del campo Jurisdicción:</p>
-<ul style="columns: 2; column-gap: 30px; font-size: 10pt;">
-  <li>La Plata</li>
-  <li>Mercedes</li>
-  <li>San Nicolás</li>
-  <li>Junín</li>
-  <li>Azul</li>
-  <li>Mar del Plata</li>
-  <li>Bahía Blanca</li>
-  <li>Trenque Lauquen</li>
-  <li>Dolores</li>
-  <li>Necochea</li>
-  <li>Zárate-Campana</li>
-  <li>Morón</li>
-  <li>San Isidro</li>
-  <li>La Matanza</li>
-  <li>Lomas de Zamora</li>
-  <li>Quilmes</li>
-  <li>San Martín</li>
-  <li>Pergamino</li>
-  <li>Tres Arroyos</li>
-</ul>
+    <h3>Preparación de audiencia</h3>
+    <ol>
+      <li><strong>Plazos Procesales</strong> → Verificar vencimiento de plazos pendientes</li>
+      <li><strong>Dalmacio / Checklist</strong> → Generar lista de control de preparación</li>
+      <li><strong>Dalmacio / Estrategia</strong> → Revisar estrategia y anticipar defensas de la contraparte</li>
+      <li><strong>Actualización / Intereses BPBA</strong> → Actualizar montos a la fecha de audiencia</li>
+    </ol>
 
-<div style="margin-top: 48px; padding-top: 20px; border-top: 2px solid #dde2ea; text-align: center;">
-  <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22pt; color: #07101e; font-weight: 700; margin-bottom: 4px;">Estudio Jurídico Manulis</div>
-  <div style="font-size: 10pt; color: #6a7a98; margin-bottom: 8px;">San Isidro · Provincia de Buenos Aires · Argentina</div>
-  <div style="font-size: 9.5pt; color: #9aaac0;">herramientas.mvcabogados.com.ar · Dalmacio v1.0 · Mayo 2026</div>
-  <div style="margin-top: 16px; font-size: 9pt; color: #c0c8d8; font-style: italic;">Documento de uso interno — Confidencial</div>
-</div>
+    <h3>Evaluación de un caso nuevo</h3>
+    <ol>
+      <li><strong>Dalmacio / Análisis</strong> → Crear caso, cargar hechos, solicitar análisis de viabilidad</li>
+      <li><strong>Dalmacio / Normativa</strong> → Consultar la normativa específica aplicable</li>
+      <li><strong>Liquidación LCT + Ley 24.013 + Ley 25.323</strong> → Calcular el monto estimado de la pretensión</li>
+      <li><strong>Carta Documento</strong> → Generar la intimación previa necesaria</li>
+    </ol>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ── Footer ── -->
+<div class="content">
+  <div class="page-footer">
+    MVC Abogados · Estudio Jurídico Manulis · San Isidro, Provincia de Buenos Aires<br>
+    herramientas.mvcabogados.com.ar · Manual versión 2.0 · Mayo 2026
+  </div>
 </div>
 
 </body>
