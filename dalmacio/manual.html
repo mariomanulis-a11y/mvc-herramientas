@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manual de Uso — Dalmacio · Estudio Jurídico Manulis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+    :root {
+      --navy:   #07101e;
+      --navy2:  #0c1828;
+      --gold:   #c9a84c;
+      --goldd:  #8a6d2a;
+      --goldl:  #e0c070;
+      --gray:   #4a5568;
+      --light:  #f7f8fa;
+      --border: #dde2ea;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.65;
+      color: #1a202c;
+      background: #fff;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* ── Portada ── */
+    .cover {
+      background: var(--navy);
+      color: #fff;
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      text-align: center;
+      page-break-after: always;
+    }
+    .cover__seal {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--goldd), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 32px;
+    }
+    .cover__title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 52pt;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .cover__subtitle {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 18pt;
+      font-weight: 400;
+      font-style: italic;
+      color: #9aaac0;
+      margin-bottom: 40px;
+    }
+    .cover__divider {
+      width: 80px; height: 2px;
+      background: var(--goldd);
+      margin: 0 auto 40px;
+    }
+    .cover__estudio {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #c8d4e8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .cover__sede {
+      font-size: 10pt;
+      color: #6a7a98;
+      margin-bottom: 60px;
+    }
+    .cover__footer {
+      margin-top: auto;
+      padding-top: 40px;
+      font-size: 9pt;
+      color: #3a4a62;
+      border-top: 1px solid #1c3050;
+      width: 100%;
+      text-align: center;
+    }
+    .cover__version {
+      display: inline-block;
+      background: rgba(201,168,76,.15);
+      border: 1px solid var(--goldd);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 9pt;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    /* ── Contenido ── */
+    .content {
+      padding: 40px 48px;
+    }
+
+    /* ── Índice ── */
+    .toc {
+      page-break-after: always;
+      padding: 40px 48px;
+    }
+    .toc h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26pt;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .toc__divider {
+      height: 2px;
+      background: linear-gradient(to right, var(--gold), transparent);
+      margin-bottom: 28px;
+    }
+    .toc__item {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 7px 0;
+      border-bottom: 1px dotted var(--border);
+      font-size: 10.5pt;
+    }
+    .toc__num  { color: var(--gold); font-weight: 600; min-width: 26px; font-size: 10pt; }
+    .toc__name { flex: 1; color: #2d3748; }
+    .toc__sub  { font-size: 9.5pt; color: var(--gray); margin-left: 26px; padding: 3px 0; }
+    .toc__sub::before { content: "→ "; color: var(--goldd); }
+
+    /* ── Secciones ── */
+    .section {
+      page-break-before: always;
+      padding: 40px 48px;
+    }
+    .section:first-child { page-break-before: avoid; }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+    .section-num {
+      font-size: 9pt;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+    h1.section-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26pt;
+      color: var(--navy);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(to right, var(--gold), transparent);
+      margin-top: 10px;
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 16pt;
+      color: var(--navy);
+      font-weight: 600;
+      margin: 28px 0 10px;
+      border-left: 3px solid var(--gold);
+      padding-left: 12px;
+    }
+    h3 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 18px 0 6px;
+    }
+    p  { margin-bottom: 10px; }
+    ul, ol { margin: 8px 0 12px 22px; }
+    li { margin-bottom: 5px; }
+    strong { color: var(--navy); }
+
+    /* ── Cajas de aviso ── */
+    .callout {
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 14px 0;
+      font-size: 10pt;
+      line-height: 1.5;
+    }
+    .callout--tip {
+      background: #fffbf0;
+      border-left: 3px solid var(--gold);
+    }
+    .callout--note {
+      background: #f0f4ff;
+      border-left: 3px solid #5580ff;
+    }
+    .callout--warn {
+      background: #fff8f0;
+      border-left: 3px solid #e07a55;
+    }
+    .callout__label {
+      font-weight: 700;
+      font-size: 9.5pt;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .callout--tip  .callout__label { color: var(--goldd); }
+    .callout--note .callout__label { color: #5580ff; }
+    .callout--warn .callout__label { color: #e07a55; }
+
+    /* ── Pasos numerados ── */
+    .steps { counter-reset: step; list-style: none; margin: 12px 0; padding: 0; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+    .steps li::before {
+      content: counter(step);
+      background: var(--navy);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 9.5pt;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Tabla de módulos ── */
+    .module-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .module-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--light);
+    }
+    .module-card__icon { font-size: 20pt; margin-bottom: 6px; display: block; }
+    .module-card__name { font-weight: 700; font-size: 10.5pt; color: var(--navy); display: block; margin-bottom: 4px; }
+    .module-card__desc { font-size: 9.5pt; color: var(--gray); line-height: 1.4; }
+
+    /* ── Tabla de plantillas ── */
+    .plantilla-list { list-style: none; margin: 0; padding: 0; }
+    .plantilla-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10pt;
+    }
+    .plantilla-list li:last-child { border-bottom: none; }
+    .plantilla-list .icon { flex-shrink: 0; font-size: 14pt; }
+
+    /* ── Tabla de bases de datos ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 10pt;
+    }
+    th {
+      background: var(--navy);
+      color: var(--gold);
+      font-size: 9.5pt;
+      font-weight: 600;
+      letter-spacing: .5px;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: var(--light); }
+
+    /* ── Teclas ── */
+    kbd {
+      display: inline-block;
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: monospace;
+      font-size: 9.5pt;
+      color: #2d3748;
+    }
+
+    /* ── Captura de pantalla simulada ── */
+    .screenshot {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 14px 0;
+    }
+    .screenshot__bar {
+      background: var(--navy2);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .screenshot__dot { width: 8px; height: 8px; border-radius: 50%; }
+    .screenshot__bar span { color: #9aaac0; font-size: 8.5pt; margin-left: 8px; }
+    .screenshot__body {
+      background: #0c1828;
+      padding: 14px;
+      color: #eef0f5;
+      font-size: 9.5pt;
+      font-family: 'Inter', monospace;
+      line-height: 1.5;
+    }
+
+    /* ── FAQ ── */
+    .faq { margin: 14px 0; }
+    .faq__q {
+      font-weight: 600;
+      color: var(--navy);
+      margin: 16px 0 4px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .faq__q::before { content: "P:"; color: var(--gold); font-size: 10pt; flex-shrink: 0; font-weight: 700; }
+    .faq__a {
+      padding-left: 24px;
+      color: #4a5568;
+    }
+    .faq__a::before { content: "R: "; font-weight: 600; color: var(--navy); }
+
+    /* ── Pie de página ── */
+    @page {
+      margin: 18mm 16mm 18mm;
+    }
+
+    @media print {
+      .cover { min-height: 100vh; }
+      .section, .toc { padding: 0; }
+      h2 { page-break-after: avoid; }
+      .module-grid { page-break-inside: avoid; }
+      .callout { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ PORTADA ══════════════ -->
+<div class="cover">
+  <div class="cover__seal">⚖️</div>
+  <div class="cover__title">Dalmacio</div>
+  <div class="cover__subtitle">Asistente Jurídico con Inteligencia Artificial</div>
+  <div class="cover__divider"></div>
+  <div class="cover__estudio">Estudio Jurídico Manulis</div>
+  <div class="cover__sede">San Isidro · Provincia de Buenos Aires · Argentina</div>
+  <div class="cover__version">Versión 1.0 — Mayo 2026</div>
+  <div class="cover__footer">
+    Manual de Uso Interno · Confidencial<br>
+    herramientas.mvcabogados.com.ar
+  </div>
+</div>
+
+<!-- ══════════════ ÍNDICE ══════════════ -->
+<div class="toc">
+  <h1>Índice</h1>
+  <div class="toc__divider"></div>
+
+  <div class="toc__item"><span class="toc__num">1</span><span class="toc__name">¿Qué es Dalmacio?</span></div>
+  <div class="toc__sub">Propósito, límites y consideraciones éticas</div>
+
+  <div class="toc__item"><span class="toc__num">2</span><span class="toc__name">Primeros pasos</span></div>
+  <div class="toc__sub">Acceso · Crear perfil de usuario · Configurar API key</div>
+
+  <div class="toc__item"><span class="toc__num">3</span><span class="toc__name">Gestión de casos</span></div>
+  <div class="toc__sub">Crear caso · Formulario · Cargar caso demo · Casos guardados</div>
+
+  <div class="toc__item"><span class="toc__num">4</span><span class="toc__name">Los seis módulos de trabajo</span></div>
+  <div class="toc__sub">Redactar · Analizar · Estrategia · Normativa · Checklist · Bases de Datos</div>
+
+  <div class="toc__item"><span class="toc__num">5</span><span class="toc__name">Plantillas rápidas</span></div>
+  <div class="toc__sub">Cómo usar las plantillas · Lista de modelos disponibles</div>
+
+  <div class="toc__item"><span class="toc__num">6</span><span class="toc__name">Adjuntar archivos</span></div>
+  <div class="toc__sub">PDF · Word · Imágenes · Documentos escaneados</div>
+
+  <div class="toc__item"><span class="toc__num">7</span><span class="toc__name">Historial persistente</span></div>
+  <div class="toc__sub">Restaurar conversación · Limpiar historial</div>
+
+  <div class="toc__item"><span class="toc__num">8</span><span class="toc__name">Exportar resultados</span></div>
+  <div class="toc__sub">Exportar .txt · Exportar .docx · Imprimir / PDF</div>
+
+  <div class="toc__item"><span class="toc__num">9</span><span class="toc__name">Búsqueda en bases de datos jurídicas</span></div>
+  <div class="toc__sub">SAIJ · InfoJus · CSJN · SCBA · PJN · InfoLEG</div>
+
+  <div class="toc__item"><span class="toc__num">10</span><span class="toc__name">Perfiles multi-usuario</span></div>
+  <div class="toc__sub">Crear perfiles · Cambiar de abogado · Casos independientes</div>
+
+  <div class="toc__item"><span class="toc__num">11</span><span class="toc__name">Preguntas frecuentes</span></div>
+
+  <div class="toc__item"><span class="toc__num">12</span><span class="toc__name">Referencia rápida</span></div>
+  <div class="toc__sub">Atajos de teclado · Límites del sistema</div>
+</div>
+
+<!-- ══════════════ 1. QUÉ ES DALMACIO ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 1</span>
+  <h1 class="section-title">¿Qué es Dalmacio?</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p><strong>Dalmacio</strong> es el asistente jurídico con inteligencia artificial del Estudio Jurídico Manulis, desarrollado especialmente para la práctica del derecho laboral en la Provincia de Buenos Aires. Su nombre rinde homenaje a <em>Dalmacio Vélez Sársfield</em>, codificador del derecho civil argentino.</p>
+
+<p>Funciona directamente en el navegador en <strong>herramientas.mvcabogados.com.ar</strong>, sin necesidad de instalar ningún programa. Utiliza el modelo de inteligencia artificial <strong>Claude Sonnet de Anthropic</strong> para generar respuestas, redactar documentos y analizar situaciones jurídicas.</p>
+
+<h2>¿Para qué sirve?</h2>
+<ul>
+  <li>Redactar escritos judiciales y extrajudiciales (demandas, cartas documento, recursos, oficios)</li>
+  <li>Analizar los hechos de un caso y determinar los rubros indemnizatorios procedentes</li>
+  <li>Diseñar estrategias procesales basadas en el fuero y la jurisdicción</li>
+  <li>Consultar normativa laboral vigente (LCT, Ley 24013, Ley 25323, CCyCN, Ley 15057)</li>
+  <li>Generar checklists de documentación y pasos procesales</li>
+  <li>Buscar jurisprudencia y legislación en bases de datos oficiales</li>
+  <li>Procesar documentos adjuntos: contratos, recibos, telegramas, imágenes</li>
+</ul>
+
+<h2>Marco legal aplicable</h2>
+<p>Dalmacio está configurado para trabajar con el derecho laboral argentino, con énfasis en la Provincia de Buenos Aires:</p>
+<ul>
+  <li><strong>LCT</strong> — Ley de Contrato de Trabajo (Ley 20744)</li>
+  <li><strong>Ley 24013</strong> — Empleo no registrado y multas</li>
+  <li><strong>Ley 25323</strong> — Incremento de indemnizaciones</li>
+  <li><strong>CCyCN</strong> — Código Civil y Comercial de la Nación</li>
+  <li><strong>Ley 24240</strong> — Defensa del Consumidor</li>
+  <li><strong>CPCC PBA</strong> — Código Procesal Civil y Comercial de Buenos Aires</li>
+  <li><strong>Ley 15057</strong> — Procedimiento Laboral de la Provincia de Buenos Aires</li>
+</ul>
+
+<div class="callout callout--warn">
+  <span class="callout__label">⚠ Importante — Verificación profesional obligatoria</span>
+  Dalmacio es una herramienta de asistencia, no reemplaza el criterio profesional del abogado. Todo documento generado debe ser revisado y validado antes de su presentación judicial. La IA puede cometer errores, en especial en citas de jurisprudencia — siempre verificar en las fuentes oficiales.
+</div>
+
+<div class="callout callout--note">
+  <span class="callout__label">🔒 Privacidad y seguridad</span>
+  Los datos de los casos se almacenan únicamente en el navegador del usuario (localStorage). La API key de Anthropic se guarda en sessionStorage y se borra automáticamente al cerrar la pestaña. Ningún dato del estudio se envía a servidores intermedios.
+</div>
+</div>
+
+<!-- ══════════════ 2. PRIMEROS PASOS ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 2</span>
+  <h1 class="section-title">Primeros pasos</h1>
+  <div class="section-divider"></div>
+</div>
+
+<h2>Acceso</h2>
+<p>Dalmacio está disponible en:</p>
+<div class="callout callout--tip">
+  <span class="callout__label">🌐 URL de acceso</span>
+  <strong>herramientas.mvcabogados.com.ar</strong> → hacer click en la herramienta <em>"Dalmacio — Asistente Jurídico IA"</em>
+</div>
+
+<h2>Crear un perfil de usuario</h2>
+<p>La primera vez que accedés a Dalmacio, el sistema te pedirá crear un perfil personal. Cada abogado del estudio tiene su propio perfil con casos independientes.</p>
+
+<ol class="steps">
+  <li>Al abrir Dalmacio por primera vez, aparece el modal <strong>"Perfiles del Estudio"</strong></li>
+  <li>Escribí tu nombre completo en el campo <em>"Nuevo abogado / abogada"</em></li>
+  <li>Hacé click en <strong>"Crear perfil"</strong></li>
+  <li>Tu avatar con las iniciales aparecerá en el ángulo superior derecho del header</li>
+</ol>
+
+<p>Para cambiar de perfil o agregar un nuevo abogado: hacé click en tu avatar (ángulo superior derecho) y seleccioná el perfil deseado o creá uno nuevo.</p>
+
+<h2>Configurar la API key de Anthropic</h2>
+<p>Dalmacio requiere una API key personal de Anthropic para funcionar. Esta clave permite el acceso al modelo de IA Claude Sonnet.</p>
+
+<ol class="steps">
+  <li>Accedé a <strong>console.anthropic.com</strong> e iniciá sesión con tu cuenta</li>
+  <li>En el menú lateral, seleccioná <em>"API Keys"</em></li>
+  <li>Creá una nueva clave o copiá una existente</li>
+  <li>En Dalmacio, hacé click en el botón <kbd>⚙</kbd> del header</li>
+  <li>Pegá la API key en el campo correspondiente (comienza con <code>sk-ant-api03-...</code>)</li>
+  <li>Hacé click en <strong>"Guardar y conectar"</strong></li>
+</ol>
+
+<div class="callout callout--warn">
+  <span class="callout__label">⚠ La API key expira al cerrar la pestaña</span>
+  Por seguridad, la clave se almacena en sessionStorage y se borra automáticamente al cerrar el navegador. Debés ingresarla de nuevo en cada sesión de trabajo.
+</div>
+
+<div class="callout callout--tip">
+  <span class="callout__label">💡 Límites de solicitudes (rate limiting)</span>
+  Si aparece el mensaje <em>"Límite de solicitudes alcanzado"</em>, el sistema reintenta automáticamente hasta 3 veces. Si persiste, esperá unos minutos. Para un uso intensivo del estudio, se recomienda contar con un plan pago en Anthropic.
+</div>
+</div>
+
+<!-- ══════════════ 3. GESTIÓN DE CASOS ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 3</span>
+  <h1 class="section-title">Gestión de casos</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>El panel lateral izquierdo es el <strong>centro de gestión de casos</strong>. Para abrirlo en el celular, tocá el botón <kbd>☰</kbd> en el ángulo superior izquierdo.</p>
+
+<h2>Crear un nuevo caso</h2>
+<ol class="steps">
+  <li>Hacé click en el botón <strong>"+ Nuevo"</strong> en la parte superior del panel lateral</li>
+  <li>Se crea automáticamente un caso en blanco con un ID único</li>
+  <li>Completá los campos del formulario</li>
+</ol>
+
+<h2>Formulario del caso</h2>
+<table>
+  <tr><th>Campo</th><th>Descripción</th><th>Ejemplo</th></tr>
+  <tr><td><strong>Cliente</strong></td><td>Nombre completo del cliente</td><td>Juan Pérez</td></tr>
+  <tr><td><strong>Expediente</strong></td><td>Número de expediente judicial</td><td>PL-1234-2025</td></tr>
+  <tr><td><strong>Juzgado / Tribunal</strong></td><td>Órgano judicial interviniente (con autocompletado)</td><td>Tribunal de Trabajo N°3 de San Isidro</td></tr>
+  <tr><td><strong>Fuero</strong></td><td>Laboral, Civil, Comercial, Consumidor u Otro</td><td>Laboral</td></tr>
+  <tr><td><strong>Jurisdicción</strong></td><td>Departamento Judicial (con autocompletado de los 19 DJ de PBA)</td><td>Departamento Judicial San Isidro</td></tr>
+  <tr><td><strong>Materia</strong></td><td>Descripción breve del objeto del caso</td><td>Despido sin causa — Diferencias salariales</td></tr>
+  <tr><td><strong>Hechos del caso</strong></td><td>Relación de hechos relevantes que guiará a Dalmacio</td><td>Ingreso 01/03/2018, remuneración $850.000...</td></tr>
+</table>
+
+<p>El formulario <strong>se guarda automáticamente</strong> mientras escribís (con un retardo de 800ms). También podés hacer click en <strong>"Guardar caso"</strong> para guardar de inmediato.</p>
+
+<h2>Caso demo</h2>
+<p>Para familiarizarte con el sistema, hacé click en el botón <strong>"Demo"</strong>. Se cargará un caso de ejemplo completo (Juan Pérez, despido sin causa, Tribunal N°3 San Isidro) con todos los campos completados.</p>
+
+<h2>Casos guardados</h2>
+<p>En la parte inferior del panel lateral se muestra la lista de todos tus casos guardados, ordenados por fecha de última modificación. Desde allí podés:</p>
+<ul>
+  <li><strong>↗ Cargar</strong> — carga el caso en el formulario y restaura el historial de conversación</li>
+  <li><strong>✕ Eliminar</strong> — borra el caso definitivamente (se pide confirmación)</li>
+</ul>
+
+<div class="callout callout--note">
+  <span class="callout__label">💾 Almacenamiento local</span>
+  Los casos se guardan en el navegador del dispositivo. Si cambiás de equipo o borrás los datos del navegador, los casos no estarán disponibles. Se recomienda exportar los documentos importantes como .docx.
+</div>
+</div>
+
+<!-- ══════════════ 4. LOS SEIS MÓDULOS ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 4</span>
+  <h1 class="section-title">Los seis módulos de trabajo</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>Dalmacio está organizado en <strong>seis módulos especializados</strong>, accesibles desde la barra horizontal debajo del header. En pantallas pequeñas podés deslizar la barra horizontalmente para ver todos los botones.</p>
+
+<div class="module-grid">
+  <div class="module-card">
+    <span class="module-card__icon">📝</span>
+    <span class="module-card__name">Redactar escritos</span>
+    <span class="module-card__desc">Genera demandas, cartas documento, telegramas, recursos y oficios. Detecta automáticamente el tipo de escrito según las palabras usadas.</span>
+  </div>
+  <div class="module-card">
+    <span class="module-card__icon">🔍</span>
+    <span class="module-card__name">Analizar hechos</span>
+    <span class="module-card__desc">Analiza los hechos del caso activo, determina rubros procedentes y calcula montos estimados con las fórmulas legales vigentes.</span>
+  </div>
+  <div class="module-card">
+    <span class="module-card__icon">⚖️</span>
+    <span class="module-card__name">Estrategia procesal</span>
+    <span class="module-card__desc">Diseña la estrategia de litigio según el fuero, la jurisdicción y el objetivo del cliente. Evalúa riesgos y alternativas.</span>
+  </div>
+  <div class="module-card">
+    <span class="module-card__icon">📚</span>
+    <span class="module-card__name">Consultar normativa</span>
+    <span class="module-card__desc">Responde consultas sobre artículos de la LCT, CCyCN, Ley 24013, Ley 25323, Ley 15057 y demás normativa aplicable.</span>
+  </div>
+  <div class="module-card">
+    <span class="module-card__icon">✅</span>
+    <span class="module-card__name">Checklist</span>
+    <span class="module-card__desc">Genera listas de verificación con la documentación necesaria, los pasos procesales y los plazos clave para cada tipo de acción legal.</span>
+  </div>
+  <div class="module-card">
+    <span class="module-card__icon">🗄️</span>
+    <span class="module-card__name">Bases de Datos</span>
+    <span class="module-card__desc">Abre el panel de búsqueda jurídica con acceso directo a SAIJ, InfoJus, CSJN, SCBA (JUBA), PJN e InfoLEG.</span>
+  </div>
+</div>
+
+<h2>Cómo usar un módulo</h2>
+<ol class="steps">
+  <li>Asegurate de tener un caso activo cargado en el panel lateral</li>
+  <li>Hacé click en el botón del módulo deseado en la barra de navegación</li>
+  <li>Dalmacio enviará un mensaje de activación indicando qué información necesita</li>
+  <li>Respondé con tu consulta o instrucción específica</li>
+  <li>También podés escribir directamente en el chat sin activar un módulo (<em>Chat libre</em>)</li>
+</ol>
+
+<div class="callout callout--tip">
+  <span class="callout__label">💡 Contexto del caso</span>
+  Cuando hay un caso activo, Dalmacio utiliza automáticamente los datos del formulario (cliente, hechos, juzgado, etc.) como contexto para todas sus respuestas. No es necesario repetir la información del caso en cada consulta.
+</div>
+
+<h2>Módulo Redactar — Tipos de escritos reconocidos</h2>
+<p>Al redactar, Dalmacio detecta automáticamente el tipo de escrito según las palabras clave que uses:</p>
+<table>
+  <tr><th>Si escribís…</th><th>Genera…</th></tr>
+  <tr><td>"demanda", "iniciar juicio", "reclamar"</td><td>Demanda judicial completa con encabezado y petitorio</td></tr>
+  <tr><td>"carta documento", "cd", "intimación"</td><td>Carta documento formal con plazos de intimación</td></tr>
+  <tr><td>"telegrama", "TCP"</td><td>Telegrama colacionado con formato postal</td></tr>
+  <tr><td>"recurso", "apelar", "apelación"</td><td>Recurso de apelación con agravios</td></tr>
+  <tr><td>"oficio", "solicitar al juzgado"</td><td>Oficio judicial con encabezado formal</td></tr>
+  <tr><td>"contestación", "contesta"</td><td>Contestación de demanda con negativas</td></tr>
+</table>
+</div>
+
+<!-- ══════════════ 5. PLANTILLAS RÁPIDAS ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 5</span>
+  <h1 class="section-title">Plantillas rápidas</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>El botón <kbd>📋</kbd> del header abre el panel de <strong>Plantillas rápidas</strong>. Cada plantilla pre-carga un prompt optimizado en el campo de chat, listo para enviar.</p>
+
+<h2>Cómo usar una plantilla</h2>
+<ol class="steps">
+  <li>Asegurate de tener un caso activo cargado</li>
+  <li>Hacé click en el botón <kbd>📋</kbd> en el header</li>
+  <li>El panel de plantillas se abre desde la derecha</li>
+  <li>Hacé click en la plantilla que necesitás</li>
+  <li>El prompt se carga automáticamente en el campo de texto</li>
+  <li>Podés editarlo antes de enviar o enviarlo directamente con <kbd>Enter</kbd></li>
+</ol>
+
+<h2>Plantillas disponibles</h2>
+<ul class="plantilla-list">
+  <li><span class="icon">📋</span><div><strong>Demanda laboral — Despido sin causa (art. 245 LCT)</strong><br>Genera una demanda completa con liquidación de rubros, derecho aplicable y petitorio.</div></li>
+  <li><span class="icon">📨</span><div><strong>Carta documento — Intimación pago de haberes</strong><br>Intima al empleador al pago de haberes adeudados, con apercibimiento de resolución del contrato.</div></li>
+  <li><span class="icon">⚖️</span><div><strong>Contestación de demanda laboral</strong><br>Negativa general y particular, ofrecimiento de prueba y planteo de defensa de fondo.</div></li>
+  <li><span class="icon">📬</span><div><strong>Telegrama — Parte alícuota Ley 25323</strong><br>Intimación de pago de SAC proporcional y multas de la Ley 25323 arts. 1 y 2.</div></li>
+  <li><span class="icon">📝</span><div><strong>Recurso de apelación laboral</strong><br>Recurso ordinario ante la Cámara, con agravios numerados y petitorio.</div></li>
+  <li><span class="icon">📄</span><div><strong>Oficio al juzgado — Solicitud de certificados</strong><br>Solicita certificado de trabajo (art. 80 LCT), recibos y constancias previsionales.</div></li>
+  <li><span class="icon">🔍</span><div><strong>Análisis de hechos — Rubros procedentes</strong><br>Analiza el caso activo y determina los rubros, montos estimados y plazos de prescripción.</div></li>
+  <li><span class="icon">✅</span><div><strong>Checklist — Despido sin causa</strong><br>Lista completa de documentación, prueba, pasos procesales y acciones previas.</div></li>
+</ul>
+</div>
+
+<!-- ══════════════ 6. ADJUNTAR ARCHIVOS ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 6</span>
+  <h1 class="section-title">Adjuntar archivos</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>Dalmacio puede procesar documentos adjuntos y analizarlos en el contexto del caso activo. Es especialmente útil para revisar contratos, recibos de haberes, telegramas y documentación escaneada.</p>
+
+<h2>Formatos admitidos</h2>
+<table>
+  <tr><th>Tipo</th><th>Extensiones</th><th>Cómo se procesa</th></tr>
+  <tr><td><strong>PDF</strong></td><td>.pdf</td><td>Extracción de texto completo por página (hasta 15 MB)</td></tr>
+  <tr><td><strong>Word</strong></td><td>.docx, .doc</td><td>Extracción de texto con formato preservado</td></tr>
+  <tr><td><strong>Texto plano</strong></td><td>.txt</td><td>Lectura directa del contenido</td></tr>
+  <tr><td><strong>Imágenes / Escaneados</strong></td><td>.jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff</td><td>Análisis visual directo por Claude Vision (OCR implícito)</td></tr>
+</table>
+
+<h2>Cómo adjuntar</h2>
+<p>Hay tres formas de adjuntar archivos:</p>
+<ol class="steps">
+  <li><strong>Botón 📎</strong> — hacé click en el clip en el área de input y seleccioná el archivo</li>
+  <li><strong>Arrastrar y soltar</strong> — arrastrá el archivo directamente sobre el área de mensajes del chat</li>
+  <li><strong>Múltiples archivos</strong> — podés adjuntar varios archivos a la vez antes de enviar el mensaje</li>
+</ol>
+
+<p>Cada archivo aparecerá como un <em>chip</em> sobre el campo de texto, indicando que está listo para enviar. Podés eliminarlo con el botón ✕ del chip.</p>
+
+<div class="callout callout--tip">
+  <span class="callout__label">📑 Documentos escaneados</span>
+  Para documentos escaneados o fotografías de telegramas y recibos, adjuntalos como imagen (JPG o PNG). Claude los lee directamente mediante visión artificial sin necesidad de OCR previo.
+</div>
+
+<div class="callout callout--note">
+  <span class="callout__label">📏 Límite de tamaño</span>
+  El tamaño máximo por archivo es de <strong>15 MB</strong>. Para PDFs muy extensos, se procesarán las primeras páginas disponibles dentro del límite de tokens de la API.
+</div>
+</div>
+
+<!-- ══════════════ 7. HISTORIAL PERSISTENTE ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 7</span>
+  <h1 class="section-title">Historial persistente</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>Cada conversación que tenés con Dalmacio en el contexto de un caso <strong>se guarda automáticamente</strong> en el navegador. Cuando volvés a cargar ese caso en el futuro, el historial completo se restaura.</p>
+
+<h2>Restaurar una conversación</h2>
+<ol class="steps">
+  <li>En el panel lateral, hacé click en <strong>↗</strong> junto al caso que querés retomar</li>
+  <li>Dalmacio mostrará un banner indicando cuántos intercambios tiene guardados el caso</li>
+  <li>Los mensajes anteriores se cargarán en el chat, pudiendo continuar donde lo dejaste</li>
+  <li>El historial también se envía a la API como contexto, por lo que Dalmacio "recuerda" lo conversado</li>
+</ol>
+
+<h2>Limpiar el historial</h2>
+<p>Para borrar el historial de un caso y empezar de cero:</p>
+<ol class="steps">
+  <li>Cargá el caso deseado</li>
+  <li>Hacé click en el botón <kbd>🗑 Limpiar</kbd> en la barra del chat</li>
+  <li>Confirmá la acción en el diálogo de confirmación</li>
+</ol>
+
+<div class="callout callout--warn">
+  <span class="callout__label">⚠ Esta acción no se puede deshacer</span>
+  Al limpiar el historial se eliminan todos los mensajes guardados del caso, tanto de la vista como del localStorage. Los datos del formulario (cliente, hechos, etc.) no se ven afectados.
+</div>
+</div>
+
+<!-- ══════════════ 8. EXPORTAR ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 8</span>
+  <h1 class="section-title">Exportar resultados</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>El botón <kbd>📥</kbd> del header despliega el menú de exportación con tres opciones. El contenido exportado corresponde al <strong>último documento generado</strong> por Dalmacio en la sesión.</p>
+
+<table>
+  <tr><th>Opción</th><th>Formato</th><th>Ideal para…</th></tr>
+  <tr>
+    <td><strong>📄 Exportar .txt</strong></td>
+    <td>Texto plano</td>
+    <td>Copiar texto rápidamente a otro editor o procesador de textos</td>
+  </tr>
+  <tr>
+    <td><strong>📝 Exportar .docx</strong></td>
+    <td>Word (Microsoft Office)</td>
+    <td>Editar el documento generado con formato y enviarlo como adjunto</td>
+  </tr>
+  <tr>
+    <td><strong>🖨️ Imprimir / PDF</strong></td>
+    <td>PDF (vía impresión del navegador)</td>
+    <td>Guardar una copia del chat completo o imprimir el resultado</td>
+  </tr>
+</table>
+
+<h2>Cómo guardar como PDF</h2>
+<ol class="steps">
+  <li>Hacé click en <kbd>📥</kbd> → <strong>Imprimir / PDF</strong></li>
+  <li>Se abre el diálogo de impresión del navegador</li>
+  <li>En el selector de impresora, elegí <strong>"Guardar como PDF"</strong> o <strong>"Microsoft Print to PDF"</strong></li>
+  <li>Seleccioná la carpeta de destino y hacé click en <strong>Guardar</strong></li>
+</ol>
+
+<div class="callout callout--tip">
+  <span class="callout__label">💡 Nombre automático del archivo</span>
+  El nombre del archivo exportado se genera automáticamente con el nombre del cliente, el número de expediente y el tipo de módulo activo. Ejemplo: <code>Pérez_Juan_PL-1234-2025_redaccion.docx</code>
+</div>
+</div>
+
+<!-- ══════════════ 9. BASES DE DATOS ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 9</span>
+  <h1 class="section-title">Búsqueda en bases de datos jurídicas</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>El módulo <strong>🗄️ Bases de Datos</strong> abre un panel lateral de búsqueda jurídica asistida. Funciona de dos maneras complementarias: consulta a Dalmacio con IA y acceso directo a bases oficiales.</p>
+
+<h2>Cómo buscar</h2>
+<ol class="steps">
+  <li>Hacé click en el botón <kbd>🗄️ Bases de Datos</kbd> en la barra de módulos</li>
+  <li>El panel se desliza desde la derecha</li>
+  <li>Escribí tu búsqueda en el campo de texto (ej: "art. 245 LCT", "Vizzoti", "Ley 24013 art. 8")</li>
+  <li>Hacé click en <strong>"Buscar"</strong></li>
+  <li>Dalmacio responde en el chat con información y links directos a las bases de datos</li>
+</ol>
+
+<h2>Bases de datos disponibles</h2>
+<table>
+  <tr><th>Base</th><th>Contenido</th><th>URL</th></tr>
+  <tr><td><strong>SAIJ</strong></td><td>Sistema Argentino de Información Jurídica — legislación y jurisprudencia</td><td>saij.gob.ar</td></tr>
+  <tr><td><strong>InfoJus</strong></td><td>Doctrina jurídica — Ministerio de Justicia</td><td>infojus.gob.ar</td></tr>
+  <tr><td><strong>CSJN Fallos</strong></td><td>Jurisprudencia de la Corte Suprema de Justicia de la Nación</td><td>sj.csjn.gov.ar</td></tr>
+  <tr><td><strong>SCBA — JUBA</strong></td><td>Jurisprudencia de la Suprema Corte de Buenos Aires</td><td>juba.scba.gov.ar</td></tr>
+  <tr><td><strong>PJN</strong></td><td>Poder Judicial de la Nación — consulta de expedientes</td><td>pjn.gov.ar</td></tr>
+  <tr><td><strong>InfoLEG</strong></td><td>Legislación nacional vigente consolidada</td><td>infoleg.gob.ar</td></tr>
+</table>
+
+<div class="callout callout--note">
+  <span class="callout__label">ℹ Verificación en fuentes oficiales</span>
+  Dalmacio siempre indica que la jurisprudencia mencionada debe verificarse en las fuentes oficiales. Nunca inventa fallos ni citas — ante la incertidumbre, informa que no tiene datos confiables sobre un fallo específico.
+</div>
+</div>
+
+<!-- ══════════════ 10. MULTI-USUARIO ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 10</span>
+  <h1 class="section-title">Perfiles multi-usuario</h1>
+  <div class="section-divider"></div>
+</div>
+
+<p>Dalmacio permite que <strong>múltiples abogados del estudio</strong> usen la misma instalación con perfiles independientes. Cada perfil tiene sus propios casos y no puede ver ni acceder a los casos de otros perfiles.</p>
+
+<h2>Crear un nuevo perfil</h2>
+<ol class="steps">
+  <li>Hacé click en tu avatar (ángulo superior derecho del header)</li>
+  <li>En el dropdown, seleccioná <strong>"Agregar abogado"</strong></li>
+  <li>Escribí el nombre del nuevo integrante</li>
+  <li>Hacé click en <strong>"Crear perfil"</strong></li>
+</ol>
+
+<h2>Cambiar de perfil</h2>
+<ol class="steps">
+  <li>Hacé click en tu avatar en el header</li>
+  <li>El dropdown muestra todos los perfiles del estudio</li>
+  <li>Hacé click en el perfil deseado — el check (✓) indica el perfil activo</li>
+  <li>Los casos del nuevo perfil se cargan automáticamente</li>
+</ol>
+
+<div class="callout callout--warn">
+  <span class="callout__label">⚠ Perfiles por dispositivo</span>
+  Los perfiles se guardan en el navegador del dispositivo. Si el Estudio tiene una computadora compartida, todos los perfiles son accesibles desde ese equipo. Para separación total entre dispositivos, cada abogado debería usar su propio equipo o perfil del navegador.
+</div>
+</div>
+
+<!-- ══════════════ 11. FAQ ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 11</span>
+  <h1 class="section-title">Preguntas frecuentes</h1>
+  <div class="section-divider"></div>
+</div>
+
+<div class="faq">
+  <div class="faq__q">¿Dalmacio puede reemplazar la consulta a un abogado especialista?</div>
+  <div class="faq__a">No. Es una herramienta de asistencia para abogados ya formados. Todo documento generado debe ser revisado profesionalmente antes de su uso.</div>
+
+  <div class="faq__q">¿Qué pasa si la respuesta de Dalmacio está incompleta o cortada?</div>
+  <div class="faq__a">Podés pedirle que continúe escribiendo: "continuá desde donde lo dejaste" o "completá el documento". El sistema admite respuestas de hasta 8.192 tokens (aproximadamente 6.000 palabras).</div>
+
+  <div class="faq__q">¿Puedo usar Dalmacio desde el celular?</div>
+  <div class="faq__a">Sí, la interfaz es completamente responsive. En el celular, el panel lateral se abre como overlay con el botón ☰, y los módulos de la barra horizontal se deslizan con el dedo.</div>
+
+  <div class="faq__q">¿Puedo adjuntar más de un archivo a la vez?</div>
+  <div class="faq__a">Sí. Podés seleccionar múltiples archivos al mismo tiempo con el botón 📎 o arrastrar varios archivos al chat. Cada uno aparecerá como un chip antes de enviar.</div>
+
+  <div class="faq__q">¿Qué pasa si aparece el error "API key inválida"?</div>
+  <div class="faq__a">La API key ingresada es incorrecta o fue revocada. Hacé click en ⚙, borrá la clave actual e ingresá una nueva válida desde console.anthropic.com.</div>
+
+  <div class="faq__q">¿Por qué Dalmacio dice que no conoce un fallo específico?</div>
+  <div class="faq__a">Por diseño, Dalmacio no fabrica jurisprudencia. Si no tiene certeza sobre un fallo, lo dice explícitamente y te indica buscar en las bases de datos oficiales.</div>
+
+  <div class="faq__q">¿Los casos se sincronizan entre dispositivos?</div>
+  <div class="faq__a">No. Los casos se almacenan localmente en el navegador de cada dispositivo. Para transferir un caso, exportalo como .docx y guardalo en un repositorio compartido del estudio.</div>
+
+  <div class="faq__q">¿Puedo usar Dalmacio sin conexión a internet?</div>
+  <div class="faq__a">No. Dalmacio requiere conexión para comunicarse con la API de Anthropic. Sin conexión, la interfaz carga pero no puede generar respuestas.</div>
+</div>
+</div>
+
+<!-- ══════════════ 12. REFERENCIA RÁPIDA ══════════════ -->
+<div class="section">
+<div class="section-header">
+  <span class="section-num">Sección 12</span>
+  <h1 class="section-title">Referencia rápida</h1>
+  <div class="section-divider"></div>
+</div>
+
+<h2>Atajos de teclado</h2>
+<table>
+  <tr><th>Acción</th><th>Tecla</th></tr>
+  <tr><td>Enviar mensaje</td><td><kbd>Enter</kbd></td></tr>
+  <tr><td>Nueva línea en el mensaje</td><td><kbd>Shift</kbd> + <kbd>Enter</kbd></td></tr>
+  <tr><td>Cerrar modales</td><td><kbd>Escape</kbd></td></tr>
+</table>
+
+<h2>Límites del sistema</h2>
+<table>
+  <tr><th>Parámetro</th><th>Valor</th></tr>
+  <tr><td>Tamaño máximo de archivo adjunto</td><td>15 MB por archivo</td></tr>
+  <tr><td>Tokens máximos por respuesta</td><td>8.192 tokens (~6.000 palabras)</td></tr>
+  <tr><td>Reintentos automáticos por rate limit</td><td>3 reintentos con backoff exponencial</td></tr>
+  <tr><td>Almacenamiento de casos</td><td>Limitado por el localStorage del navegador (~5 MB por origen)</td></tr>
+  <tr><td>Duración de la API key en sesión</td><td>Hasta cerrar la pestaña (sessionStorage)</td></tr>
+</table>
+
+<h2>Departamentos Judiciales de la Provincia de Buenos Aires</h2>
+<p>Todos los departamentos judiciales de PBA están disponibles en el autocompletado del campo Jurisdicción:</p>
+<ul style="columns: 2; column-gap: 30px; font-size: 10pt;">
+  <li>La Plata</li>
+  <li>Mercedes</li>
+  <li>San Nicolás</li>
+  <li>Junín</li>
+  <li>Azul</li>
+  <li>Mar del Plata</li>
+  <li>Bahía Blanca</li>
+  <li>Trenque Lauquen</li>
+  <li>Dolores</li>
+  <li>Necochea</li>
+  <li>Zárate-Campana</li>
+  <li>Morón</li>
+  <li>San Isidro</li>
+  <li>La Matanza</li>
+  <li>Lomas de Zamora</li>
+  <li>Quilmes</li>
+  <li>San Martín</li>
+  <li>Pergamino</li>
+  <li>Tres Arroyos</li>
+</ul>
+
+<div style="margin-top: 48px; padding-top: 20px; border-top: 2px solid #dde2ea; text-align: center;">
+  <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22pt; color: #07101e; font-weight: 700; margin-bottom: 4px;">Estudio Jurídico Manulis</div>
+  <div style="font-size: 10pt; color: #6a7a98; margin-bottom: 8px;">San Isidro · Provincia de Buenos Aires · Argentina</div>
+  <div style="font-size: 9.5pt; color: #9aaac0;">herramientas.mvcabogados.com.ar · Dalmacio v1.0 · Mayo 2026</div>
+  <div style="margin-top: 16px; font-size: 9pt; color: #c0c8d8; font-style: italic;">Documento de uso interno — Confidencial</div>
+</div>
+</div>
+
+</body>
+</html>
