@@ -131,7 +131,7 @@
   const topbarTitle = document.getElementById('topbar-title');
   const sidebar     = document.getElementById('sidebar');
 
-  function showWelcome() {
+  function showWelcome(updateHash = true) {
     if (typeof cleanupFn === 'function') { cleanupFn(); cleanupFn = null; }
     currentTool = null;
 
@@ -160,14 +160,19 @@
 
     topbarTitle.textContent = 'Herramientas Legales';
     setActive(null);
+
+    if (updateHash && location.hash) history.replaceState(null, '', location.pathname + location.search);
   }
 
-  async function loadTool(key) {
+  async function loadTool(key, updateHash = true) {
+    if (!TOOLS[key]) { showWelcome(); return; }
     if (key === currentTool) return;
     if (typeof cleanupFn === 'function') { cleanupFn(); cleanupFn = null; }
     currentTool = key;
     setActive(key);
     topbarTitle.textContent = TOOLS[key].label;
+
+    if (updateHash && location.hash.slice(1) !== key) location.hash = key;
 
     container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--color-muted);">Cargando...</div>';
 
@@ -187,6 +192,18 @@
     sidebar.classList.remove('open');
   }
 
+  // Enlaces directos: permite abrir una herramienta puntual vía URL
+  // (ej. https://herramientas.mvcabogados.com.ar/#carta-documento)
+  function applyHash() {
+    const key = decodeURIComponent(location.hash.slice(1));
+    if (key && key !== 'home' && TOOLS[key]) {
+      loadTool(key, false);
+    } else {
+      showWelcome(false);
+    }
+  }
+  window.addEventListener('hashchange', applyHash);
+
   function setActive(key) {
     document.querySelectorAll('.nav-item[data-tool]').forEach(b =>
       b.classList.toggle('active', b.dataset.tool === key));
@@ -205,7 +222,7 @@
     if (window.innerWidth <= 768) sidebar.classList.remove('open');
   });
 
-  showWelcome();
+  applyHash();
 </script>
 </body>
 </html>
