@@ -60,6 +60,9 @@
     <button class="nav-item" data-tool="demanda-despido">
       <span class="nav-icon">🏛️</span> Demanda por Despido (PBA)
     </button>
+    <button class="nav-item" data-tool="demanda-consumidor">
+      <span class="nav-icon">🛡️</span> Demanda por Consumidor (PBA)
+    </button>
     <button class="nav-item" data-tool="presupuestos">
       <span class="nav-icon">🧾</span> Presupuestos
     </button>
@@ -100,6 +103,7 @@
     'carta-documento':{ label: 'Generador de Carta Documento',       load: () => import('./tools/carta-documento.js').then(m => m.initCartaDocumento) },
     'carta-poder-laboral': { label: 'Generador de Carta Poder Laboral', load: () => import('./tools/carta-poder-laboral.js').then(m => m.initCartaPoderLaboral) },
     'demanda-despido': { label: 'Generador de Demanda por Despido (PBA)', load: () => import('./tools/demanda-despido.js').then(m => m.initDemandaDespido) },
+    'demanda-consumidor': { label: 'Generador de Demanda por Consumidor (PBA)', load: () => import('./tools/demanda-consumidor.js').then(m => m.initDemandaConsumidor) },
     presupuestos:     { label: 'Generador de Presupuestos',          load: () => import('./tools/presupuestos.js').then(m => m.initPresupuestos) },
     documentacion:    { label: 'Generador de Documentación Requerida', load: () => import('./tools/documentacion.js').then(m => m.initDocumentacion) },
     dalmacio:         { label: 'Dalmacio — Asistente Jurídico IA',   load: () => import('./tools/dalmacio.js').then(m => m.initDalmacio) },
@@ -109,7 +113,7 @@
     liquidacion:'⚖️', ley24013:'📋', ley25323:'➕',
     intereses:'📈', actualizacion:'💹', plazos:'📅',
     incapacidad:'🩺', 'danio-punitivo':'⚠️', 'carta-documento':'✉️',
-    'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️',
+    'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️', 'demanda-consumidor':'🛡️',
     presupuestos:'🧾', documentacion:'📑',
     dalmacio:'🤖'
   };
@@ -118,7 +122,7 @@
     'Derecho Laboral':    ['liquidacion','ley24013','ley25323'],
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
-    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','presupuestos','documentacion'],
+    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','presupuestos','documentacion'],
     'Asistente IA':       ['dalmacio'],
   };
 

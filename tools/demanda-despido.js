@@ -284,7 +284,7 @@ export function initDemandaDespido(container) {
     const abogadoSel = ABOGADOS_BY_ID[selAbogado.value];
     const matricula = val('dd-matricula') || 'T° __ F° __';
     const d = {
-      abogado: `Dr./Dra. ${abogadoSel.nombre} (MVC Abogados), ${matricula}`,
+      abogado: `Dr./Dra. ${abogadoSel.nombre}, ${matricula}`,
       juzgado: val('dd-juzgado'),
       domicilio_procesal: val('dd-domicilio_procesal') || '[DOMICILIO PROCESAL A CONSTITUIR]',
       email_notificaciones: val('dd-email_notificaciones') || abogadoSel.domicilioElectronico,
@@ -376,9 +376,9 @@ export function initDemandaDespido(container) {
     ].filter(Boolean).join('\n');
 
     const texto =
-`SEÑOR JUEZ DEL TRABAJO${d.juzgado ? ` — ${d.juzgado}` : ''}:
+`EXCMO. TRIBUNAL DEL TRABAJO${d.juzgado ? ` — ${d.juzgado}` : ''}:
 
-${d.abogado}, en mi carácter de patrocinante/apoderado/a de ${d.actor_nombre}, DNI ${d.actor_dni}, con domicilio real en ${d.actor_domicilio_real}, constituyendo domicilio procesal en ${d.domicilio_procesal} y domicilio electrónico en ${d.email_notificaciones} (art. 40, CPCC de la Provincia de Buenos Aires, de aplicación supletoria conforme art. 89, Ley 15.057), a V.S. respetuosamente me presento y digo:
+${d.abogado}, en mi carácter de patrocinante/apoderado/a de ${d.actor_nombre}, DNI ${d.actor_dni}, con domicilio real en ${d.actor_domicilio_real}, constituyendo domicilio procesal en ${d.domicilio_procesal} y domicilio electrónico en ${d.email_notificaciones} (art. 40, CPCC de la Provincia de Buenos Aires, de aplicación supletoria conforme art. 89, Ley 15.057), a V.E. respetuosamente me presento y digo:
 
 I. OBJETO
 Que vengo por el presente a promover demanda laboral contra ${d.empleador_nombre}, con domicilio en ${d.empleador_domicilio}${d.empleador_cuit ? `, CUIT ${d.empleador_cuit}` : ''}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}), o lo que en más o en menos resulte de la prueba a producirse en autos, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
@@ -403,7 +403,7 @@ VI. BENEFICIO DE GRATUIDAD
 Que en mi carácter de trabajador/a, invoco el beneficio de gratuidad previsto en el art. 27 de la Ley 15.057, solicitando se me exima del pago de tasas por servicios judiciales, así como de toda caución real o personal para el pago de costas, gastos, honorarios o por la responsabilidad derivada de eventuales medidas cautelares.
 
 VII. PETITORIO
-Por lo expuesto, a V.S. solicito:
+Por lo expuesto, a V.E. solicito:
 1) Me tenga por presentado, por parte y por constituido el domicilio procesal indicado.
 2) Se tenga por promovida la presente demanda laboral contra ${d.empleador_nombre}.
 3) Se tenga presente la prueba ofrecida y se provea oportunamente su producción.
@@ -458,7 +458,7 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     if (!texto) return;
     const htmlBody = texto.split('\n').map(linea => {
       if (!linea.trim()) return '<p>&nbsp;</p>';
-      const negrita = /^(SEÑOR JUEZ|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|PROVEER|SERÁ JUSTICIA|TOTAL RECLAMADO|Recordatorios)/.test(linea.trim());
+      const negrita = /^(EXCMO\. TRIBUNAL|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|PROVEER|SERÁ JUSTICIA|TOTAL RECLAMADO|Recordatorios)/.test(linea.trim());
       const esc = linea.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return `<p style="margin:0 0 8pt 0;${negrita ? 'font-weight:bold;' : ''}">${esc}</p>`;
     }).join('\n');
