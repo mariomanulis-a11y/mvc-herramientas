@@ -294,6 +294,64 @@ export function initCartaDocumento(container) {
         },
       },
     },
+
+    seguros: {
+      label: 'Seguros — Consumidor de Seguros',
+      remitenteLabel: 'Asegurado/a (consumidor de seguros)',
+      destinatarioLabel: 'Compañía Aseguradora',
+      detalleLabel: 'Datos de la póliza / siniestro',
+      revisionPendiente: true,
+      plantillas: {
+        seg_silencio_aceptacion_tacita: {
+          label: 'Intimación por silencio del asegurador — aceptación tácita del siniestro (Art. 56 Ley 17.418)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','fecha_siniestro'],
+          opcionales: ['numero_siniestro','ramo_seguro','monto_reclamado'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.ramo_seguro ? ` (seguro de ${d.ramo_seguro})` : ''}, hago saber a Ud. que habiendo denunciado en tiempo y forma el siniestro ocurrido el ${d.fecha_siniestro}${d.numero_siniestro ? ` (siniestro N° ${d.numero_siniestro})` : ''} y remitido la información complementaria requerida, ha transcurrido en exceso el plazo de TREINTA (30) días previsto en el art. 56 de la Ley 17.418 sin que Ud. se haya pronunciado sobre mi derecho. En consecuencia, dicho silencio importa la aceptación del siniestro en los términos de la norma citada, por lo que intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a abonar${d.monto_reclamado ? ` la suma de $ ${d.monto_reclamado}` : ' la indemnización correspondiente'}, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan, con más el reclamo del daño punitivo previsto en el art. 52 bis de la Ley 24.240, sin perjuicio de las demás normas que resulten aplicables.`,
+        },
+        seg_mora_pago_indemnizacion: {
+          label: 'Intimación por mora en el pago de la indemnización ya fijada (Art. 49 Ley 17.418)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','monto_reclamado'],
+          opcionales: ['numero_siniestro','fecha_hecho'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.numero_siniestro ? `, siniestro N° ${d.numero_siniestro}` : ''}, hago saber a Ud. que habiéndose fijado el monto de la indemnización en la suma de $ ${d.monto_reclamado}${d.fecha_hecho ? ` con fecha ${d.fecha_hecho}` : ''}, ha transcurrido en exceso el plazo de QUINCE (15) días previsto en el art. 49 de la Ley 17.418 sin que Ud. haya efectuado el pago correspondiente. Intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a abonar la suma adeudada, con más los intereses moratorios correspondientes, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan, con más el reclamo del daño punitivo previsto en el art. 52 bis de la Ley 24.240, sin perjuicio de las demás normas que resulten aplicables.`,
+        },
+        seg_impugnacion_rechazo: {
+          label: 'Impugnación de rechazo de cobertura — pedido de revisión fundada (Art. 56 Ley 17.418)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','incumplimiento'],
+          opcionales: ['numero_siniestro','fecha_siniestro','monto_reclamado'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.numero_siniestro ? `, siniestro N° ${d.numero_siniestro}` : ''}${d.fecha_siniestro ? ` de fecha ${d.fecha_siniestro}` : ''}, vengo a impugnar formalmente el rechazo de cobertura notificado por Ud., fundado en ${d.incumplimiento}, por resultar infundado y/o extemporáneo en los términos del art. 56 de la Ley 17.418, y por corresponder una interpretación restrictiva de las cláusulas limitativas de la cobertura en caso de duda. Intimo a Ud. para que en el plazo de DIEZ (10) días hábiles proceda a revisar su decisión y a reconocer el siniestro${d.monto_reclamado ? `, abonando la suma de $ ${d.monto_reclamado}` : ''}, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan, con más el reclamo del daño punitivo previsto en el art. 52 bis de la Ley 24.240, sin perjuicio de las demás normas que resulten aplicables.`,
+        },
+        seg_reclamo_previo_ssn: {
+          label: 'Reclamo previo a denuncia ante la SSN por incumplimiento normativo (Res. SSN 360/2024)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','incumplimiento'],
+          opcionales: ['numero_siniestro'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.numero_siniestro ? `, siniestro N° ${d.numero_siniestro}` : ''}, formulo reclamo formal respecto de ${d.incumplimiento}, intimando a Ud. para que en el plazo de QUINCE (15) días hábiles previsto en la Resolución SSN N° 360/2024 brinde respuesta fundada y dé solución al presente reclamo, bajo apercibimiento de formalizar la denuncia correspondiente ante la Superintendencia de Seguros de la Nación (Coordinación de Comunicación y Atención al Asegurado) y de iniciar las acciones judiciales que correspondan.`,
+        },
+        seg_impugnacion_franquicia_exclusion: {
+          label: 'Impugnación de franquicia o exclusión de cobertura no oponible/abusiva',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','incumplimiento'],
+          opcionales: ['numero_siniestro','monto_reclamado'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.numero_siniestro ? `, siniestro N° ${d.numero_siniestro}` : ''}, impugno la aplicación de ${d.incumplimiento} invocada por Ud. para reducir y/o rechazar la cobertura, por no haberme sido debidamente informada al momento de la contratación y/o por resultar de aplicación abusiva o extensiva. Intimo a Ud. para que en el plazo de DIEZ (10) días hábiles proceda a dejar sin efecto dicha limitación y a reconocer el siniestro en su integridad${d.monto_reclamado ? `, abonando la suma de $ ${d.monto_reclamado}` : ''}, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan.`,
+        },
+        seg_demora_vida_accidentes_beneficiarios: {
+          label: 'Reclamo por demora/rechazo en seguro de vida o accidentes personales — pago a beneficiarios',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza'],
+          opcionales: ['caracter_reclamante','monto_reclamado','fecha_siniestro'],
+          generar: (d) => `Por medio de la presente, en mi carácter de ${d.caracter_reclamante ? d.caracter_reclamante : 'beneficiario/a'} de la póliza de seguro de vida/accidentes personales N° ${d.numero_poliza}${d.fecha_siniestro ? `, en virtud del siniestro ocurrido el ${d.fecha_siniestro}` : ''}, intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda al pago${d.monto_reclamado ? ` de la suma de $ ${d.monto_reclamado}` : ' de la indemnización correspondiente'}, conforme lo dispuesto por los arts. 49 y 56 de la Ley 17.418, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan, con más el reclamo del daño punitivo previsto en el art. 52 bis de la Ley 24.240, sin perjuicio de las demás normas que resulten aplicables.`,
+        },
+        seg_impugnacion_caducidad_convencional: {
+          label: 'Impugnación de caducidad convencional aplicada por incumplimiento de cargas (Art. 36 Ley 17.418)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','incumplimiento'],
+          opcionales: ['numero_siniestro'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.numero_siniestro ? `, siniestro N° ${d.numero_siniestro}` : ''}, impugno la caducidad convencional invocada por Ud. en virtud de ${d.incumplimiento}, por resultar desproporcionada respecto del incumplimiento imputado y contraria al principio de buena fe que rige el contrato de seguro (art. 36 de la Ley 17.418, en tanto la caducidad allí prevista requiere pacto expreso y proporcional). Intimo a Ud. para que en el plazo de DIEZ (10) días hábiles proceda a dejar sin efecto la caducidad declarada y a reconocer el siniestro, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan.`,
+        },
+        seg_liquidacion_pluralidad_seguros: {
+          label: 'Reclamo por liquidación incorrecta en pluralidad de seguros / sobreseguro (Art. 68 Ley 17.418)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','numero_poliza','monto_reclamado'],
+          opcionales: ['numero_siniestro'],
+          generar: (d) => `Por medio de la presente, en mi carácter de asegurado/a de la póliza N° ${d.numero_poliza}${d.numero_siniestro ? `, siniestro N° ${d.numero_siniestro}` : ''}, hago saber a Ud. que la liquidación practicada respecto de la indemnización correspondiente resulta incorrecta, por cuanto no se ha respetado la proporción que corresponde en virtud de la pluralidad de seguros vigentes sobre el mismo riesgo (art. 68 de la Ley 17.418), lo cual determina un perjuicio de $ ${d.monto_reclamado} en mi contra. Intimo a Ud. para que en el plazo de DIEZ (10) días hábiles proceda a rectificar la liquidación practicada y a abonar la diferencia adeudada, bajo apercibimiento de formular la denuncia pertinente ante la Superintendencia de Seguros de la Nación y de iniciar las acciones judiciales que correspondan.`,
+        },
+      },
+    },
   };
 
   // ── Campos (pool compartido entre todas las materias) ────────────────────
@@ -335,6 +393,12 @@ export function initCartaDocumento(container) {
     { id: 'fecha_resumen',   label: 'Fecha del resumen que incluye el cargo/consumo', placeholder: '',           tipo: 'date',   grupo: 'detalle' },
     { id: 'datos_cajero',    label: 'Cajero automático — fecha, hora y sucursal (opcional)', placeholder: 'sucursal Microcentro, 15/03/2026, 18:40hs', tipo: 'text', grupo: 'detalle' },
     { id: 'categoria_central_deudores', label: 'Categoría/calificación informada (opcional)', placeholder: 'Situación 3', tipo: 'text', grupo: 'detalle' },
+    // Detalle — seguros
+    { id: 'numero_poliza',   label: 'Número de póliza',                   placeholder: '123.456.789',            tipo: 'text',   grupo: 'detalle' },
+    { id: 'numero_siniestro', label: 'Número de siniestro (opcional)',    placeholder: 'SIN-2026-00123',         tipo: 'text',   grupo: 'detalle' },
+    { id: 'fecha_siniestro', label: 'Fecha del siniestro',                placeholder: '',                       tipo: 'date',   grupo: 'detalle' },
+    { id: 'ramo_seguro',     label: 'Ramo del seguro (opcional)',         placeholder: 'automotor / vida / hogar / ART', tipo: 'text', grupo: 'detalle' },
+    { id: 'caracter_reclamante', label: 'Carácter invocado (opcional)',   placeholder: 'beneficiario/a, derechohabiente', tipo: 'text', grupo: 'detalle' },
   ];
   const CAMPOS_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
 
