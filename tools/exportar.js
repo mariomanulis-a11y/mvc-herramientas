@@ -69,6 +69,50 @@ export function exportarPDF(titulo, htmlBody) {
 }
 
 /**
+ * Genera y descarga un documento de Word (.doc) editable a partir de HTML.
+ * Usa el formato "Word HTML" (MIME application/msword) — se abre y edita
+ * directamente en Microsoft Word, sin dependencias externas ni backend.
+ * @param {string} titulo   Título / nombre base del archivo
+ * @param {string} htmlBody Contenido HTML interno (párrafos, etc.)
+ */
+export function exportarWord(titulo, htmlBody) {
+  const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>${escHtml(titulo)}</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page Section1 { size: 21.0cm 29.7cm; margin: 3cm 2.5cm 2.5cm 3cm; }
+  div.Section1 { page: Section1; }
+  body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color:#000; }
+  p { margin: 0 0 8pt 0; text-align: justify; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="Section1">
+${htmlBody}
+</div>
+</body>
+</html>`;
+  const blob = new Blob(['﻿', preHtml], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = (titulo.replace(/[^\w\s\-áéíóúÁÉÍÓÚñÑ.]/g, '') || 'documento').trim().replace(/\s+/g, '_') + '.doc';
+  document.body.appendChild(anchor);
+  anchor.click();
+  setTimeout(() => { document.body.removeChild(anchor); URL.revokeObjectURL(url); }, 150);
+}
+
+/**
  * Descarga un archivo CSV con los datos.
  * @param {string}   nombre  Nombre base del archivo (sin extensión)
  * @param {string[][]} filas  Array de arrays de strings; la primera fila se usa como encabezado
