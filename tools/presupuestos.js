@@ -31,14 +31,22 @@ export function initPresupuestos(container) {
     },
     laboral_demandada: {
       label: 'Laboral — Representación de la parte demandada (empleadora)',
-      subtipos: null,
+      subtipos: { caba: 'CABA / Justicia Nacional del Trabajo', pba: 'Provincia de Buenos Aires' },
       campos: ['empresa_cliente', 'actor_reclamante', 'instancia', 'monto_reclamado', 'cant_rubros', 'prueba_pericial'],
-      alcance: () => 'Contestación de demanda; ofrecimiento y producción de prueba; asistencia a audiencias; alegato; seguimiento de la causa hasta sentencia definitiva o acuerdo homologado.',
-      etapas: () => [
-        'Contestación de demanda y etapa probatoria',
-        'Alegato y sentencia de primera instancia',
-        'Instancia recursiva (Cámara de Apelaciones)',
-      ],
+      alcance: (sub) => sub === 'pba'
+        ? 'Comparecencia a la instancia de mediación previa obligatoria; contestación de demanda; ofrecimiento y producción de prueba; asistencia a la audiencia de vista de causa; seguimiento de la causa hasta sentencia definitiva o acuerdo homologado.'
+        : 'Contestación de demanda; ofrecimiento y producción de prueba; asistencia a audiencias; alegato; seguimiento de la causa hasta sentencia definitiva o acuerdo homologado.',
+      etapas: (sub) => sub === 'pba'
+        ? [
+            'Mediación previa',
+            'Contestación de demanda',
+            'Audiencia de vista de causa',
+          ]
+        : [
+            'Contestación de demanda y etapa probatoria',
+            'Alegato y sentencia de primera instancia',
+            'Instancia recursiva (Cámara de Apelaciones)',
+          ],
       baseDesc: 'Monto reclamado / monto de sentencia o acuerdo',
     },
     danios: {
@@ -61,7 +69,7 @@ export function initPresupuestos(container) {
   const CAMPOS_CONFIG = [
     { id: 'causante',            label: 'Causante (nombre del fallecido)',            tipo: 'text' },
     { id: 'fecha_fallecimiento', label: 'Fecha de fallecimiento',                     tipo: 'date',   opcional: true },
-    { id: 'cant_herederos',      label: 'Cantidad de herederos',                      tipo: 'number', opcional: true },
+    { id: 'cant_herederos',      label: 'Cantidad de herederos',                      tipo: 'entero', opcional: true },
     { id: 'bienes_registrables', label: 'Bienes registrables',                        tipo: 'text',   opcional: true, placeholder: 'Inmuebles, automotores, otros' },
     { id: 'conflicto_herederos', label: '¿Existe conflicto entre herederos?',         tipo: 'checkbox' },
     { id: 'jurisdiccion',        label: 'Juzgado / jurisdicción (opcional)',          tipo: 'text',   opcional: true },
@@ -70,7 +78,7 @@ export function initPresupuestos(container) {
     { id: 'actor_reclamante',    label: 'Actor / reclamante (opcional)',              tipo: 'text',   opcional: true },
     { id: 'instancia',           label: 'Instancia',                                  tipo: 'select', opciones: ['SECLO / Conciliación previa', 'Primera instancia', 'Cámara de Apelaciones'] },
     { id: 'monto_reclamado',     label: 'Monto reclamado aprox. (opcional)',          tipo: 'number', opcional: true },
-    { id: 'cant_rubros',         label: 'Cantidad de rubros reclamados (opcional)',   tipo: 'number', opcional: true },
+    { id: 'cant_rubros',         label: 'Cantidad de rubros reclamados (opcional)',   tipo: 'entero', opcional: true },
     { id: 'prueba_pericial',     label: 'Prueba pericial estimada (opcional)',        tipo: 'text',   opcional: true, placeholder: 'Contable, médica, ninguna' },
 
     { id: 'reclamante_danio',      label: 'Reclamante (cliente)',                       tipo: 'text', placeholder: 'Nombre y apellido' },
@@ -169,6 +177,11 @@ export function initPresupuestos(container) {
 
       <div id="pr-honor-totales" class="info-box-local" style="background:var(--color-bg);border:1px solid var(--color-input-border);border-radius:8px;padding:12px 16px;margin-top:8px;font-size:.9rem"></div>
 
+      <div class="field-group" style="margin-top:10px">
+        <label for="pr-honor-aclaraciones">Aclaraciones / limitaciones sobre los honorarios (opcional)</label>
+        <textarea id="pr-honor-aclaraciones" rows="2" placeholder="Ej: el componente variable es estimado y se determinará en forma definitiva conforme al resultado del proceso."></textarea>
+      </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-top:16px">
         <div class="field-group">
           <label for="pr-forma-pago">Forma de pago</label>
@@ -223,7 +236,7 @@ export function initPresupuestos(container) {
           : `<label for="pr-${c.id}">${c.label}</label>
              ${c.tipo === 'select'
                 ? `<select id="pr-${c.id}">${c.opciones.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`
-                : `<input type="${c.tipo}" id="pr-${c.id}" placeholder="${c.placeholder || ''}"${c.tipo === 'number' ? ' min="0" step="0.01"' : ''}>`
+                : `<input type="${c.tipo === 'entero' ? 'number' : c.tipo}" id="pr-${c.id}" placeholder="${c.placeholder || ''}"${c.tipo === 'number' ? ' min="0" step="0.01"' : ''}${c.tipo === 'entero' ? ' min="0" step="1"' : ''}>`
              }`
         }
       </div>`).join('');
@@ -241,6 +254,7 @@ export function initPresupuestos(container) {
   const inpJusValor     = container.querySelector('#pr-jus-valor');
   const divFilas        = container.querySelector('#pr-honor-filas');
   const divTotales      = container.querySelector('#pr-honor-totales');
+  const taHonorAclaraciones = container.querySelector('#pr-honor-aclaraciones');
   const divRes          = container.querySelector('#pr-resultado');
   const textarea        = container.querySelector('#pr-texto');
   const btnGen          = container.querySelector('#pr-generar');
@@ -335,6 +349,17 @@ export function initPresupuestos(container) {
     inpBaseMonto.disabled = selCalculo.value !== 'automatico';
   }
 
+  // Aclara si el TOTAL GENERAL ya incluye el componente variable o si éste
+  // queda pendiente de determinar, para evitar que se confunda con el total final.
+  function notaTotalGeneral(h) {
+    const hayPct = h.filas.some(f => f.pct > 0);
+    if (!hayPct) return null;
+    const hayVariableCalculado = h.totalVariable != null && h.totalVariable > 0;
+    return hayVariableCalculado
+      ? 'El total general consignado incluye tanto el componente fijo como el componente variable calculado sobre la base de referencia indicada.'
+      : 'El total general consignado corresponde únicamente al componente fijo. El componente variable (porcentaje sobre la base de referencia) se determinará y adicionará conforme al resultado del proceso.';
+  }
+
   function recalcHonorarios() {
     const etiquetas = etiquetasFilas();
     const calculoAuto = selCalculo.value === 'automatico';
@@ -370,15 +395,7 @@ export function initPresupuestos(container) {
 
     const jusTotal = jusValor > 0 ? totalGeneral / jusValor : 0;
 
-    divTotales.innerHTML = `
-      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <span>Total fijo: <strong>${fmtMoney(totalFijo)}</strong></span>
-        <span>Total variable${calculoAuto && baseMonto > 0 ? '' : ' (a determinar)'}: <strong>${calculoAuto && baseMonto > 0 ? fmtMoney(totalVariable) : '—'}</strong></span>
-        <span>Total general: <strong>${fmtMoney(totalGeneral)}</strong></span>
-        <span>Equivalente: <strong style="color:var(--color-accent)">${jusValor > 0 ? fmtJus(jusTotal) : '—'}</strong></span>
-      </div>`;
-
-    ultimoResultadoHonorarios = {
+    const resultado = {
       modalidad: selModalidad.value,
       calculo: selCalculo.value,
       baseDesc: inpBaseDesc.value.trim(),
@@ -388,6 +405,18 @@ export function initPresupuestos(container) {
       totalFijo, totalVariable: calculoAuto && baseMonto > 0 ? totalVariable : null, totalGeneral,
       jusTotal: jusValor > 0 ? jusTotal : null,
     };
+    const nota = notaTotalGeneral(resultado);
+
+    divTotales.innerHTML = `
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span>Total fijo: <strong>${fmtMoney(totalFijo)}</strong></span>
+        <span>Total variable${calculoAuto && baseMonto > 0 ? '' : ' (a determinar)'}: <strong>${calculoAuto && baseMonto > 0 ? fmtMoney(totalVariable) : '—'}</strong></span>
+        <span>Total general: <strong>${fmtMoney(totalGeneral)}</strong></span>
+        <span>Equivalente: <strong style="color:var(--color-accent)">${jusValor > 0 ? fmtJus(jusTotal) : '—'}</strong></span>
+      </div>
+      ${nota ? `<div style="margin-top:8px;font-size:.78rem;color:var(--color-muted);font-style:italic">${nota}</div>` : ''}`;
+
+    ultimoResultadoHonorarios = resultado;
   }
 
   selModalidad.addEventListener('change', renderFilasHonorarios);
@@ -424,6 +453,7 @@ export function initPresupuestos(container) {
           if (p.length === 3) valor = `${p[2]}/${p[1]}/${p[0]}`;
         }
         if (cfg.tipo === 'number' && valor) valor = fmtMoney(valor);
+        if (cfg.tipo === 'entero' && valor) valor = String(Math.trunc(Number(valor)) || valor);
       }
       if (valor === '' && cfg.opcional) return;
       detalles.push({ label: cfg.label.replace(/\s*\(opcional\)/i, ''), valor: valor || '—' });
@@ -449,6 +479,9 @@ export function initPresupuestos(container) {
       return partes.join(' ');
     });
 
+    const notaTotal = notaTotalGeneral(h);
+    const honorAclaraciones = taHonorAclaraciones.value.trim();
+
     const lineas = [
       `PRESUPUESTO — ${tituloTramite}`,
       `Fecha de emisión: ${fechaHoy}`,
@@ -467,6 +500,8 @@ export function initPresupuestos(container) {
       'HONORARIOS' + (h.modalidad === 'etapas' ? ' — POR ETAPAS' : ''),
       ...lineasHonorarios,
       `TOTAL GENERAL: ${fmtMoney(h.totalGeneral)}${h.jusTotal != null ? ` (≈ ${fmtJus(h.jusTotal)} — valor Jus: ${fmtMoney(h.jusValor)})` : ''}`,
+      notaTotal ? notaTotal : null,
+      honorAclaraciones ? `Aclaraciones sobre los honorarios: ${honorAclaraciones}` : null,
       `Forma de pago: ${formaPago}`,
       gastos ? `Gastos y aranceles estimados (no incluidos en el honorario): ${gastos}` : null,
       '',
@@ -488,6 +523,7 @@ export function initPresupuestos(container) {
     textarea.dataset.clienteContacto = clienteContacto;
     textarea.dataset.detalles = JSON.stringify(detalles);
     textarea.dataset.honorarios = JSON.stringify(h);
+    textarea.dataset.honorAclaraciones = honorAclaraciones;
     textarea.dataset.formaPago = formaPago;
     textarea.dataset.gastos = gastos;
     textarea.dataset.validez = validez;
@@ -508,6 +544,7 @@ export function initPresupuestos(container) {
     selCalculo.value = 'manual';
     inpBaseMonto.value = '';
     inpJusValor.value = JUS_VALOR_DEFAULT;
+    taHonorAclaraciones.value = '';
     container.querySelector('#pr-forma-pago').value = 'Contado';
     container.querySelector('#pr-gastos').value = '';
     container.querySelector('#pr-validez').value = '30';
@@ -572,6 +609,8 @@ export function initPresupuestos(container) {
         </tbody>
       </table>
       <p class="nota">Base de referencia del variable: ${esc(h.baseDesc || '—')}${h.baseMonto ? ` — Monto base utilizado: ${fmtMoney(h.baseMonto)}` : ''}. Valor del Jus considerado: ${fmtMoney(h.jusValor || 0)} (verificar vigencia).</p>
+      ${notaTotalGeneral(h) ? `<p class="nota"><strong>${esc(notaTotalGeneral(h))}</strong></p>` : ''}
+      ${textarea.dataset.honorAclaraciones ? `<div class="info-box"><strong>Aclaraciones sobre los honorarios:</strong><br>${esc(textarea.dataset.honorAclaraciones).replace(/\n/g, '<br>')}</div>` : ''}
 
       <table>
         <tbody>
