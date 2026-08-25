@@ -212,6 +212,88 @@ export function initCartaDocumento(container) {
         },
       },
     },
+
+    bancario: {
+      label: 'Consumidor Bancario / Financiero',
+      remitenteLabel: 'Consumidor/a (usuario de servicios financieros)',
+      destinatarioLabel: 'Entidad Financiera',
+      detalleLabel: 'Datos de la operación bancaria',
+      revisionPendiente: true,
+      plantillas: {
+        banc_comision_no_autorizada: {
+          label: 'Reclamo por comisión/cargo no autorizado o no pactado (Secc. 2.3.2.2 y 2.3.5 PUSF)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','concepto_comision','monto_reclamado'],
+          opcionales: ['fecha_resumen','numero_cuenta_producto'],
+          generar: (d) => `Por medio de la presente, en mi carácter de usuario/a de servicios financieros${d.numero_cuenta_producto ? ` de la cuenta/producto N° ${d.numero_cuenta_producto}` : ''}, hago saber a Ud. que he detectado el débito de la suma de $ ${d.monto_reclamado} en concepto de ${d.concepto_comision}${d.fecha_resumen ? `, conforme resumen de fecha ${d.fecha_resumen}` : ''}, cargo que no fue expresa y previamente pactado ni autorizado por mi parte. En los términos de las Secciones 2.3.2.2 y 2.3.5 del Texto Ordenado de las normas del Banco Central de la República Argentina sobre "Protección de los Usuarios de Servicios Financieros", intimo a Ud. para que en el plazo de DIEZ (10) días hábiles proceda a la reversión íntegra del importe cuestionado, con más sus intereses, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y de iniciar las acciones judiciales que correspondan.`,
+        },
+        banc_falta_respuesta_escalamiento: {
+          label: 'Reclamo por falta de respuesta en plazo legal — aviso de escalamiento al BCRA (Secc. 3.1.6 y 4.2.1 PUSF)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','incumplimiento'],
+          opcionales: ['numero_reclamo_previo','fecha_hecho'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que con fecha ${d.fecha_hecho ? d.fecha_hecho : '[FECHA DEL RECLAMO ORIGINAL]'}${d.numero_reclamo_previo ? ` (reclamo N° ${d.numero_reclamo_previo})` : ''} formulé reclamo respecto de ${d.incumplimiento}, sin haber obtenido respuesta fundada dentro del plazo previsto en la Sección 3.1.6 del Texto Ordenado de las normas del Banco Central de la República Argentina sobre "Protección de los Usuarios de Servicios Financieros". Intimo a Ud. para que en el plazo de CINCO (5) días hábiles brinde respuesta definitiva y resuelva el reclamo planteado, bajo apercibimiento de formalizar la denuncia correspondiente ante el Banco Central de la República Argentina (Secc. 4.2.1 PUSF) y de iniciar las acciones judiciales y/o administrativas que correspondan.`,
+        },
+        banc_aumento_comisiones_sin_aviso: {
+          label: 'Reclamo por aumento de comisiones sin notificación previa de 60 días (Secc. 2.3.4 PUSF)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','concepto_comision'],
+          opcionales: ['fecha_hecho','monto_reclamado'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que he tomado conocimiento del aumento aplicado a ${d.concepto_comision}${d.monto_reclamado ? `, actualmente por la suma de $ ${d.monto_reclamado}` : ''}, sin que se me haya cursado la notificación previa de SESENTA (60) días exigida por la Sección 2.3.4 del Texto Ordenado de las normas del Banco Central de la República Argentina sobre "Protección de los Usuarios de Servicios Financieros". En consecuencia, intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a dejar sin efecto el aumento aplicado y a reintegrar las sumas percibidas en exceso, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y de iniciar las acciones judiciales que correspondan.`,
+        },
+        banc_venta_atada: {
+          label: 'Reclamo por venta atada de seguros u otros productos sin consentimiento (Secc. 2.3.12.2 y 2.3.2.2 PUSF)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','producto_servicio'],
+          opcionales: ['monto_reclamado','fecha_operacion'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que he detectado la contratación de ${d.producto_servicio}${d.fecha_operacion ? `, con fecha ${d.fecha_operacion}` : ''}${d.monto_reclamado ? `, por la suma de $ ${d.monto_reclamado}` : ''}, sin mi consentimiento expreso e informado, en infracción a la prohibición de venta atada prevista en las Secciones 2.3.12.2 y 2.3.2.2 del Texto Ordenado de las normas del Banco Central de la República Argentina sobre "Protección de los Usuarios de Servicios Financieros" y al art. 8 bis de la Ley 24.240. Intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a la baja del producto y a la restitución de las sumas debitadas por dicho concepto, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y ante la autoridad de aplicación de defensa del consumidor, y de iniciar las acciones judiciales que correspondan, incluyendo el daño punitivo previsto en el art. 52 bis de la Ley 24.240.`,
+        },
+        banc_debito_no_reconocido: {
+          label: 'Desconocimiento de débito/operación no reconocida — pedido de reversión (Secc. 2.3.5 PUSF + art. 53 Ley 24.240)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','monto_reclamado'],
+          opcionales: ['fecha_hecho','numero_cuenta_producto'],
+          generar: (d) => `Por medio de la presente, desconozco expresamente la operación/débito${d.numero_cuenta_producto ? ` registrado en la cuenta/producto N° ${d.numero_cuenta_producto}` : ''} por la suma de $ ${d.monto_reclamado}${d.fecha_hecho ? `, de fecha ${d.fecha_hecho}` : ''}, la cual no he realizado ni autorizado, pudiendo tratarse de una maniobra de fraude, phishing o clonación. En los términos de la Sección 2.3.5 del Texto Ordenado de las normas del Banco Central de la República Argentina sobre "Protección de los Usuarios de Servicios Financieros", y atento que corresponde a la entidad financiera acreditar la autoría y autenticidad de la operación cuestionada (art. 53 de la Ley 24.240), intimo a Ud. para que en el plazo de DIEZ (10) días hábiles proceda a la reversión íntegra del importe debitado, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y de iniciar las acciones judiciales que correspondan.`,
+        },
+        banc_impugnacion_tarjeta: {
+          label: 'Impugnación de consumos no reconocidos en resumen de tarjeta de crédito (Arts. 26 a 29 Ley 25.065)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','monto_reclamado'],
+          opcionales: ['fecha_resumen','concepto_comision'],
+          generar: (d) => `Por medio de la presente, en los términos de los arts. 26 a 29 de la Ley 25.065 de Tarjetas de Crédito, impugno fundadamente el consumo${d.concepto_comision ? ` correspondiente a ${d.concepto_comision}` : ''} por la suma de $ ${d.monto_reclamado}, incluido en el resumen${d.fecha_resumen ? ` de fecha ${d.fecha_resumen}` : ''}, por no reconocer su origen. Intimo a Ud. para que proceda conforme el procedimiento legal de impugnación, absteniéndose de exigir el pago de la suma cuestionada ni de sus intereses hasta tanto se expida fundadamente sobre la presente, bajo apercibimiento de formular la denuncia correspondiente ante el Banco Central de la República Argentina y de iniciar las acciones judiciales que correspondan.`,
+        },
+        banc_central_deudores: {
+          label: 'Intimación por inclusión indebida en la Central de Deudores del BCRA — rectificación (Art. 16 Ley 25.326)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario'],
+          opcionales: ['categoria_central_deudores','monto_reclamado'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que he sido incluido/a indebidamente en la Central de Deudores del Sistema Financiero del Banco Central de la República Argentina${d.categoria_central_deudores ? `, en la categoría/calificación "${d.categoria_central_deudores}"` : ''}${d.monto_reclamado ? `, por la suma de $ ${d.monto_reclamado}` : ''}, dato que resulta inexacto. En los términos del art. 16 de la Ley 25.326 de Protección de Datos Personales, intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a la rectificación y/o supresión del dato inexacto informado, comunicando dicha rectificación al Banco Central de la República Argentina, bajo apercibimiento de iniciar la acción de protección de datos personales (hábeas data) prevista en la citada ley, sin perjuicio del reclamo de los daños y perjuicios ocasionados.`,
+        },
+        banc_cierre_cuenta: {
+          label: 'Reclamo por cierre unilateral e injustificado de cuenta bancaria (Art. 8 bis Ley 24.240)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario'],
+          opcionales: ['fecha_hecho','numero_cuenta_producto'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que con fecha ${d.fecha_hecho ? d.fecha_hecho : '[FECHA]'} he tomado conocimiento del cierre/baja unilateral de mi cuenta/producto${d.numero_cuenta_producto ? ` N° ${d.numero_cuenta_producto}` : ''}, sin que se me haya informado causa objetiva y razonable que lo justifique. Dicha conducta resulta violatoria del deber de trato digno y equitativo previsto en el art. 8 bis de la Ley 24.240. Intimo a Ud. para que en el plazo de CINCO (5) días hábiles informe fehacientemente los motivos del cierre y, en su caso, proceda a su reversión, bajo apercibimiento de formular la denuncia pertinente ante la autoridad de aplicación de defensa del consumidor y el Banco Central de la República Argentina, y de iniciar las acciones judiciales que correspondan, incluyendo el daño punitivo previsto en el art. 52 bis de la Ley 24.240.`,
+        },
+        banc_retencion_cajero: {
+          label: 'Reclamo por retención de fondos/tarjeta en cajero automático sin entrega del dinero (Secc. 2.3.5 PUSF)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','monto_reclamado'],
+          opcionales: ['datos_cajero'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que en oportunidad de operar en cajero automático${d.datos_cajero ? ` (${d.datos_cajero})` : ''}, el mismo retuvo mi tarjeta y/o no efectuó la entrega del efectivo por la suma de $ ${d.monto_reclamado}, no obstante lo cual la operación fue debitada de mi cuenta. En los términos de la Sección 2.3.5 del Texto Ordenado de las normas del Banco Central de la República Argentina sobre "Protección de los Usuarios de Servicios Financieros", intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a la reversión íntegra del importe debitado y/o a la restitución del efectivo no entregado, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y de iniciar las acciones judiciales que correspondan.`,
+        },
+        banc_credito_preaprobado_sin_verificacion: {
+          label: 'Impugnación de crédito preaprobado acreditado sin verificación de identidad (Com. "A" 7319 BCRA)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','monto_reclamado'],
+          opcionales: ['fecha_hecho'],
+          generar: (d) => `Por medio de la presente, desconozco e impugno el préstamo/crédito preaprobado por la suma de $ ${d.monto_reclamado}${d.fecha_hecho ? `, acreditado en mi cuenta con fecha ${d.fecha_hecho}` : ''}, por cuanto dicha operación fue efectuada sin la verificación fehaciente de mi identidad mediante técnicas de identificación positiva ni la comunicación previa con ventana de CUARENTA Y OCHO (48) horas hábiles exigidas por la Comunicación "A" 7319 del Banco Central de la República Argentina. En consecuencia, intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a dejar sin efecto el crédito cuestionado, cesar todo débito vinculado al mismo y reintegrar las sumas que hubieran sido percibidas en su consecuencia, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y de iniciar las acciones judiciales que correspondan, incluyendo la nulidad del acto y el reclamo de los daños y perjuicios ocasionados.`,
+        },
+        banc_phishing_estandar: {
+          label: 'Responsabilidad del Banco ante estafa virtual / phishing — reclamo íntegro (Arts. 5, 6, 40 y 52 bis Ley 24.240; Art. 1757 CCCN)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','monto_reclamado'],
+          opcionales: ['fecha_hecho'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que con fecha ${d.fecha_hecho ? d.fecha_hecho : '[FECHA]'} fui víctima de una maniobra de phishing/ingeniería social por parte de terceros ajenos a mi voluntad, quienes lograron efectuar transferencias y/o operaciones no autorizadas por mi parte por la suma de $ ${d.monto_reclamado}, aprovechando vulnerabilidades del sistema de banca electrónica puesto a disposición por Ud. En su condición de proveedor y organizador de dicho sistema, Ud. responde objetivamente por las fallas de seguridad del servicio prestado, en los términos de los arts. 5, 6 y 40 de la Ley 24.240 y del art. 1757 del Código Civil y Comercial de la Nación (actividad riesgosa). Intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a la reversión íntegra de las sumas debitadas/transferidas y, en su caso, a la anulación de todo crédito u operación derivada de dicha maniobra, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y ante la autoridad de aplicación de defensa del consumidor, y de iniciar las acciones judiciales que correspondan, con más el daño moral y el daño punitivo previsto en el art. 52 bis de la Ley 24.240.`,
+        },
+        banc_phishing_hipervulnerable: {
+          label: 'Responsabilidad agravada del Banco ante estafa virtual — consumidor hipervulnerable (Res. 139/2020; Art. 1725 CCCN)',
+          requiere: ['nombre','dni','domicilio','razon_social','dom_destinatario','monto_reclamado'],
+          opcionales: ['fecha_hecho'],
+          generar: (d) => `Por medio de la presente, hago saber a Ud. que en mi condición de consumidor hipervulnerable (Resolución 139/2020 de la Secretaría de Comercio Interior), con fecha ${d.fecha_hecho ? d.fecha_hecho : '[FECHA]'} fui víctima de una maniobra de phishing/ingeniería social que derivó en operaciones y/o créditos no autorizados por mi parte por la suma de $ ${d.monto_reclamado}. Dicha entidad se encontraba especialmente obligada a extremar los recaudos de seguridad y a detectar la operatoria atípica en atención a mi condición particular, conforme el estándar agravado de responsabilidad profesional (art. 1725 del Código Civil y Comercial de la Nación) y el deber objetivo de seguridad previsto en los arts. 5, 6 y 40 de la Ley 24.240, sin que la eventual entrega de claves o datos de acceso mediante engaño resulte apta para interrumpir el nexo causal, por ser ello inherente a la modalidad delictiva empleada. Intimo a Ud. para que en el plazo de CINCO (5) días hábiles proceda a la reversión íntegra de las sumas debitadas/transferidas y a la anulación de todo crédito u operación derivada de dicha maniobra, asumiendo la totalidad de la responsabilidad por el hecho, bajo apercibimiento de formular la denuncia pertinente ante el Banco Central de la República Argentina y ante la autoridad de aplicación de defensa del consumidor, y de iniciar las acciones judiciales que correspondan, con más el daño moral y el daño punitivo previsto en el art. 52 bis de la Ley 24.240.`,
+        },
+      },
+    },
   };
 
   // ── Campos (pool compartido entre todas las materias) ────────────────────
@@ -245,6 +327,14 @@ export function initCartaDocumento(container) {
     { id: 'vinculo_familiar', label: 'Vínculo / parentesco (opcional)',  placeholder: 'cónyuge / progenitor/a', tipo: 'text',  grupo: 'detalle' },
     { id: 'monto_cuota',     label: 'Monto de la cuota alimentaria',     placeholder: '150000',                 tipo: 'number', grupo: 'detalle' },
     { id: 'cargo_social',    label: 'Cargo / carácter en la sociedad (opcional)', placeholder: 'socio gerente', tipo: 'text', grupo: 'detalle' },
+    // Detalle — bancario / financiero
+    { id: 'concepto_comision', label: 'Concepto de la comisión/cargo cuestionado', placeholder: 'mantenimiento de cuenta',       tipo: 'text',   grupo: 'detalle' },
+    { id: 'monto_reclamado', label: 'Monto reclamado / cuestionado',      placeholder: '85000',                  tipo: 'number', grupo: 'detalle' },
+    { id: 'numero_cuenta_producto', label: 'Nro. de cuenta / tarjeta / producto (opcional)', placeholder: '0000-1234567-8', tipo: 'text', grupo: 'detalle' },
+    { id: 'numero_reclamo_previo', label: 'Número de reclamo/ticket previo (opcional)', placeholder: 'REC-2026-000123', tipo: 'text', grupo: 'detalle' },
+    { id: 'fecha_resumen',   label: 'Fecha del resumen que incluye el cargo/consumo', placeholder: '',           tipo: 'date',   grupo: 'detalle' },
+    { id: 'datos_cajero',    label: 'Cajero automático — fecha, hora y sucursal (opcional)', placeholder: 'sucursal Microcentro, 15/03/2026, 18:40hs', tipo: 'text', grupo: 'detalle' },
+    { id: 'categoria_central_deudores', label: 'Categoría/calificación informada (opcional)', placeholder: 'Situación 3', tipo: 'text', grupo: 'detalle' },
   ];
   const CAMPOS_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
 
