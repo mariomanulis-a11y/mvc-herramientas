@@ -1,7 +1,10 @@
 // exportar.js — Utilidades de exportación PDF y CSV para MVC Abogados
 
-const WA_NUMERO = '1144496992';
-const WA_URL    = `https://wa.me/54${WA_NUMERO}`;
+const WA_NUMERO_1 = '1144496992';
+const WA_NUMERO_2 = '1155781501';
+const WA_URL_1    = `https://wa.me/54${WA_NUMERO_1}`;
+const WA_URL_2    = `https://wa.me/54${WA_NUMERO_2}`;
+const EMAIL       = 'mvcabogadospilar@gmail.com';
 
 /**
  * Abre una ventana nueva con el contenido listo para imprimir / Guardar como PDF.
@@ -49,7 +52,8 @@ export function exportarPDF(titulo, htmlBody) {
       <div class="mvc-sub">Herramientas para la práctica profesional de la abogacía Bonaerense</div>
     </div>
     <div class="mvc-contact">
-      WhatsApp: <a href="${WA_URL}">${WA_NUMERO}</a><br>
+      WhatsApp: <a href="${WA_URL_1}">${WA_NUMERO_1}</a> / <a href="${WA_URL_2}">${WA_NUMERO_2}</a><br>
+      Email: <a href="mailto:${EMAIL}">${EMAIL}</a><br>
       Provincia de Buenos Aires, Argentina
     </div>
   </div>
