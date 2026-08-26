@@ -72,6 +72,9 @@
     <button class="nav-item" data-tool="documentacion">
       <span class="nav-icon">📑</span> Documentación Requerida
     </button>
+    <button class="nav-item" data-tool="convenio-honorarios">
+      <span class="nav-icon">🤝</span> Convenio de Honorarios
+    </button>
 
     <div class="nav-label">Asistente IA</div>
     <button class="nav-item" data-tool="dalmacio" style="border-left:2px solid #c9a84c;">
@@ -110,6 +113,7 @@
     'amparo-salud':   { label: 'Generador de Amparo por Salud con Medida Cautelar', load: () => import('./tools/amparo-salud.js').then(m => m.initAmparoSalud) },
     presupuestos:     { label: 'Generador de Presupuestos',          load: () => import('./tools/presupuestos.js').then(m => m.initPresupuestos) },
     documentacion:    { label: 'Generador de Documentación Requerida', load: () => import('./tools/documentacion.js').then(m => m.initDocumentacion) },
+    'convenio-honorarios': { label: 'Generador de Convenios de Honorarios', load: () => import('./tools/convenio-honorarios.js').then(m => m.initConvenioHonorarios) },
     dalmacio:         { label: 'Dalmacio — Asistente Jurídico IA',   load: () => import('./tools/dalmacio.js').then(m => m.initDalmacio) },
   };
 
@@ -120,6 +124,7 @@
     'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️', 'demanda-consumidor':'🛡️',
     'amparo-salud':'🏥',
     presupuestos:'🧾', documentacion:'📑',
+    'convenio-honorarios':'🤝',
     dalmacio:'🤖'
   };
 
@@ -127,7 +132,7 @@
     'Derecho Laboral':    ['liquidacion','ley24013','ley25323'],
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
-    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','presupuestos','documentacion'],
+    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','presupuestos','documentacion','convenio-honorarios'],
     'Asistente IA':       ['dalmacio'],
   };
 
