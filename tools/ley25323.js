@@ -1,11 +1,26 @@
-// ley25323.js — Calculadora Ley 25323 - Recargos Indemnizatorios
-// Panel Legal — Herramienta de recargos sobre indemnizaciones
+// ley25323.js — Daños y Perjuicios por Falta de Registración y Mora en el Pago (ex Ley 25.323)
+// Panel Legal — El art. 55 del DNU 70/2023 (B.O. 21/12/2023) derogó la Ley 25.323 en su totalidad
+// (arts. 1 y 2), derogación ratificada por el Congreso vía Ley 27.742 "Bases" (B.O. 8/7/2024,
+// vigencia 9/7/2024, arts. 99-100). Ya existe aplicación judicial: STJ Corrientes, "Guastavino,
+// Elisa G. c/ Corsal S.A. s/ despido", sent. 45 del 14/4/2026, revocó el recargo del art. 2 por esta
+// derogación. Por decisión expresa del Estudio (confirmada 26/8/2026), esta herramienta reclama estos
+// rubros directamente como daño y perjuicio de derecho común (arts. 1716, 1717, 1738 y 1740 CCyC),
+// utilizando las fórmulas de los arts. 1 y 2 de la Ley 25.323 como pauta objetiva de cuantificación
+// del daño. Se corrige además un error preexistente: el art. 1 Ley 25.323 duplica la indemnización
+// del art. 245 LCT ("al doble" — incremento del 100%), no la incrementa un 50% como calculaba
+// erróneamente esta herramienta.
 import { exportarPDF, exportarCSV } from './exportar.js';
 
 export function initLey25323(container) {
   container.innerHTML = `
     <div class="tool-card">
-      <h2 style="margin-bottom:1.2rem;color:var(--color-accent)">Ley 25323 — Recargos Indemnizatorios</h2>
+      <h2 style="margin-bottom:.6rem;color:var(--color-accent)">Daños y Perjuicios por Falta de Registración y Mora en el Pago <span style="font-weight:400;opacity:.7">(ex Ley 25.323)</span></h2>
+
+      <div style="padding:.8rem 1rem;background:rgba(255,200,50,.08);border-left:3px solid rgba(255,200,50,.45);border-radius:4px;font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.75);margin-bottom:1.2rem;">
+        <strong style="color:rgba(255,200,50,.95);">Encuadre normativo:</strong> el art. 55 del DNU 70/2023 (B.O. 21/12/2023) derogó la Ley 25.323 en su totalidad (arts. 1 y 2), derogación ratificada por el Congreso mediante la Ley 27.742 "Bases" (B.O. 8/7/2024, vigencia 9/7/2024, arts. 99-100). Existe ya aplicación judicial: STJ Corrientes, "Guastavino, Elisa G. c/ Corsal S.A. s/ despido", sent. 45 del 14/4/2026. Por definición del Estudio, estos rubros se reclaman como <strong>daño y perjuicio de derecho común</strong> (arts. 1716, 1717, 1738 y 1740 CCyC), utilizando las fórmulas de la ley derogada como pauta objetiva del quantum del daño.<br><br>
+        <strong style="color:rgba(255,200,50,.95);">Nota de riesgo residual:</strong> que la derogación esté ratificada por una ley del Congreso (y no solo por el DNU) no la inmuniza per se de un planteo de inconstitucionalidad por no regresividad — la doctrina describe este punto como terreno constitucional aún no saldado por la Corte Suprema. No asumir que el riesgo es menor solo por tratarse de una ley.<br><br>
+        <strong style="color:rgba(255,200,50,.95);">Advertencia — cláusula de exclusividad art. 245 LCT:</strong> el art. 245 LCT (texto según art. 51, Ley 27.802, B.O. 6/3/2026) dispone que la indemnización por despido es "la única reparación procedente frente a la extinción sin justa causa... no pudiendo promoverse acciones por fuera del régimen especial... incluidos los de naturaleza civil". Entendemos que esta cláusula no alcanza a estos rubros por tratarse de incumplimientos autónomos (registración deficiente, mora en el pago) y no de la extinción en sí, pero es una norma sin desarrollo jurisprudencial propio todavía. Evaluar este riesgo interpretativo en cada caso concreto.
+      </div>
 
       <div class="form-row">
         <div class="field-group">
@@ -46,34 +61,35 @@ export function initLey25323(container) {
         </div>
       </div>
 
-      <p style="font-weight:600;margin:.8rem 0 .6rem 0;color:var(--color-accent);">Recargos aplicables:</p>
+      <p style="font-weight:600;margin:.8rem 0 .6rem 0;color:var(--color-accent);">Rubros de daño y perjuicio reclamables:</p>
 
       <div style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1rem;">
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;padding:.7rem .9rem;background:rgba(201,168,76,.07);border-radius:8px;border:1px solid rgba(201,168,76,.18);">
           <input type="checkbox" id="l25-art1" style="margin-top:3px;flex-shrink:0;">
           <span>
-            <strong style="color:var(--color-accent);">Art. 1 Ley 25323</strong> — El trabajador estaba no registrado o la relación estaba registrada deficientemente<br>
-            <span style="font-size:.82rem;color:rgba(255,255,255,.55);">+50% adicional sobre la indemnización Art. 245</span>
+            <strong style="color:var(--color-accent);">Daño por falta o deficiente registración</strong> — El trabajador estaba no registrado o la relación estaba registrada deficientemente<br>
+            <span style="font-size:.82rem;color:rgba(255,255,255,.55);">Quantum equivalente al ex art. 1, Ley 25.323 (hoy derogado): indemnización Art. 245 <strong>duplicada</strong> (+100% adicional)</span>
           </span>
         </label>
 
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;padding:.7rem .9rem;background:rgba(201,168,76,.07);border-radius:8px;border:1px solid rgba(201,168,76,.18);">
           <input type="checkbox" id="l25-art2" style="margin-top:3px;flex-shrink:0;">
           <span>
-            <strong style="color:var(--color-accent);">Art. 2 Ley 25323</strong> — El empleador no abonó en tiempo y forma las indemnizaciones tras intimación fehaciente<br>
-            <span style="font-size:.82rem;color:rgba(255,255,255,.55);">+50% adicional sobre (Ind. 245 + Preaviso + Integración + SAC s/Preaviso)</span>
+            <strong style="color:var(--color-accent);">Daño por mora en el pago</strong> — El empleador no abonó en tiempo y forma las indemnizaciones tras intimación fehaciente<br>
+            <span style="font-size:.82rem;color:rgba(255,255,255,.55);">Quantum equivalente al ex art. 2, Ley 25.323 (hoy derogado): +50% adicional sobre (Ind. 245 + Preaviso + Integración + SAC s/Preaviso)</span>
           </span>
         </label>
       </div>
 
       <div style="padding:.7rem 1rem;background:rgba(255,200,50,.07);border-left:3px solid rgba(255,200,50,.4);border-radius:4px;font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.6);margin-bottom:1.2rem;">
         <strong style="color:rgba(255,200,50,.9);">Notas:</strong><br>
-        • <strong>Art. 1:</strong> Procede cuando la relación no está registrada o lo está deficientemente. No es acumulable con las multas de la Ley 24013, salvo por el excedente que pudiera corresponder.<br>
-        • <strong>Art. 2:</strong> Requiere intimación fehaciente previa del trabajador al empleador. El juez puede reducir o eximir el recargo si mediare causa justificada de la mora en el pago.
+        • <strong>Registración:</strong> procede cuando la relación no está registrada o lo está deficientemente. Fundar en la responsabilidad civil por incumplimiento (arts. 1716, 1717, 1738 y 1740 CCyC), tomando la duplicación del ex art. 1 Ley 25.323 como pauta objetiva del daño. Los arts. 8, 9 y 10 de la Ley 24.013 fueron derogados por el mismo paquete normativo (Ley 27.742, vigencia 9/7/2024) — ver la herramienta "Daños — Empleo No Registrado" del sitio, con idéntico quantum.<br>
+        • <strong>Mora en el pago:</strong> requiere intimación fehaciente previa del trabajador al empleador. El juez conserva la facultad de reducir o eximir el monto si mediare causa justificada de la mora, por analogía con el criterio judicial desarrollado bajo el art. 2 Ley 25.323.<br>
+        • Ambos rubros se reclaman como daño y perjuicio autónomo, distinto de la indemnización por la extinción del contrato — ver advertencia sobre la cláusula de exclusividad del art. 245 LCT (art. 51, Ley 27.802) al inicio de esta herramienta.
       </div>
 
       <div>
-        <button class="btn btn-primary" id="l25-calcular">Calcular recargos</button>
+        <button class="btn btn-primary" id="l25-calcular">Calcular</button>
       </div>
 
       <div id="l25-resultado" style="margin-top:1.6rem;display:none;"></div>
@@ -140,8 +156,8 @@ export function initLey25323(container) {
 
     // Auto-carátula
     const autoCaratula = nombre && empleador
-      ? `${nombre} c/ ${empleador} s/ Cobro de Recargos Ley 25323`
-      : (nombre ? `${nombre} s/ Cobro de Recargos Ley 25323` : '');
+      ? `${nombre} c/ ${empleador} s/ Cobro de Daños y Perjuicios por Incumplimientos Laborales (ex Ley 25.323)`
+      : (nombre ? `${nombre} s/ Cobro de Daños y Perjuicios por Incumplimientos Laborales (ex Ley 25.323)` : '');
 
     let valid = true;
 
@@ -163,8 +179,11 @@ export function initLey25323(container) {
       return;
     }
 
-    const recargo1  = art1 ? ind245 * 0.50 : 0;
+    // Art. 1 Ley 25.323 (derogado — pauta de cuantificación): "incrementadas AL DOBLE", es decir
+    // +100% adicional sobre la indemnización art. 245 (no +50%; corregido error preexistente).
+    const recargo1  = art1 ? ind245 * 1.00 : 0;
     const baseArt2  = ind245 + preaviso + integracion + sacPreaviso;
+    // Art. 2 Ley 25.323 (derogado — pauta de cuantificación): +50% adicional sobre la base impaga.
     const recargo2  = art2 ? baseArt2 * 0.50 : 0;
     const baseTotal = ind245 + preaviso + integracion + sacPreaviso;
     const total     = baseTotal + recargo1 + recargo2;
@@ -192,11 +211,11 @@ export function initLey25323(container) {
     filas += `<tr style="opacity:.5"><td colspan="2" style="text-align:right;font-size:.85rem;padding:.3rem .7rem;">Subtotal base</td><td class="monto" style="text-align:right;font-size:.85rem;padding:.3rem .7rem;">${fmt(baseTotal)}</td></tr>`;
 
     if (art1 || art2) {
-      filas += `<tr class="seccion-row"><td colspan="3">Recargos Ley 25323</td></tr>`;
-      if (art1) filas += `<tr class="recargo-row"><td>Recargo Art. 1 Ley 25323 (+50% sobre Ind. 245)</td><td class="monto">+ ${fmt(recargo1)}</td><td style="font-size:.78rem;color:rgba(255,255,255,.45);">${fmt(ind245)} × 50%</td></tr>`;
-      if (art2) filas += `<tr class="recargo-row"><td>Recargo Art. 2 Ley 25323 (+50% sobre base indemnizatoria)</td><td class="monto">+ ${fmt(recargo2)}</td><td style="font-size:.78rem;color:rgba(255,255,255,.45);">${fmt(baseArt2)} × 50%</td></tr>`;
+      filas += `<tr class="seccion-row"><td colspan="3">Daños y perjuicios (ex Ley 25.323)</td></tr>`;
+      if (art1) filas += `<tr class="recargo-row"><td>Daño por falta/deficiente registración (ex art. 1 Ley 25.323 — indemnización duplicada)</td><td class="monto">+ ${fmt(recargo1)}</td><td style="font-size:.78rem;color:rgba(255,255,255,.45);">${fmt(ind245)} × 100%</td></tr>`;
+      if (art2) filas += `<tr class="recargo-row"><td>Daño por mora en el pago (ex art. 2 Ley 25.323)</td><td class="monto">+ ${fmt(recargo2)}</td><td style="font-size:.78rem;color:rgba(255,255,255,.45);">${fmt(baseArt2)} × 50%</td></tr>`;
     }
-    filas += `<tr class="total-row"><td>TOTAL CON RECARGOS</td><td class="monto">${fmt(total)}</td><td></td></tr>`;
+    filas += `<tr class="total-row"><td>TOTAL CON DAÑOS Y PERJUICIOS</td><td class="monto">${fmt(total)}</td><td></td></tr>`;
 
     resultDiv.innerHTML = `
       ${headerInfo}
@@ -209,13 +228,14 @@ export function initLey25323(container) {
 
       <div class="l25-total-grande">${fmt(total)}</div>
 
-      ${!art1 && !art2 ? `<p style="margin-top:.8rem;color:rgba(255,255,255,.45);font-size:.85rem;">No se seleccionaron recargos. El total equivale a la suma de los conceptos base.</p>` : ''}
+      ${!art1 && !art2 ? `<p style="margin-top:.8rem;color:rgba(255,255,255,.45);font-size:.85rem;">No se seleccionó ningún rubro de daño y perjuicio. El total equivale a la suma de los conceptos base.</p>` : ''}
 
       <div style="margin-top:1rem;padding:.7rem 1rem;background:rgba(255,200,50,.07);border-left:3px solid rgba(255,200,50,.4);border-radius:4px;font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.7;">
         <strong style="color:rgba(255,200,50,.9);">Recordatorio:</strong><br>
-        ${art1 ? '• <strong>Art. 1:</strong> No acumulable con multas Ley 24013, salvo por el excedente.<br>' : ''}
-        ${art2 ? '• <strong>Art. 2:</strong> El juez puede reducir o eximir el recargo si el empleador acredita causa justificada de mora.<br>' : ''}
-        • Los montos base ingresados deben provenir del cálculo de liquidación final conforme LCT.
+        ${art1 ? '• <strong>Registración:</strong> los arts. 8, 9 y 10 de la Ley 24.013 fueron derogados por el mismo paquete normativo (Ley 27.742) — ver la herramienta "Daños — Empleo No Registrado" del sitio.<br>' : ''}
+        ${art2 ? '• <strong>Mora en el pago:</strong> el juez conserva la facultad de reducir o eximir el monto si el empleador acredita causa justificada.<br>' : ''}
+        • Los montos base ingresados deben provenir del cálculo de liquidación final conforme LCT.<br>
+        • Fundar el reclamo como daño y perjuicio de derecho común (arts. 1716, 1717, 1738 y 1740 CCyC), no como multa de la Ley 25.323 (hoy sin vigencia plena — ver advertencia al inicio).
       </div>
 
       <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:10px;">
@@ -228,7 +248,7 @@ export function initLey25323(container) {
 
     // — Copiar resumen
     container.querySelector('#l25-copiar').addEventListener('click', () => {
-      let texto = `LEY 25323 — RECARGOS INDEMNIZATORIOS\n`;
+      let texto = `DAÑOS Y PERJUICIOS POR INCUMPLIMIENTOS LABORALES (ex Ley 25.323)\n`;
       texto += `${'='.repeat(50)}\n`;
       if (nombre)       texto += `Trabajador: ${nombre}\n`;
       if (empleador)    texto += `Empleador:  ${empleador}\n`;
@@ -241,12 +261,12 @@ export function initLey25323(container) {
       }
       texto += `  Subtotal base${' '.repeat(31)} ${fmt(baseTotal)}\n`;
       if (art1 || art2) {
-        texto += `\nRECARGOS LEY 25323\n`;
-        if (art1) texto += `  Art. 1 — +50% sobre Ind. 245${' '.repeat(15)} ${fmt(recargo1)}\n`;
-        if (art2) texto += `  Art. 2 — +50% sobre base indemn.${' '.repeat(10)} ${fmt(recargo2)}\n`;
+        texto += `\nDAÑOS Y PERJUICIOS (pauta ex Ley 25.323)\n`;
+        if (art1) texto += `  Registración deficiente — Ind. 245 duplicada (ex art. 1)${' '.repeat(0)} ${fmt(recargo1)}\n`;
+        if (art2) texto += `  Mora en el pago — +50% s/base (ex art. 2)${' '.repeat(13)} ${fmt(recargo2)}\n`;
       }
       texto += `${'─'.repeat(50)}\n`;
-      texto += `TOTAL CON RECARGOS${' '.repeat(26)} ${fmt(total)}\n`;
+      texto += `TOTAL${' '.repeat(39)} ${fmt(total)}\n`;
       texto += `${'='.repeat(50)}\n`;
       navigator.clipboard.writeText(texto).then(() => {
         const b = container.querySelector('#l25-copiar');
@@ -269,7 +289,7 @@ export function initLey25323(container) {
           <tbody>${filasHtml}</tbody>
         </table>
         <div class="result-big">TOTAL: ${fmt(total)}</div>`;
-      exportarPDF('Ley 25323 — Recargos Indemnizatorios', html);
+      exportarPDF('Daños y Perjuicios por Incumplimientos Laborales (ex Ley 25.323)', html);
     });
 
     // — Exportar CSV
@@ -278,9 +298,9 @@ export function initLey25323(container) {
         ['Concepto', 'Monto ($)', 'Tipo'],
         ...bases.filter(b => b.activo).map(b => [b.label, b.monto.toFixed(2), 'Base']),
         ['Subtotal base', baseTotal.toFixed(2), ''],
-        ...(art1 ? [['Recargo Art. 1 (+50% sobre Ind. 245)', recargo1.toFixed(2), 'Recargo']] : []),
-        ...(art2 ? [['Recargo Art. 2 (+50% sobre base indemn.)', recargo2.toFixed(2), 'Recargo']] : []),
-        ['TOTAL CON RECARGOS', total.toFixed(2), ''],
+        ...(art1 ? [['Daño registración deficiente (Ind. 245 duplicada, ex art. 1 Ley 25.323)', recargo1.toFixed(2), 'Daño y perjuicio']] : []),
+        ...(art2 ? [['Daño mora en el pago (+50% s/base, ex art. 2 Ley 25.323)', recargo2.toFixed(2), 'Daño y perjuicio']] : []),
+        ['TOTAL', total.toFixed(2), ''],
         ['', '', ''],
         ['Trabajador', nombre, ''],
         ['Empleador', empleador, ''],

@@ -48,7 +48,7 @@ export function initDocumentacion(container) {
         'Legajo completo del trabajador/a',
         'Libro de sueldos y jornales — Art. 52 LCT (fotocopia certificada de las hojas pertinentes)',
         'Telegramas y cartas documento cruzadas con el/la trabajador/a',
-        'Constancia de inscripción ante AFIP y de la relación laboral',
+        'Constancia de inscripción ante la ARCA (Agencia de Recaudación y Control Aduanero, ex AFIP) y de la relación laboral',
         'Certificado de cobertura de ART vigente al momento del hecho (si hay reclamo por accidente/enfermedad)',
         'Estatuto social y últimas actas de designación de autoridades (si el cliente es persona jurídica)',
         'DNI del representante legal',

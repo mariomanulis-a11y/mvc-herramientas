@@ -1,11 +1,21 @@
-// ley24013.js — Calculadora Ley 24013 - Empleo No Registrado
-// Panel Legal — Herramienta de multas por trabajo no registrado
+// ley24013.js — Daños y Perjuicios por Empleo No Registrado (ex arts. 8, 9 y 10, Ley 24.013)
+// Panel Legal — Los arts. 8, 9, 10 y 15 de la Ley 24.013 fueron derogados por los arts. 99-100 de la
+// Ley 27.742 "Bases" (B.O. 8/7/2024, vigencia 9/7/2024), en el mismo paquete normativo que derogó la
+// Ley 25.323 (art. 55, DNU 70/2023, ratificado por la propia Ley 27.742). Por decisión del Estudio
+// (26/8/2026), esta herramienta reclama estos rubros como daño y perjuicio de derecho común
+// (arts. 1716, 1717, 1738 y 1740 CCyC), usando el 25% de las remuneraciones devengadas como pauta
+// objetiva de cuantificación — idéntico criterio que en ley25323.js.
 import { exportarPDF, exportarCSV } from './exportar.js';
 
 export function initLey24013(container) {
   container.innerHTML = `
     <div class="tool-card">
-      <h2 style="margin-bottom:1.2rem;color:var(--color-accent)">Ley 24013 — Empleo No Registrado</h2>
+      <h2 style="margin-bottom:.6rem;color:var(--color-accent)">Daños y Perjuicios por Empleo No Registrado <span style="font-weight:400;opacity:.7">(ex arts. 8, 9 y 10, Ley 24.013)</span></h2>
+
+      <div style="padding:.8rem 1rem;background:rgba(255,200,50,.08);border-left:3px solid rgba(255,200,50,.45);border-radius:4px;font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.75);margin-bottom:1.2rem;">
+        <strong style="color:rgba(255,200,50,.95);">Encuadre normativo:</strong> los arts. 8, 9, 10 y 15 de la Ley 24.013 fueron derogados por los arts. 99-100 de la Ley 27.742 "Bases" (B.O. 8/7/2024, vigencia 9/7/2024) — el mismo paquete que derogó la Ley 25.323. Esta herramienta reclama los rubros de no registración/subregistro como <strong>daño y perjuicio de derecho común</strong> (arts. 1716, 1717, 1738 y 1740 CCyC), utilizando el 25% de las remuneraciones devengadas (fórmula de los ex arts. 8, 9 y 10) como pauta objetiva del daño.<br><br>
+        <strong style="color:rgba(255,200,50,.95);">Nota de riesgo residual:</strong> que la derogación esté ratificada por una ley del Congreso no la inmuniza per se de un planteo de inconstitucionalidad por no regresividad — es terreno constitucional aún no saldado por la Corte Suprema. No asumir que el riesgo es menor solo por tratarse de una ley.
+      </div>
 
       <div class="form-row">
         <div class="field-group">
@@ -40,16 +50,16 @@ export function initLey24013(container) {
       </div>
 
       <div class="form-row" style="flex-direction:column;gap:.5rem;margin-top:.4rem;">
-        <p style="font-weight:600;margin:0 0 .4rem 0;color:var(--color-accent);">Artículos aplicables:</p>
+        <p style="font-weight:600;margin:0 0 .4rem 0;color:var(--color-accent);">Rubros de daño y perjuicio reclamables:</p>
 
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;">
           <input type="checkbox" id="l24-art8" style="margin-top:2px;">
-          <span><strong>Art. 8</strong> — Relación laboral no registrada (25% de remuneraciones devengadas durante el período no registrado)</span>
+          <span><strong>Falta de registración</strong> — Relación laboral no registrada <span style="font-size:.82rem;color:rgba(255,255,255,.55);">(quantum ex art. 8, Ley 24.013 — hoy derogado: 25% de remuneraciones devengadas durante el período no registrado)</span></span>
         </label>
 
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;">
           <input type="checkbox" id="l24-art9" style="margin-top:2px;">
-          <span><strong>Art. 9</strong> — Subregistro en fecha de ingreso (fecha consignada posterior a la real)</span>
+          <span><strong>Subregistro de fecha de ingreso</strong> — fecha consignada posterior a la real <span style="font-size:.82rem;color:rgba(255,255,255,.55);">(quantum ex art. 9, Ley 24.013 — hoy derogado)</span></span>
         </label>
         <div id="l24-art9-campos" style="display:none;padding:.5rem .8rem;background:rgba(255,255,255,.04);border-radius:6px;margin-left:1.6rem;">
           <div class="field-group">
@@ -61,7 +71,7 @@ export function initLey24013(container) {
 
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;">
           <input type="checkbox" id="l24-art10" style="margin-top:2px;">
-          <span><strong>Art. 10</strong> — Remuneración subregistrada (remuneración consignada inferior a la real)</span>
+          <span><strong>Subregistro de remuneración</strong> — remuneración consignada inferior a la real <span style="font-size:.82rem;color:rgba(255,255,255,.55);">(quantum ex art. 10, Ley 24.013 — hoy derogado)</span></span>
         </label>
         <div id="l24-art10-campos" style="display:none;padding:.5rem .8rem;background:rgba(255,255,255,.04);border-radius:6px;margin-left:1.6rem;">
           <div class="field-group">
@@ -73,24 +83,24 @@ export function initLey24013(container) {
 
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;">
           <input type="checkbox" id="l24-art11" style="margin-top:2px;">
-          <span><strong>Art. 11</strong> — Obstaculización de inspección laboral (duplica las multas de arts. 8, 9 y/o 10 seleccionados)</span>
+          <span><strong>Obstaculización de la inspección laboral</strong> — duplica los montos seleccionados <span style="font-size:.82rem;color:rgba(255,255,255,.55);">(criterio ex art. 11, Ley 24.013)</span></span>
         </label>
 
         <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;">
           <input type="checkbox" id="l24-regularizo" style="margin-top:2px;">
-          <span style="color:rgba(255,200,100,.9);"><strong>El empleador regularizó dentro de los 30 días</strong> de la intimación fehaciente (las multas no proceden)</span>
+          <span style="color:rgba(255,200,100,.9);"><strong>El empleador regularizó dentro de los 30 días</strong> de la intimación fehaciente (el daño no procede)</span>
         </label>
       </div>
 
       <div style="margin-top:1.2rem;padding:.7rem 1rem;background:rgba(255,200,50,.07);border-left:3px solid rgba(255,200,50,.4);border-radius:4px;font-size:.82rem;line-height:1.6;color:rgba(255,255,255,.65);">
         <strong style="color:rgba(255,200,50,.9);">Requisitos formales:</strong><br>
-        • Se requiere intimación fehaciente previa al empleador (art. 11 Ley 24013).<br>
-        • Se requiere también intimación al AFIP (art. 47 dec. 1043/2001).<br>
-        • Las multas no proceden si el empleador regularizó dentro de los 30 días de la intimación.
+        • Se requiere intimación fehaciente previa al empleador (criterio ex art. 11 Ley 24.013).<br>
+        • Se requiere también intimación a la ARCA (Agencia de Recaudación y Control Aduanero, ex AFIP), conforme art. 47 dec. 1043/2001 y art. 52 LCT (texto según art. 20, Ley 27.802).<br>
+        • El daño no procede si el empleador regularizó dentro de los 30 días de la intimación.
       </div>
 
       <div style="margin-top:1.2rem;">
-        <button class="btn btn-primary" id="l24-calcular">Calcular multas</button>
+        <button class="btn btn-primary" id="l24-calcular">Calcular</button>
       </div>
 
       <div id="l24-resultado" style="margin-top:1.6rem;display:none;"></div>
@@ -158,8 +168,8 @@ export function initLey24013(container) {
 
     // Auto-carátula
     const autoCaratula = nombre && empleador
-      ? `${nombre} c/ ${empleador} s/ Cobro de Multas Ley 24013`
-      : (nombre ? `${nombre} s/ Cobro de Multas Ley 24013` : '');
+      ? `${nombre} c/ ${empleador} s/ Cobro de Daños y Perjuicios por Empleo No Registrado (ex Ley 24.013)`
+      : (nombre ? `${nombre} s/ Cobro de Daños y Perjuicios por Empleo No Registrado (ex Ley 24.013)` : '');
 
     let valid = true;
 
@@ -222,14 +232,14 @@ export function initLey24013(container) {
     let multa8 = 0, multa8Base = '', multa8Label = '';
     if (art8) {
       multa8       = rem * mesesNRDisplay * 0.25 * mult;
-      multa8Label  = `Art. 8 — No registro${art11 ? ' (×2 art. 11)' : ''}`;
+      multa8Label  = `Daño por falta de registración (ex art. 8, Ley 24.013)${art11 ? ' (×2 obstaculización)' : ''}`;
       multa8Base   = `${fmt(rem)} × ${mesesNRDisplay} mes(es) × 25%${art11 ? ' × 2' : ''}`;
     }
 
     let multa9 = 0, multa9Base = '', multa9Label = '';
     if (art9) {
       multa9       = rem * mesesArt9 * 0.25 * mult;
-      multa9Label  = `Art. 9 — Subregistro fecha de ingreso${art11 ? ' (×2 art. 11)' : ''}`;
+      multa9Label  = `Daño por subregistro de fecha de ingreso (ex art. 9, Ley 24.013)${art11 ? ' (×2 obstaculización)' : ''}`;
       multa9Base   = `${fmt(rem)} × ${mesesArt9} mes(es) de diferencia × 25%${art11 ? ' × 2' : ''}`;
     }
 
@@ -237,7 +247,7 @@ export function initLey24013(container) {
     if (art10) {
       const difRem  = rem - remConsignada;
       multa10       = difRem * mesesNRDisplay * 0.25 * mult;
-      multa10Label  = `Art. 10 — Remuneración subregistrada${art11 ? ' (×2 art. 11)' : ''}`;
+      multa10Label  = `Daño por subregistro de remuneración (ex art. 10, Ley 24.013)${art11 ? ' (×2 obstaculización)' : ''}`;
       multa10Base   = `(${fmt(rem)} − ${fmt(remConsignada)}) × ${mesesNRDisplay} mes(es) × 25%${art11 ? ' × 2' : ''}`;
     }
 
@@ -252,14 +262,14 @@ export function initLey24013(container) {
       resultDiv.innerHTML = `
         <div class="l24-aviso-noprocede">
           El empleador regularizó la situación dentro de los 30 días de la intimación fehaciente.<br>
-          Las multas de los Arts. 8, 9 y 10 de la Ley 24013 <strong>no proceden</strong>.
+          El daño y perjuicio por no registración/subregistro (ex arts. 8, 9 y 10 Ley 24.013) <strong>no procede</strong>.
         </div>`;
       resultDiv.style.display = 'block';
       return;
     }
 
     if (!art8 && !art9 && !art10) {
-      resultDiv.innerHTML = `<p style="color:rgba(255,255,255,.5);">Seleccioná al menos un artículo para calcular.</p>`;
+      resultDiv.innerHTML = `<p style="color:rgba(255,255,255,.5);">Seleccioná al menos un rubro para calcular.</p>`;
       resultDiv.style.display = 'block';
       return;
     }
@@ -288,21 +298,21 @@ export function initLey24013(container) {
       <div class="display-box" style="margin-bottom:1rem;">
         <strong>Período no registrado:</strong> ${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')} (${mesesNRDisplay} mes(es))<br>
         <strong>Remuneración real:</strong> ${fmt(rem)}<br>
-        ${art11 ? '<strong style="color:var(--color-accent);">Art. 11 activo: todas las multas se duplican.</strong>' : ''}
+        ${art11 ? '<strong style="color:var(--color-accent);">Obstaculización de la inspección: todos los montos se duplican.</strong>' : ''}
       </div>
 
       <table class="l24-tabla">
         <thead>
           <tr>
             <th>Concepto</th>
-            <th style="text-align:right;">Multa</th>
+            <th style="text-align:right;">Daño</th>
             <th>Base de cálculo</th>
           </tr>
         </thead>
         <tbody>
           ${filas}
           <tr class="total-row">
-            <td>TOTAL MULTAS LEY 24013</td>
+            <td>TOTAL DAÑOS Y PERJUICIOS</td>
             <td class="monto">${fmt(total)}</td>
             <td></td>
           </tr>
@@ -313,9 +323,10 @@ export function initLey24013(container) {
 
       <div style="margin-top:1rem;padding:.7rem 1rem;background:rgba(255,200,50,.07);border-left:3px solid rgba(255,200,50,.4);border-radius:4px;font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.7;">
         <strong style="color:rgba(255,200,50,.9);">Notas:</strong><br>
-        • Las multas no proceden si el empleador regularizó dentro de los 30 días de la intimación fehaciente.<br>
-        • Se requiere intimación previa al empleador (art. 11 Ley 24013) y al AFIP (art. 47 dec. 1043/2001).<br>
-        • Arts. 8, 9 y 10: no acumulables entre sí por el mismo período cuando encubren el mismo incumplimiento.
+        • El daño no procede si el empleador regularizó dentro de los 30 días de la intimación fehaciente.<br>
+        • Se requiere intimación previa al empleador y a la ARCA (Agencia de Recaudación y Control Aduanero, ex AFIP), conforme art. 47 dec. 1043/2001.<br>
+        • Los tres rubros no son acumulables entre sí por el mismo período cuando encubren el mismo incumplimiento.<br>
+        • Fundar como daño y perjuicio de derecho común (arts. 1716, 1717, 1738 y 1740 CCyC): los arts. 8, 9, 10 y 15 de la Ley 24.013 fueron derogados por los arts. 99-100 de la Ley 27.742 (vigencia 9/7/2024).
       </div>
 
       <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:10px;">
@@ -328,14 +339,14 @@ export function initLey24013(container) {
 
     // — Copiar resumen
     container.querySelector('#l24-copiar').addEventListener('click', () => {
-      let texto = `LEY 24013 — EMPLEO NO REGISTRADO\n`;
+      let texto = `DAÑOS Y PERJUICIOS POR EMPLEO NO REGISTRADO (ex Ley 24.013)\n`;
       texto += `${'='.repeat(50)}\n`;
       if (nombre)       texto += `Trabajador: ${nombre}\n`;
       if (empleador)    texto += `Empleador:  ${empleador}\n`;
       if (autoCaratula) texto += `Carátula:   ${autoCaratula}\n`;
       texto += `Período no registrado: ${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')} (${mesesNRDisplay} mes(es))\n`;
       texto += `Remuneración real: ${fmt(rem)}\n`;
-      if (art11) texto += `Art. 11: ACTIVO (multas duplicadas)\n`;
+      if (art11) texto += `Obstaculización de inspección: ACTIVO (montos duplicados)\n`;
       texto += `${'─'.repeat(50)}\n`;
       for (const c of conceptos) {
         if (!c.activo) continue;
@@ -360,7 +371,7 @@ export function initLey24013(container) {
           <td style="font-size:11px;color:#777">${c.base}</td>
         </tr>`).join('') + `
         <tr class="total-row">
-          <td>TOTAL MULTAS LEY 24013</td>
+          <td>TOTAL DAÑOS Y PERJUICIOS</td>
           <td class="monto">${fmt(total)}</td>
           <td></td>
         </tr>`;
@@ -371,22 +382,22 @@ export function initLey24013(container) {
           ${empleador ? `<strong>Empleador:</strong> ${empleador}<br>` : ''}
           <strong>Período no registrado:</strong> ${inicio.toLocaleDateString('es-AR')} → ${telegrama.toLocaleDateString('es-AR')} (${mesesNRDisplay} mes(es))<br>
           <strong>Remuneración real:</strong> ${fmt(rem)}
-          ${art11 ? '<br><strong>Art. 11 activo: multas duplicadas</strong>' : ''}
+          ${art11 ? '<br><strong>Obstaculización de inspección: montos duplicados</strong>' : ''}
         </div>
         <table>
-          <thead><tr><th>Concepto</th><th>Multa</th><th>Base de cálculo</th></tr></thead>
+          <thead><tr><th>Concepto</th><th>Daño</th><th>Base de cálculo</th></tr></thead>
           <tbody>${filasHtml}</tbody>
         </table>
         <div class="result-big">TOTAL: ${fmt(total)}</div>`;
-      exportarPDF('Ley 24013 — Empleo No Registrado', html);
+      exportarPDF('Daños y Perjuicios por Empleo No Registrado (ex Ley 24.013)', html);
     });
 
     // — Exportar CSV
     container.querySelector('#l24-csv').addEventListener('click', () => {
       const csvFilas = [
-        ['Concepto', 'Multa ($)', 'Base de cálculo'],
+        ['Concepto', 'Monto ($)', 'Base de cálculo'],
         ...conceptos.filter(c => c.activo).map(c => [c.label, c.monto.toFixed(2), c.base]),
-        ['TOTAL MULTAS LEY 24013', total.toFixed(2), ''],
+        ['TOTAL', total.toFixed(2), ''],
         ['', '', ''],
         ['Trabajador', nombre, ''],
         ['Empleador', empleador, ''],

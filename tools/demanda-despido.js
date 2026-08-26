@@ -36,10 +36,10 @@ export function initDemandaDespido(container) {
     { id: 'sac_proporcional',    label: 'SAC proporcional' },
     { id: 'vacaciones',          label: 'Vacaciones no gozadas' },
     { id: 'salarios_adeudados',  label: 'Salarios adeudados' },
-    { id: 'ley25323_art1',       label: 'Recargo art. 1 Ley 25.323 (registración deficiente/omitida)' },
-    { id: 'ley25323_art2',       label: 'Recargo art. 2 Ley 25.323 (falta de pago en término)' },
-    { id: 'art80_lct',           label: 'Indemnización art. 80 LCT (falta de entrega de certificados)' },
-    { id: 'ley24013',            label: 'Multas Ley 24.013 (arts. 8, 9, 10 y/o 15)' },
+    { id: 'ley25323_art1',       label: 'Daño y perjuicio por registración deficiente/omitida (quantum ex art. 1, Ley 25.323 — derogado)' },
+    { id: 'ley25323_art2',       label: 'Daño y perjuicio por falta de pago en término (quantum ex art. 2, Ley 25.323 — derogado)' },
+    { id: 'art80_lct',           label: 'Daño y perjuicio por falta de entrega de certificados (quantum ex art. 45, Ley 25.345 — derogado)' },
+    { id: 'ley24013',            label: 'Daño y perjuicio por no registración/subregistro (quantum ex arts. 8, 9, 10 y/o 15, Ley 24.013 — derogados)' },
     { id: 'indemnizacion_especial_estabilidad', label: 'Indemnización especial por estabilidad (art. 182 LCT / Ley 23.551, según corresponda)' },
     { id: 'dano_moral',          label: 'Daño moral (opcional)' },
     { id: 'otro',                label: 'Otro concepto (detallar)' },
@@ -60,7 +60,7 @@ export function initDemandaDespido(container) {
       <p class="tool-desc">Conforme Ley 15.057 (Procedimiento Laboral) y CPCC de la Provincia de Buenos Aires (aplicación supletoria, art. 89)</p>
 
       <div id="dd-aviso-revision" style="display:block;background:#fff3cd;border:1px solid #d9a441;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem;line-height:1.6;color:#5a4408">
-        ⚠️ Herramienta en versión inicial, pendiente de revisión final por el Estudio antes de su uso en un caso real. Las citas normativas fueron verificadas contra fuentes oficiales (Ley 15.057, LCT, Ley 23.551, CPCC PBA), pero el escrito generado es un ANTEPROYECTO: revisar domicilio procesal, Bono de Derecho Fijo (Ley 8480) y particularidades del caso antes de presentar.
+        ⚠️ Herramienta en versión inicial, pendiente de revisión final por el Estudio antes de su uso en un caso real. Las citas normativas fueron verificadas contra fuentes oficiales (Ley 15.057, LCT, Ley 23.551, CPCC PBA) y actualizadas conforme la Ley 27.802 (B.O. 6/3/2026) y la Ley 27.742 (B.O. 8/7/2024), pero el escrito generado es un ANTEPROYECTO: revisar domicilio procesal, Bono de Derecho Fijo (Ley 8480) y particularidades del caso antes de presentar.
       </div>
 
       <div class="field-group">
@@ -362,9 +362,10 @@ export function initDemandaDespido(container) {
       const extra = { sindical: 'los arts. 47 y 52 de la Ley 23.551', maternidad: 'los arts. 177, 178 y 182 de la LCT', matrimonio: 'los arts. 181 y 182 de la LCT' }[d.tipo_estabilidad];
       derecho += `, y ${extra}`;
     }
-    if (rubroActivo('ley25323_art1') || rubroActivo('ley25323_art2')) derecho += `, arts. 1 y 2 de la Ley 25.323`;
-    if (rubroActivo('ley24013')) derecho += `, arts. 8, 9, 10 y 15 de la Ley 24.013`;
-    if (rubroActivo('art80_lct')) derecho += `, art. 80 de la LCT`;
+    const reclamaDanioDerogado = rubroActivo('ley25323_art1') || rubroActivo('ley25323_art2') || rubroActivo('art80_lct') || rubroActivo('ley24013');
+    if (reclamaDanioDerogado) {
+      derecho += `. Los rubros de registración deficiente, mora en el pago y/o falta de entrega de certificados se fundan en la responsabilidad civil de derecho común (arts. 1716, 1717, 1738 y 1740 del Código Civil y Comercial de la Nación), tomando como pauta objetiva de cuantificación del daño las fórmulas que preveían los arts. 1 y 2 de la Ley 25.323 (derogada por art. 55, DNU 70/2023, B.O. 21/12/2023, ratificado por Ley 27.742, B.O. 8/7/2024), los arts. 8, 9, 10 y 15 de la Ley 24.013 (derogados por arts. 99-100, Ley 27.742) y el art. 45 de la Ley 25.345 (derogado por art. 99, Ley 27.742), normas hoy sin vigencia como sanción estatutaria pero cuyo quantum se invoca como medida objetiva y razonable del perjuicio sufrido`;
+    }
     derecho += `. En cuanto a los requisitos formales de la presente, se estará a lo dispuesto por el art. 31 de la Ley 15.057 de Procedimiento Laboral de la Provincia de Buenos Aires, siendo de aplicación supletoria el Código Procesal Civil y Comercial de la Provincia de Buenos Aires conforme lo dispone el art. 89 de la citada ley.`;
 
     const totalTexto = fmtMoneda(total);
@@ -418,7 +419,8 @@ Recordatorios previos a la presentación (no forman parte del escrito):
 - Verificar y acompañar el Bono de Derecho Fijo (Ley 8480), salvo que corresponda su exención por patrocinio gratuito.
 - Verificar la exención de tasa de justicia conforme el beneficio de gratuidad invocado (art. 27, Ley 15.057).
 - Verificar el Juzgado del Trabajo y Departamento Judicial competente según el domicilio del demandado o el lugar de prestación de tareas.
-- Cotejar la liquidación practicada con las herramientas de Liquidación LCT, Ley 24.013 y Ley 25.323 del sitio.`;
+- Cotejar la liquidación practicada con las herramientas "Liquidación LCT", "Daños — Empleo No Registrado" y "Daños — Registro y Mora" del sitio.${reclamaDanioDerogado ? `
+- ADVERTENCIA: se reclaman rubros de daño y perjuicio (registración deficiente, mora en el pago y/o falta de certificados) fundados en pautas de leyes hoy derogadas (Ley 25.323, arts. 8/9/10/15 Ley 24.013, art. 45 Ley 25.345). El art. 245 LCT (texto según art. 51, Ley 27.802) dispone que la indemnización por despido es "la única reparación procedente frente a la extinción sin justa causa... incluidos los reclamos de naturaleza civil". Entendemos que esta cláusula no alcanza a estos rubros por tratarse de incumplimientos autónomos y no de la extinción en sí, pero es una norma sin desarrollo jurisprudencial propio (vigente desde marzo de 2026): evaluar este riesgo interpretativo antes de presentar.` : ''}`;
 
     ultimoTextoGenerado = texto;
     textarea.value = texto;

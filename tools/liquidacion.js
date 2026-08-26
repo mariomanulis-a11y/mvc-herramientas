@@ -43,7 +43,7 @@ export function initLiquidacion(container) {
             <option value="despido_sin_causa">Despido sin causa (Art. 245)</option>
             <option value="despido_indirecto">Despido indirecto (Art. 246)</option>
             <option value="renuncia">Renuncia</option>
-            <option value="mutuo_acuerdo">Mutuo acuerdo (Art. 241)</option>
+            <option value="mutuo_acuerdo">Mutuo acuerdo o abandono recíproco tácito (Art. 241)</option>
             <option value="vencimiento_plazo">Vencimiento de plazo fijo (Art. 95)</option>
             <option value="fuerza_mayor">Fuerza mayor / falta de trabajo (Art. 247 — 50%)</option>
           </select>
@@ -180,27 +180,32 @@ export function initLiquidacion(container) {
     const anosParaCalculo = Math.max(anosConFraccion, 1);
 
     // ── INDEMNIZACIÓN ART. 245 ───────────────────────────────────────────────
+    // Nota: el mínimo legal del art. 245 LCT es de UN (1) mes de sueldo ("la indemnización en
+    // ningún caso podrá ser inferior a un (1) mes de sueldo" — texto según art. 51, Ley 27.802,
+    // idéntico en este punto al texto anterior). Se corrige aquí un mínimo de 2 remuneraciones
+    // que calculaba erróneamente esta herramienta (en la práctica no llegaba a aplicarse, porque
+    // anosParaCalculo ya tiene un piso de 1 año, pero se corrige por prolijidad y exactitud).
     let ind245 = 0, ind245Label = '', ind245Base = '';
     if (causa === 'despido_sin_causa' || causa === 'despido_indirecto') {
       const formula = rem * anosParaCalculo;
-      const minimo  = rem * 2;
+      const minimo  = rem * 1;
       ind245 = Math.max(formula, minimo);
       const art = causa === 'despido_sin_causa' ? 'Art. 245 LCT' : 'Art. 246 / 245 LCT';
       ind245Label = `Indemnización por antigüedad (${art})`;
-      ind245Base  = `${fmt(rem)} × ${anosParaCalculo} año(s)${formula < minimo ? ' [mínimo 2 remuneraciones aplicado]' : ''}`;
+      ind245Base  = `${fmt(rem)} × ${anosParaCalculo} año(s)${formula < minimo ? ' [mínimo 1 remuneración aplicado]' : ''}`;
     } else if (causa === 'fuerza_mayor') {
       const formula = rem * anosParaCalculo;
-      const minimo  = rem * 2;
+      const minimo  = rem * 1;
       const base245 = Math.max(formula, minimo);
       ind245 = base245 * 0.5;
       ind245Label = 'Indemnización fuerza mayor / falta de trabajo (Art. 247 LCT — 50%)';
       ind245Base  = `50% de ${fmt(base245)} (${fmt(rem)} × ${anosParaCalculo} año(s))`;
     } else if (causa === 'vencimiento_plazo') {
       const formula = rem * anosParaCalculo;
-      const minimo  = rem * 2;
+      const minimo  = rem * 1;
       ind245 = Math.max(formula, minimo) * 0.5;
       ind245Label = 'Indemnización plazo fijo (Art. 95 LCT — 50% del art. 245)';
-      ind245Base  = `50% de ${fmt(Math.max(rem * anosParaCalculo, rem * 2))}`;
+      ind245Base  = `50% de ${fmt(Math.max(rem * anosParaCalculo, rem * 1))}`;
     }
 
     // ── PREAVISO ART. 232 ────────────────────────────────────────────────────
@@ -362,7 +367,7 @@ export function initLiquidacion(container) {
 
       <div class="liq-total-grande">${fmt(total)}</div>
 
-      <p class="liq-nota">* Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes. Verificar topes del art. 245 LCT si aplica convenio colectivo.</p>
+      <p class="liq-nota">* Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes. Esta calculadora no aplica el tope convencional del art. 245 LCT (3 veces el salario promedio del CCT); si corresponde, verificar manualmente que la indemnización no sea inferior al 67% de la remuneración normal y habitual, piso hoy codificado expresamente por el art. 245 LCT (texto según art. 51, Ley 27.802 — doctrina "Vizzoti", Fallos 327:3677).</p>
 
       <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:10px;">
         <button class="btn btn-ghost" id="liq-copiar">📋 Copiar resumen</button>
@@ -423,7 +428,7 @@ export function initLiquidacion(container) {
           <tbody>${filasHtml}</tbody>
         </table>
         <div class="result-big">TOTAL: ${fmt(total)}</div>
-        <p class="nota">Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes.</p>`;
+        <p class="nota">Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes. Verificar el piso del 67% (art. 245 LCT, texto según art. 51, Ley 27.802) si aplica tope convencional.</p>`;
       exportarPDF('Liquidación Laboral — LCT (Ley 20744)', html);
     });
 

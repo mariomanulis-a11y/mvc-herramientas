@@ -25,10 +25,10 @@
       <span class="nav-icon">⚖️</span> Liquidación LCT
     </button>
     <button class="nav-item" data-tool="ley24013">
-      <span class="nav-icon">📋</span> Ley 24.013
+      <span class="nav-icon">📋</span> Daños — Empleo No Registrado
     </button>
     <button class="nav-item" data-tool="ley25323">
-      <span class="nav-icon">➕</span> Ley 25.323
+      <span class="nav-icon">➕</span> Daños — Registro y Mora
     </button>
 
     <div class="nav-label">Cálculos Judiciales</div>
@@ -96,8 +96,8 @@
 <script type="module">
   const TOOLS = {
     liquidacion:      { label: 'Liquidación Laboral — LCT',          load: () => import('./tools/liquidacion.js').then(m => m.initLiquidacion) },
-    ley24013:         { label: 'Ley 24.013 — Empleo No Registrado',  load: () => import('./tools/ley24013.js').then(m => m.initLey24013) },
-    ley25323:         { label: 'Ley 25.323 — Recargos',              load: () => import('./tools/ley25323.js').then(m => m.initLey25323) },
+    ley24013:         { label: 'Daños y Perjuicios — Empleo No Registrado (ex Ley 24.013)', load: () => import('./tools/ley24013.js').then(m => m.initLey24013) },
+    ley25323:         { label: 'Daños y Perjuicios — Registro y Mora (ex Ley 25.323)',       load: () => import('./tools/ley25323.js').then(m => m.initLey25323) },
     intereses:        { label: 'Intereses Judiciales — BPBA',        load: () => import('./tools/intereses.js').then(m => m.initIntereses) },
     actualizacion:    { label: 'Actualización Monetaria',            load: () => import('./tools/actualizacion.js').then(m => m.initActualizacion) },
     plazos:           { label: 'Plazos Procesales',                  load: () => import('./tools/plazos.js').then(m => m.initPlazos) },
