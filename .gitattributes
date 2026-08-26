@@ -1,0 +1,22 @@
+# Normaliza los finales de línea a LF para archivos de texto, sin importar el
+# sistema operativo o el editor que los toque (evita el ida-y-vuelta CRLF/LF
+# que generaba diffs espurios de miles de líneas sin cambios de contenido real).
+* text=auto eol=lf
+
+*.js   text eol=lf
+*.html text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.svg  text eol=lf
+*.txt  text eol=lf
+
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.doc  binary
+*.docx binary
+*.xlsx binary
