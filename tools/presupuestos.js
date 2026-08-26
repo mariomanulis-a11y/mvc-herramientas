@@ -23,9 +23,9 @@ export function initPresupuestos(container) {
         ? 'Protocolización del testamento; inicio del juicio sucesorio testamentario; obtención de la declaratoria de herederos / aprobación formal del testamento; inscripción registral de los bienes a nombre de los herederos.'
         : 'Inicio del juicio sucesorio ab intestato; obtención de la declaratoria de herederos; inscripción registral de los bienes a nombre de los herederos.',
       etapas: (sub) => [
-        'Inicio del sucesorio y declaratoria de herederos',
-        sub === 'testamentaria' ? 'Protocolización del testamento y trámite hasta quedar firme' : 'Inventario y avalúo de bienes (si corresponde)',
-        'Inscripción registral y adjudicación final de los bienes',
+        'Inicio y trámites previos',
+        'Declaratoria de Herederos',
+        'Inscripción y Partición',
       ],
       baseDesc: 'Monto del acervo hereditario / valor de los bienes a adjudicar',
     },
