@@ -10,8 +10,13 @@ const EMAIL       = 'mvcabogadospilar@gmail.com';
  * Abre una ventana nueva con el contenido listo para imprimir / Guardar como PDF.
  * @param {string} titulo  Título del documento
  * @param {string} htmlBody Contenido HTML interno (ya escapado si corresponde)
+ * @param {object} [opts]  Opciones. opts.footer permite reemplazar la leyenda
+ *   final ("Resultado meramente orientativo...") por otro texto, o por '' para omitirla.
  */
-export function exportarPDF(titulo, htmlBody) {
+export function exportarPDF(titulo, htmlBody, opts = {}) {
+  const footerTexto = opts.footer !== undefined
+    ? opts.footer
+    : 'Resultado meramente orientativo. No constituye asesoramiento legal.';
   const win = window.open('', '_blank', 'width=900,height=750');
   if (!win) {
     alert('El navegador bloqueó la ventana emergente. Permití popups para esta página e intentá de nuevo.');
@@ -49,17 +54,17 @@ export function exportarPDF(titulo, htmlBody) {
   <div class="mvc-header">
     <div>
       <div class="mvc-logo">MVC <span>ABOGADOS</span></div>
-      <div class="mvc-sub">Herramientas para la práctica profesional de la abogacía Bonaerense</div>
+      <div class="mvc-sub">Soluciones jurídicas para tu tranquilidad</div>
     </div>
     <div class="mvc-contact">
       WhatsApp: <a href="${WA_URL_1}">${WA_NUMERO_1}</a> / <a href="${WA_URL_2}">${WA_NUMERO_2}</a><br>
       Email: <a href="mailto:${EMAIL}">${EMAIL}</a><br>
-      Provincia de Buenos Aires, Argentina
+      Pilar, Provincia de Buenos Aires, Argentina
     </div>
   </div>
   <h1 class="titulo">${escHtml(titulo)}</h1>
   ${htmlBody}
-  <div class="mvc-footer">Resultado meramente orientativo. No constituye asesoramiento legal. — MVC Abogados</div>
+  <div class="mvc-footer">${footerTexto ? escHtml(footerTexto) + ' — ' : ''}MVC Abogados</div>
   <div class="no-print" style="text-align:center;margin-top:18px">
     <button class="btn-impr" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
   </div>

@@ -223,7 +223,6 @@ export function initPresupuestos(container) {
       </div>
 
       <p style="margin-top:24px;font-size:.78rem;color:var(--color-muted);border-top:1px solid var(--color-border);padding-top:12px">
-        Documento orientativo. El honorario y las condiciones deben adaptarse a cada caso concreto y a las pautas arancelarias vigentes.
         Valor del Jus sugerido a modo de referencia — verificar la última acordada/resolución de la SCBA antes de emitir el presupuesto.
       </p>
     </div>`;
@@ -621,9 +620,8 @@ export function initPresupuestos(container) {
       </table>
 
       ${textarea.dataset.observaciones ? `<div class="info-box"><strong>Observaciones:</strong><br>${esc(textarea.dataset.observaciones).replace(/\n/g, '<br>')}</div>` : ''}
-      <p class="nota">Documento orientativo. El honorario y las condiciones deben adaptarse al caso concreto y a las pautas arancelarias vigentes.</p>
     `;
-    exportarPDF(`Presupuesto — ${textarea.dataset.titulo}`, html);
+    exportarPDF(`Presupuesto — ${textarea.dataset.titulo}`, html, { footer: '' });
   });
 
   function esc(s) {

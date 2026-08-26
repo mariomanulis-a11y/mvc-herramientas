@@ -531,7 +531,12 @@ export function initAmparoSalud(container) {
     const domicilioProcesal = val('am-domicilio_procesal') || '[DOMICILIO PROCESAL A CONSTITUIR]';
     const emailNotif = val('am-email_notificaciones') || abogadoSel.domicilioElectronico;
 
-    const pruebasLabels = { documental: 'Documental (historia clínica, prescripciones, estudios, negativa por escrito)', informativa: 'Informativa (a la demandada, ANMAT, Ministerio de Salud, SeNaDis)', pericial_medica: 'Pericial médica', testimonial: 'Testimonial' };
+    const pruebasLabels = {
+      documental: 'Documental: se acompaña la historia clínica, prescripciones médicas, estudios complementarios y la negativa por escrito de la demandada (o constancia de la solicitud efectuada sin respuesta), mediante los cuales se acredita el diagnóstico, el tratamiento prescripto y la falta de cobertura relatada en el punto II.',
+      informativa: 'Informativa: se ofrece prueba informativa, solicitándose se libre oficio a la parte demandada, a la ANMAT, al Ministerio de Salud y/o a la Agencia Nacional de Discapacidad (SeNaDis/ANDIS), a fin de que informen sobre la existencia, eficacia y disponibilidad del tratamiento/prestación requerido y sobre los antecedentes del reclamo administrativo efectuado.',
+      pericial_medica: 'Pericial médica: se ofrece prueba pericial médica a fin de que el/la perito informe sobre el diagnóstico de la parte actora, la necesidad, adecuación y urgencia del tratamiento prescripto, y las eventuales consecuencias de su no realización [PUNTOS DE PERICIA ADICIONALES A COMPLETAR SEGÚN EL CASO].',
+      testimonial: 'Testimonial: se ofrece la declaración de los/las testigos que se individualizarán en el escrito de ofrecimiento de prueba correspondiente [NÓMINA Y DOMICILIOS A COMPLETAR], quienes declararán sobre los hechos relatados en el punto II y sobre la urgencia invocada en el acápite VI.',
+    };
     const pruebasTexto = [];
     container.querySelectorAll('.am-prueba-check').forEach(chk => { if (chk.checked) pruebasTexto.push(pruebasLabels[chk.dataset.prueba]); });
     const pruebaOtros = val('am-prueba_otros');
@@ -563,7 +568,13 @@ VI. MEDIDA CAUTELAR
 Que atento la urgencia expuesta, solicito a V.S. el dictado de una medida cautelar innovativa/de no innovar, en los términos del art. 230 y ccdtes. del Código Procesal Civil y Comercial de la Nación, ordenando a la demandada que, en forma inmediata y hasta tanto recaiga sentencia definitiva, brinde la cobertura/prestación objeto de la presente. Fundo la procedencia de la cautelar en que se encuentra configurada la verosimilitud del derecho invocado conforme los fundamentos expuestos en el acápite V, así como el peligro en la demora, toda vez que ${d.riesgo_salud}. ${CAUTELAR_ESTANDAR} Ofrezco caución juratoria, atento el carácter alimentario de los derechos en juego.
 
 VII. PRUEBA
-${pruebasTexto.length ? pruebasTexto.map(p => `- ${p}`).join('\n') : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]'}${pruebaOtros ? `\n- ${pruebaOtros}` : ''}
+${(() => {
+  const letras = 'abcdefghijklmnopqrstuvwxyz';
+  const items = [...pruebasTexto, ...(pruebaOtros ? [`Otros medios de prueba: ${pruebaOtros}`] : [])];
+  return items.length
+    ? 'Se ofrecen los siguientes medios de prueba, sin perjuicio de los que se produzcan en el curso del proceso:\n\n' + items.map((p, i) => `${letras[i] || i + 1}) ${p}`).join('\n\n')
+    : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]';
+})()}
 
 VIII. PETITORIO
 Por lo expuesto, a V.S. solicito:

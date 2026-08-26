@@ -46,12 +46,18 @@ export function initDemandaDespido(container) {
   ];
 
   const PRUEBAS = [
-    { id: 'documental_recibos',    label: 'Documental — recibos de sueldo' },
-    { id: 'documental_telegramas', label: 'Documental — telegramas / cartas documento cursadas' },
-    { id: 'documental_contrato',   label: 'Documental — contrato de trabajo / legajo' },
-    { id: 'testimonial',           label: 'Testimonial' },
-    { id: 'pericial_contable',     label: 'Pericial contable' },
-    { id: 'informativa',           label: 'Informativa (ARCA, ANSES, bancos, etc.)' },
+    { id: 'documental_recibos',    label: 'Documental — recibos de sueldo',
+      texto: 'Documental: se acompañan los recibos de sueldo correspondientes a los períodos [PERÍODOS A COMPLETAR], mediante los cuales se acredita la remuneración percibida, la categoría y la registración (o falta/deficiencia de registración) de la relación laboral invocada en el punto II.' },
+    { id: 'documental_telegramas', label: 'Documental — telegramas / cartas documento cursadas',
+      texto: 'Documental: se acompañan las piezas postales (telegramas y/o cartas documento) cursadas entre las partes — intimaciones, respuestas y, en su caso, notificación de despido —, mediante las cuales se acredita el intercambio epistolar relatado en el punto II.' },
+    { id: 'documental_contrato',   label: 'Documental — contrato de trabajo / legajo',
+      texto: 'Documental: se acompaña copia del contrato de trabajo y/o legajo del/de la trabajador/a, en cuanto resulte pertinente para acreditar la fecha de ingreso, la categoría desempeñada y las condiciones pactadas de la relación laboral.' },
+    { id: 'testimonial',           label: 'Testimonial',
+      texto: 'Testimonial: se ofrece la declaración de los/las testigos que se individualizarán en el escrito de ofrecimiento de prueba correspondiente [NÓMINA Y DOMICILIOS A COMPLETAR], quienes declararán sobre los hechos relativos a la prestación de tareas, la jornada cumplida, la remuneración percibida y/o los incumplimientos patronales relatados en el punto II.' },
+    { id: 'pericial_contable',     label: 'Pericial contable',
+      texto: 'Pericial contable: se ofrece prueba pericial contable, a producirse sobre los libros y demás documentación laboral y contable de la parte demandada, a fin de que el/la perito informe sobre: a) la existencia, fecha de inicio y demás términos de la relación laboral; b) las remuneraciones efectivamente devengadas y percibidas por el/la actor/a; c) [PUNTOS DE PERICIA ADICIONALES A COMPLETAR SEGÚN EL CASO].' },
+    { id: 'informativa',           label: 'Informativa (ARCA, ANSES, bancos, etc.)',
+      texto: 'Informativa: se ofrece prueba informativa, solicitándose se libre oficio a la ARCA (Agencia de Recaudación y Control Aduanero), a la ANSES y/o a la/s entidad/es bancaria/s que se indicará/n oportunamente, a fin de que informen sobre la registración de la relación laboral, los aportes y contribuciones efectuados y/o la acreditación de haberes, según corresponda.' },
   ];
 
   container.innerHTML = `
@@ -329,7 +335,7 @@ export function initDemandaDespido(container) {
     // Pruebas
     const pruebasTexto = [];
     PRUEBAS.forEach(p => {
-      if (container.querySelector(`[data-prueba="${p.id}"]`).checked) pruebasTexto.push(p.label);
+      if (container.querySelector(`[data-prueba="${p.id}"]`).checked) pruebasTexto.push(p.texto);
     });
     const archivos = Array.from(container.querySelector('#dd-archivos').files || []).map(f => f.name);
 
@@ -370,9 +376,11 @@ export function initDemandaDespido(container) {
 
     const totalTexto = fmtMoneda(total);
 
+    const letras = 'abcdefghijklmnopqrstuvwxyz';
+    const itemsPrueba = [...pruebasTexto, ...(d.prueba_otros ? [`Otros medios de prueba: ${d.prueba_otros}`] : [])];
     const pruebaTextoFinal = [
-      pruebasTexto.length ? pruebasTexto.map(p => `- ${p}`).join('\n') : '',
-      d.prueba_otros ? `- ${d.prueba_otros}` : '',
+      itemsPrueba.length ? 'Se ofrecen los siguientes medios de prueba, sin perjuicio de los que se produzcan en el curso del proceso:\n\n' +
+        itemsPrueba.map((p, i) => `${letras[i] || i + 1}) ${p}`).join('\n\n') : '',
       archivos.length ? `\nArchivos acompañados como referencia: ${archivos.join(', ')}` : '',
     ].filter(Boolean).join('\n');
 

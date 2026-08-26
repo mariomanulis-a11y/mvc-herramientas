@@ -449,7 +449,14 @@ export function initDemandaConsumidor(container) {
       rubrosTexto.push(`- Gastos de gestiones/intimaciones previas: $ ${fmtMoneda(m)}`);
     }
 
-    const pruebasLabels = { documental: 'Documental (comprobantes, contratos, resúmenes, pólizas, etc.)', telegramas: 'Documental — telegramas / cartas documento cursadas', testimonial: 'Testimonial', pericial_contable: 'Pericial contable', pericial_informatica: 'Pericial informática (fraudes/canales electrónicos)', informativa: 'Informativa (ARCA, ANSES, BCRA, SSN, bancos, etc.)' };
+    const pruebasLabels = {
+      documental: 'Documental: se acompañan los comprobantes, contratos, resúmenes, pólizas y/o demás documentación vinculada a la relación de consumo, mediante los cuales se acredita la operación cuestionada y los hechos relatados en el punto II.',
+      telegramas: 'Documental: se acompañan las piezas postales (telegramas y/o cartas documento) cursadas entre las partes, mediante las cuales se acredita el reclamo previo y la falta de respuesta satisfactoria de la demandada.',
+      testimonial: 'Testimonial: se ofrece la declaración de los/las testigos que se individualizarán en el escrito de ofrecimiento de prueba correspondiente [NÓMINA Y DOMICILIOS A COMPLETAR], quienes declararán sobre los hechos relatados en el punto II.',
+      pericial_contable: 'Pericial contable: se ofrece prueba pericial contable a fin de que el/la perito informe sobre: a) los movimientos, débitos y/o liquidaciones cuestionados; b) [PUNTOS DE PERICIA ADICIONALES A COMPLETAR SEGÚN EL CASO].',
+      pericial_informatica: 'Pericial informática: se ofrece prueba pericial informática a fin de que el/la perito informe sobre el origen, autenticidad y trazabilidad de las operaciones/comunicaciones electrónicas cuestionadas, así como sobre las medidas de seguridad implementadas por la demandada [PUNTOS DE PERICIA A COMPLETAR SEGÚN EL CASO].',
+      informativa: 'Informativa: se ofrece prueba informativa, solicitándose se libre oficio a la ARCA, ANSES, BCRA, Superintendencia de Seguros de la Nación y/o a la/s entidad/es bancaria/s o financiera/s que se indicará/n oportunamente, a fin de que informen sobre los extremos vinculados a la relación de consumo objeto de autos.',
+    };
     const pruebasTexto = [];
     container.querySelectorAll('.dcons-prueba-check').forEach(chk => { if (chk.checked) pruebasTexto.push(pruebasLabels[chk.dataset.prueba]); });
     const pruebaOtros = val('dcons-prueba_otros');
@@ -477,7 +484,13 @@ ${rubrosTexto.length ? rubrosTexto.join('\n') : '- [DETALLAR RUBROS Y MONTOS]'}
 TOTAL RECLAMADO: $ ${totalTexto}
 
 V. PRUEBA
-${pruebasTexto.length ? pruebasTexto.map(p => `- ${p}`).join('\n') : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]'}${pruebaOtros ? `\n- ${pruebaOtros}` : ''}
+${(() => {
+  const letras = 'abcdefghijklmnopqrstuvwxyz';
+  const items = [...pruebasTexto, ...(pruebaOtros ? [`Otros medios de prueba: ${pruebaOtros}`] : [])];
+  return items.length
+    ? 'Se ofrecen los siguientes medios de prueba, sin perjuicio de los que se produzcan en el curso del proceso:\n\n' + items.map((p, i) => `${letras[i] || i + 1}) ${p}`).join('\n\n')
+    : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]';
+})()}
 
 VI. BENEFICIO DE JUSTICIA GRATUITA
 Que en mi carácter de consumidor/a, invoco el beneficio de justicia gratuita previsto en el art. 25 de la Ley 13.133 y en el art. 53, tercer párrafo, de la Ley 24.240, solicitando se me exima del pago de tasas, contribuciones u otra imposición económica.

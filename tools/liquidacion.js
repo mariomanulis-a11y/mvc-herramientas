@@ -185,7 +185,7 @@ export function initLiquidacion(container) {
     // idéntico en este punto al texto anterior). Se corrige aquí un mínimo de 2 remuneraciones
     // que calculaba erróneamente esta herramienta (en la práctica no llegaba a aplicarse, porque
     // anosParaCalculo ya tiene un piso de 1 año, pero se corrige por prolijidad y exactitud).
-    let ind245 = 0, ind245Label = '', ind245Base = '';
+    let ind245 = 0, ind245Label = '', ind245Base = '', ind245Fundamento = '';
     if (causa === 'despido_sin_causa' || causa === 'despido_indirecto') {
       const formula = rem * anosParaCalculo;
       const minimo  = rem * 1;
@@ -193,6 +193,9 @@ export function initLiquidacion(container) {
       const art = causa === 'despido_sin_causa' ? 'Art. 245 LCT' : 'Art. 246 / 245 LCT';
       ind245Label = `Indemnización por antigüedad (${art})`;
       ind245Base  = `${fmt(rem)} × ${anosParaCalculo} año(s)${formula < minimo ? ' [mínimo 1 remuneración aplicado]' : ''}`;
+      ind245Fundamento = causa === 'despido_sin_causa'
+        ? 'Procede en virtud de la extinción del contrato de trabajo por decisión unilateral del empleador sin invocación de justa causa (art. 245 LCT), que reconoce al trabajador el derecho a una indemnización equivalente a un (1) mes de sueldo por cada año de servicio o fracción mayor de tres (3) meses, calculada sobre la mejor remuneración mensual, normal y habitual, con un piso mínimo de un (1) mes de sueldo y sujeta al piso del 67% fijado por la doctrina "Vizzoti" (hoy codificado expresamente en el art. 245 LCT, texto según art. 51, Ley 27.802).'
+        : 'Procede en virtud de haberse considerado el/la trabajador/a despedido/a por exclusiva culpa del empleador (art. 246 LCT), lo que genera el derecho a las mismas indemnizaciones derivadas del despido sin justa causa (art. 245 LCT), con igual metodología de cálculo y piso mínimo.';
     } else if (causa === 'fuerza_mayor') {
       const formula = rem * anosParaCalculo;
       const minimo  = rem * 1;
@@ -200,16 +203,18 @@ export function initLiquidacion(container) {
       ind245 = base245 * 0.5;
       ind245Label = 'Indemnización fuerza mayor / falta de trabajo (Art. 247 LCT — 50%)';
       ind245Base  = `50% de ${fmt(base245)} (${fmt(rem)} × ${anosParaCalculo} año(s))`;
+      ind245Fundamento = 'Procede la indemnización reducida (50% de la del art. 245 LCT) prevista en el art. 247 LCT para los casos de extinción por fuerza mayor o falta o disminución de trabajo no imputable al empleador, circunstancia cuya acreditación fehaciente queda a cargo de este último.';
     } else if (causa === 'vencimiento_plazo') {
       const formula = rem * anosParaCalculo;
       const minimo  = rem * 1;
       ind245 = Math.max(formula, minimo) * 0.5;
       ind245Label = 'Indemnización plazo fijo (Art. 95 LCT — 50% del art. 245)';
       ind245Base  = `50% de ${fmt(Math.max(rem * anosParaCalculo, rem * 1))}`;
+      ind245Fundamento = 'Procede la indemnización reducida (50% de la del art. 245 LCT) prevista en el art. 95 LCT para la extinción de un contrato a plazo fijo por su vencimiento, en tanto el contrato hubiera tenido una duración superior a un (1) año y se hubiera cursado el preaviso previsto en el art. 94 LCT.';
     }
 
     // ── PREAVISO ART. 232 ────────────────────────────────────────────────────
-    let preaviso = 0, preavisoLabel = '', preavisoDias = 0, preavisoBase = '';
+    let preaviso = 0, preavisoLabel = '', preavisoDias = 0, preavisoBase = '', preavisoFundamento = '';
     const aplicaPreaviso = !praAvRecibido && causa !== 'mutuo_acuerdo' && causa !== 'renuncia';
     const esRenuncia = causa === 'renuncia';
 
@@ -220,6 +225,7 @@ export function initLiquidacion(container) {
         preaviso      = -(rem / 30) * 15;
         preavisoLabel = 'Preaviso omitido por renuncia (Art. 231 LCT — 15 días, a descontar)';
         preavisoBase  = `(${fmt(rem)} / 30) × 15 días`;
+        preavisoFundamento = 'Corresponde deducir el importe equivalente a los quince (15) días de preaviso que el/la trabajador/a debió otorgar al renunciar y no otorgó, conforme el art. 231 LCT.';
       } else if (aplicaPreaviso) {
         if (mesesTotales < 3) {
           preavisoDias  = 15;
@@ -235,6 +241,7 @@ export function initLiquidacion(container) {
           preavisoBase  = `2 meses (${fmt(rem * 2)}) — antigüedad > 5 años`;
         }
         preavisoLabel = `Indemnización sustitutiva de preaviso (Art. 232 LCT)`;
+        preavisoFundamento = 'Procede en virtud de la falta de otorgamiento del preaviso previsto en los arts. 231 y 232 LCT, que impone a quien decide unilateralmente la extinción del contrato sin justa causa el deber de preavisar a la otra parte con la antelación legal; su omisión genera el derecho a una indemnización sustitutiva equivalente a los salarios correspondientes al plazo omitido.';
       }
     }
 
@@ -297,12 +304,12 @@ export function initLiquidacion(container) {
     // ── ARMAR CONCEPTOS ─────────────────────────────────────────────────────
     const conceptos = [];
 
-    if (ind245 > 0) conceptos.push({ label: ind245Label, monto: ind245, base: ind245Base });
-    if (preaviso !== 0 && preavisoLabel) conceptos.push({ label: preavisoLabel, monto: preaviso, base: preavisoBase, esDescuento: preaviso < 0 });
-    if (aplicaIntegracion && integracion > 0) conceptos.push({ label: 'Integración mes de despido (Art. 233 LCT)', monto: integracion, base: integracionBase });
-    if (preavisoPositivo && sacPreaviso > 0)  conceptos.push({ label: 'SAC sobre preaviso', monto: sacPreaviso, base: sacPreavisoBase });
-    if (!sacCobrado && sacProp > 0)           conceptos.push({ label: 'SAC proporcional', monto: sacProp, base: sacPropBase });
-    if (vacProp > 0) conceptos.push({ label: `Vacaciones proporcionales (Art. 156 LCT) — ${diasVac} días/año`, monto: vacProp, base: vacPropBase });
+    if (ind245 > 0) conceptos.push({ label: ind245Label, monto: ind245, base: ind245Base, fundamento: ind245Fundamento });
+    if (preaviso !== 0 && preavisoLabel) conceptos.push({ label: preavisoLabel, monto: preaviso, base: preavisoBase, esDescuento: preaviso < 0, fundamento: preavisoFundamento });
+    if (aplicaIntegracion && integracion > 0) conceptos.push({ label: 'Integración mes de despido (Art. 233 LCT)', monto: integracion, base: integracionBase, fundamento: 'Procede conforme el art. 233 LCT, que impone al empleador, cuando la extinción se produce sin otorgamiento de preaviso, abonar además una indemnización equivalente a los salarios correspondientes a los días faltantes hasta el último día del mes en que se produjo la extinción.' });
+    if (preavisoPositivo && sacPreaviso > 0)  conceptos.push({ label: 'SAC sobre preaviso', monto: sacPreaviso, base: sacPreavisoBase, fundamento: 'Procede en virtud del carácter remuneratorio del preaviso indemnizado (art. 232 LCT), que conforme doctrina y jurisprudencia mayoritaria incide en el cálculo del sueldo anual complementario (arts. 121 y ccdtes. LCT).' });
+    if (!sacCobrado && sacProp > 0)           conceptos.push({ label: 'SAC proporcional', monto: sacProp, base: sacPropBase, fundamento: 'Procede conforme el art. 123 LCT, que reconoce el derecho a percibir la parte proporcional del sueldo anual complementario correspondiente al semestre en que se produjo la extinción, calculada sobre el tiempo efectivamente trabajado en dicho semestre.' });
+    if (vacProp > 0) conceptos.push({ label: `Vacaciones proporcionales (Art. 156 LCT) — ${diasVac} días/año`, monto: vacProp, base: vacPropBase, fundamento: 'Procede conforme el art. 156 LCT, que reconoce al trabajador cuya relación se extingue sin haber gozado de las vacaciones que le correspondían el derecho a una indemnización sustitutiva, calculada en proporción al tiempo trabajado en el año, sobre la base de los días de descanso previstos según su antigüedad (art. 150 LCT).' });
 
     const total = conceptos.reduce((acc, c) => acc + c.monto, 0);
 
@@ -369,6 +376,9 @@ export function initLiquidacion(container) {
 
       <p class="liq-nota">* Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes. Esta calculadora no aplica el tope convencional del art. 245 LCT (3 veces el salario promedio del CCT); si corresponde, verificar manualmente que la indemnización no sea inferior al 67% de la remuneración normal y habitual, piso hoy codificado expresamente por el art. 245 LCT (texto según art. 51, Ley 27.802 — doctrina "Vizzoti", Fallos 327:3677).</p>
 
+      <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:1.4rem 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Fundamentos de procedencia de los rubros (texto editable)</div>
+      <textarea id="liq-fundamentos" rows="10" style="width:100%;resize:vertical;font-family:inherit;font-size:.88rem;padding:12px;border:1px solid var(--color-border);border-radius:6px;background:#ffffff;color:#1a1a1a;line-height:1.6">${conceptos.filter(c => c.fundamento).map(c => `${c.label}:\n${c.fundamento}`).join('\n\n')}</textarea>
+
       <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:10px;">
         <button class="btn btn-ghost" id="liq-copiar">📋 Copiar resumen</button>
         <button class="btn btn-ghost" id="liq-pdf">📄 Exportar PDF</button>
@@ -394,6 +404,8 @@ export function initLiquidacion(container) {
       texto += `${'─'.repeat(50)}\n`;
       texto += `TOTAL:${' '.repeat(42)} ${fmt(total)}\n`;
       texto += `${'='.repeat(50)}\n`;
+      const fundamentosTxt = container.querySelector('#liq-fundamentos')?.value.trim();
+      if (fundamentosTxt) texto += `\nFUNDAMENTOS DE PROCEDENCIA\n${fundamentosTxt}\n`;
       navigator.clipboard.writeText(texto).then(() => {
         const btn = container.querySelector('#liq-copiar');
         btn.textContent = 'Copiado!';
@@ -428,7 +440,11 @@ export function initLiquidacion(container) {
           <tbody>${filasHtml}</tbody>
         </table>
         <div class="result-big">TOTAL: ${fmt(total)}</div>
-        <p class="nota">Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes. Verificar el piso del 67% (art. 245 LCT, texto según art. 51, Ley 27.802) si aplica tope convencional.</p>`;
+        <p class="nota">Valores calculados sobre la mejor remuneración mensual normal y habitual declarada. No incluye retenciones ni aportes. Verificar el piso del 67% (art. 245 LCT, texto según art. 51, Ley 27.802) si aplica tope convencional.</p>
+        ${(() => {
+          const fundamentosTxt = container.querySelector('#liq-fundamentos')?.value.trim();
+          return fundamentosTxt ? `<div class="info-box"><strong>Fundamentos de procedencia de los rubros:</strong><br><br>${fundamentosTxt.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>` : '';
+        })()}`;
       exportarPDF('Liquidación Laboral — LCT (Ley 20744)', html);
     });
 
