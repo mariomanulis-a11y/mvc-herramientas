@@ -335,6 +335,27 @@ export function initAmparoSalud(container) {
   ];
   const CAMPOS_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
 
+  // ── Prueba: documental e informativa (comunes a todas las materias) ────
+  const DOCUMENTALES = [
+    { id: 'historia_clinica', label: 'Historia clínica', pideDato: true,
+      placeholder: 'Institución y período' },
+    { id: 'prescripcion',     label: 'Prescripción médica / indicación del tratamiento', pideDato: true,
+      placeholder: 'Fecha y profesional tratante' },
+    { id: 'estudios',         label: 'Estudios complementarios / informes médicos', pideDato: true,
+      placeholder: 'Tipo de estudio y fecha' },
+    { id: 'negativa_escrita', label: 'Negativa/omisión de la demandada por escrito', pideDato: true,
+      placeholder: 'Fecha y medio (nota, correo electrónico, resolución)' },
+    { id: 'otro',             label: 'Otro documento', pideDato: true,
+      placeholder: 'Detalle del documento' },
+  ];
+
+  const INFORMATIVAS = [
+    { id: 'demandada', label: 'A la propia demandada (antecedentes del reclamo administrativo)', pideDato: false },
+    { id: 'anmat',     label: 'ANMAT', pideDato: false },
+    { id: 'min_salud', label: 'Ministerio de Salud (Nación/Provincia, según corresponda)', pideDato: false },
+    { id: 'senadis',   label: 'Agencia Nacional de Discapacidad / SeNaDis', pideDato: false },
+  ];
+
   let materiaActual = Object.keys(MATERIAS)[0];
 
   // ── HTML ─────────────────────────────────────────────────────────────────
@@ -403,13 +424,79 @@ export function initAmparoSalud(container) {
       </div>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Prueba ofrecida</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="am-prueba-check" data-prueba="documental" style="width:auto"> Documental (historia clínica, prescripciones, estudios, negativa por escrito)</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="am-prueba-check" data-prueba="informativa" style="width:auto"> Informativa (a la demandada, ANMAT, Ministerio de Salud, SeNaDis)</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="am-prueba-check" data-prueba="pericial_medica" style="width:auto"> Pericial médica</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="am-prueba-check" data-prueba="testimonial" style="width:auto"> Testimonial</label>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:8px">
+        <p style="font-weight:700;margin:0 0 8px">1. Prueba Documental</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${DOCUMENTALES.map(p => `
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+                <input type="checkbox" class="am-documental-check" data-documental="${p.id}" style="width:auto"> ${p.label}
+              </label>
+              ${p.pideDato ? `<input type="text" class="am-documental-dato" data-documental-dato="${p.id}" placeholder="${p.placeholder}" style="display:none;margin-top:4px;width:100%" disabled>` : ''}
+            </div>`).join('')}
+        </div>
       </div>
-      <div class="field-group" style="margin-top:8px"><label for="am-prueba_otros">Otros medios de prueba (detallar)</label><textarea id="am-prueba_otros" rows="2"></textarea></div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="am-prueba-confesional" style="width:auto" checked> 2. Prueba Confesional
+        </label>
+        <div id="am-wrap-confesional" style="margin-top:8px">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="am-sugerir-pliego" type="button">Sugerir pliego</button>
+          </div>
+          <textarea id="am-confesional_pliego" rows="5" style="width:100%;margin-top:6px" placeholder="a) ...que la parte actora padece ...; b) ...que se solicitó la cobertura con fecha ...; c) ...que la demandada denegó/omitió la prestación con fecha ...; d) Me reservo el derecho de ampliar."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="am-prueba-doc_demandada" style="width:auto"> 3. Documental en poder de la demandada
+        </label>
+        <div id="am-wrap-doc_demandada" style="margin-top:8px;display:none">
+          <textarea id="am-doc_demandada_detalle" rows="3" style="width:100%" placeholder="Historia clínica en poder de la demandada, auditoría médica interna, dictámenes de la comisión evaluadora, legajo del afiliado, etc."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="am-prueba-testifical" style="width:auto"> 4. Prueba Testifical
+        </label>
+        <div id="am-wrap-testifical" style="margin-top:8px;display:none">
+          <div id="am-testigos-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+            <button class="btn btn-ghost" id="am-add-testigo" type="button">+ Agregar testigo (máx. 5)</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="am-prueba-pericial" style="width:auto" checked> 5. Prueba Pericial Médica
+        </label>
+        <div id="am-wrap-pericial" style="margin-top:8px">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="am-sugerir-pericial" type="button">Sugerir puntos de pericia</button>
+          </div>
+          <textarea id="am-pericial_puntos" rows="6" style="width:100%;margin-top:6px" placeholder="Puntos de pericia a informar por el/la perito médico/a."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <p style="font-weight:700;margin:0 0 8px">6. Prueba Informativa</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${INFORMATIVAS.map(p => `
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+                <input type="checkbox" class="am-informativa-check" data-informativa="${p.id}" style="width:auto"> ${p.label}
+              </label>
+              ${p.pideDato ? `<input type="text" class="am-informativa-dato" data-informativa-dato="${p.id}" placeholder="${p.placeholder}" style="display:none;margin-top:4px;width:100%" disabled>` : ''}
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:10px"><label for="am-prueba_otros">Otros medios de prueba (detallar)</label><textarea id="am-prueba_otros" rows="2"></textarea></div>
 
       <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:16px">
         <button class="btn btn-primary" id="am-generar">Generar amparo</button>
@@ -511,6 +598,101 @@ export function initAmparoSalud(container) {
       };
     }).filter(x => x.nombre);
   }
+
+  // ── Prueba: toggles de bloque y detalle por ítem ────────────────────────
+  function wireBloqueToggle(chkId, wrapId) {
+    const chk = container.querySelector(`#${chkId}`);
+    const wrap = container.querySelector(`#${wrapId}`);
+    const actualizar = () => { wrap.style.display = chk.checked ? 'block' : 'none'; };
+    chk.addEventListener('change', actualizar);
+    actualizar();
+  }
+  wireBloqueToggle('am-prueba-confesional', 'am-wrap-confesional');
+  wireBloqueToggle('am-prueba-doc_demandada', 'am-wrap-doc_demandada');
+  wireBloqueToggle('am-prueba-testifical', 'am-wrap-testifical');
+  wireBloqueToggle('am-prueba-pericial', 'am-wrap-pericial');
+
+  container.querySelectorAll('.am-documental-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const input = container.querySelector(`[data-documental-dato="${chk.dataset.documental}"]`);
+      if (input) { input.disabled = !chk.checked; input.style.display = chk.checked ? 'block' : 'none'; }
+    });
+  });
+  container.querySelectorAll('.am-informativa-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const input = container.querySelector(`[data-informativa-dato="${chk.dataset.informativa}"]`);
+      if (input) { input.disabled = !chk.checked; input.style.display = chk.checked ? 'block' : 'none'; }
+    });
+  });
+
+  // ── Prueba testifical: testigos dinámicos (máx. 5) ──────────────────────
+  const wrapTestigos = container.querySelector('#am-testigos-wrapper');
+  const btnAddTestigo = container.querySelector('#am-add-testigo');
+  const MAX_TESTIGOS = 5;
+  let testigosCount = 0, testigosActivos = 0;
+
+  function actualizarBotonTestigo() {
+    btnAddTestigo.disabled = testigosActivos >= MAX_TESTIGOS;
+    btnAddTestigo.textContent = testigosActivos >= MAX_TESTIGOS ? 'Máximo de 5 testigos alcanzado' : '+ Agregar testigo (máx. 5)';
+  }
+
+  function agregarTestigo() {
+    if (testigosActivos >= MAX_TESTIGOS) return;
+    testigosCount++; testigosActivos++;
+    const id = testigosCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `am-testigo-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="am-testigo-nombre-${id}" placeholder="Nombre y apellido"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="am-testigo-dni-${id}" placeholder="DNI"></div>
+      <div class="field-group" style="flex:3"><input type="text" id="am-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-testigo="${id}">✕</button></div>`;
+    wrapTestigos.appendChild(div);
+    div.querySelector('[data-remove-testigo]').addEventListener('click', () => { div.remove(); testigosActivos--; actualizarBotonTestigo(); });
+    actualizarBotonTestigo();
+  }
+  btnAddTestigo.addEventListener('click', agregarTestigo);
+
+  function leerTestigos() {
+    return Array.from(wrapTestigos.querySelectorAll('[id^="am-testigo-row-"]')).map(row => {
+      const id = row.id.replace('am-testigo-row-', '');
+      return {
+        nombre: container.querySelector(`#am-testigo-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#am-testigo-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#am-testigo-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(t => t.nombre);
+  }
+
+  // ── Sugerencias editables: pliego de confesional y puntos de pericia ────
+  container.querySelector('#am-sugerir-pliego').addEventListener('click', () => {
+    const nombreActor = val('am-nombre') || 'la parte actora';
+    const diagnostico = val('am-diagnostico') || '[DIAGNÓSTICO]';
+    const tratamiento = val('am-tratamiento_prescripto') || '[TRATAMIENTO/PRESTACIÓN]';
+    const fechaSolicitud = val('am-fecha_solicitud') ? fmtFecha(val('am-fecha_solicitud')) : '[FECHA DE SOLICITUD]';
+    const fechaNegativa = val('am-fecha_negativa') ? fmtFecha(val('am-fecha_negativa')) : '[FECHA DE LA NEGATIVA/OMISIÓN]';
+    container.querySelector('#am-confesional_pliego').value =
+`Solicito se cite al representante legal de la demandada a absolver posiciones a tenor del siguiente interrogatorio, sin perjuicio del pliego que se acompañará oportunamente:
+Jure que es cierto:
+a) ...que ${nombreActor} padece ${diagnostico};
+b) ...que ${nombreActor} requiere ${tratamiento};
+c) ...que con fecha ${fechaSolicitud} se solicitó a la demandada la cobertura de dicha prestación;
+d) ...que la demandada denegó u omitió pronunciarse sobre dicha solicitud con fecha ${fechaNegativa};
+e) Me reservo el derecho de ampliar el presente interrogatorio.-`;
+  });
+
+  container.querySelector('#am-sugerir-pericial').addEventListener('click', () => {
+    const nombreActor = val('am-nombre') || 'la parte actora';
+    const diagnostico = val('am-diagnostico') || '[DIAGNÓSTICO]';
+    const tratamiento = val('am-tratamiento_prescripto') || '[TRATAMIENTO/PRESTACIÓN]';
+    container.querySelector('#am-pericial_puntos').value =
+`Se designe Perito Médico/a único/a de oficio, especialista según la patología de autos, para que, previo examen de ${nombreActor} y de la historia clínica obrante en la causa, informe:
+a) Diagnóstico actual de ${nombreActor} y su evolución;
+b) Si el tratamiento/prestación consistente en ${tratamiento} resulta médicamente adecuado, necesario y no sustituible por alternativas de igual eficacia y menor costo;
+c) Si la demora u omisión en su otorgamiento genera riesgo cierto de agravamiento del cuadro de salud y/o de daño irreversible;
+d) Todo otro dato de interés que contribuya a la solución del pleito.`;
+  });
 
   function fmtMoneda(n) { return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
@@ -623,15 +805,80 @@ export function initAmparoSalud(container) {
     ]);
     const demandadosTextoPetitorio = joinConY(demandadosNombres);
 
-    const pruebasLabels = {
-      documental: 'Documental: se acompaña la historia clínica, prescripciones médicas, estudios complementarios y la negativa por escrito de la demandada (o constancia de la solicitud efectuada sin respuesta), mediante los cuales se acredita el diagnóstico, el tratamiento prescripto y la falta de cobertura relatada en el punto II.',
-      informativa: 'Informativa: se ofrece prueba informativa, solicitándose se libre oficio a la parte demandada, a la ANMAT, al Ministerio de Salud y/o a la Agencia Nacional de Discapacidad (SeNaDis/ANDIS), a fin de que informen sobre la existencia, eficacia y disponibilidad del tratamiento/prestación requerido y sobre los antecedentes del reclamo administrativo efectuado.',
-      pericial_medica: 'Pericial médica: se ofrece prueba pericial médica a fin de que el/la perito informe sobre el diagnóstico de la parte actora, la necesidad, adecuación y urgencia del tratamiento prescripto, y las eventuales consecuencias de su no realización [PUNTOS DE PERICIA ADICIONALES A COMPLETAR SEGÚN EL CASO].',
-      testimonial: 'Testimonial: se ofrece la declaración de los/las testigos que se individualizarán en el escrito de ofrecimiento de prueba correspondiente [NÓMINA Y DOMICILIOS A COMPLETAR], quienes declararán sobre los hechos relatados en el punto II y sobre la urgencia invocada en el acápite VI.',
-    };
-    const pruebasTexto = [];
-    container.querySelectorAll('.am-prueba-check').forEach(chk => { if (chk.checked) pruebasTexto.push(pruebasLabels[chk.dataset.prueba]); });
-    const pruebaOtros = val('am-prueba_otros');
+    // ── Prueba — bloques numerados según la estructura del Estudio ─────────
+    const bloquesPrueba = [];
+    let nProb = 0;
+    const letrasProb = 'abcdefghijklmnopqrstuvwxyz';
+
+    // 1. Documental
+    const documentalesActivos = DOCUMENTALES.filter(p => container.querySelector(`[data-documental="${p.id}"]`).checked);
+    if (documentalesActivos.length) {
+      nProb++;
+      const itemsDoc = documentalesActivos.map((p, i) => {
+        const dato = p.pideDato ? (container.querySelector(`[data-documental-dato="${p.id}"]`)?.value.trim() || '[COMPLETAR DATO]') : '';
+        return `${letrasProb[i]}) ${p.label}${dato ? `: ${dato}` : ''}`;
+      }).join('; ');
+      bloquesPrueba.push(`${nProb}.- Prueba Documental: Se acompaña la siguiente prueba documental: ${itemsDoc}. Se peticiona se la tenga por acompañada y por parte integrante de la presente, sin perjuicio de la que se ofrezca o produzca en el curso del proceso.`);
+    }
+
+    // 2. Confesional
+    if (container.querySelector('#am-prueba-confesional').checked) {
+      nProb++;
+      const pliego = val('am-confesional_pliego') || 'Solicito se cite al representante legal de la demandada a absolver posiciones a tenor del pliego que se acompañará oportunamente.';
+      bloquesPrueba.push(`${nProb}.- Prueba Confesional: ${pliego}`);
+    }
+
+    // 3. Documental en poder de la demandada
+    if (container.querySelector('#am-prueba-doc_demandada').checked) {
+      nProb++;
+      const detalleDD = val('am-doc_demandada_detalle') || '[DETALLAR DOCUMENTACIÓN EN PODER DE LA DEMANDADA]';
+      bloquesPrueba.push(`${nProb}.- Documental en poder de la demandada: Denuncio como documental en poder de la demandada: ${detalleDD}. Peticiono se libre cédula a fin de que la presente en autos, bajo apercibimiento de ley.`);
+    }
+
+    // 4. Testifical
+    if (container.querySelector('#am-prueba-testifical').checked) {
+      nProb++;
+      const testigos = leerTestigos();
+      if (testigos.length) {
+        const nomina = testigos.map((t, i) => `${letrasProb[i]}).- ${t.nombre}, DNI ${t.dni || '[DNI]'}, con domicilio en ${t.domicilio || '[DOMICILIO COMPLETO]'}`).join('; ');
+        bloquesPrueba.push(`${nProb}.- Prueba Testifical: Solicito se cite a prestar declaración testimonial a las siguientes personas: ${nomina}.-`);
+      } else {
+        bloquesPrueba.push(`${nProb}.- Prueba Testifical: Solicito se cite a prestar declaración testimonial a las personas que se individualizarán oportunamente [COMPLETAR NÓMINA DE TESTIGOS Y DOMICILIOS].`);
+      }
+    }
+
+    // 5. Pericial médica
+    if (container.querySelector('#am-prueba-pericial').checked) {
+      nProb++;
+      const puntos = val('am-pericial_puntos') || 'Se designe Perito Médico/a de oficio para que informe sobre los extremos de la presente demanda [DETALLAR PUNTOS DE PERICIA].';
+      bloquesPrueba.push(`${nProb}.- Prueba Pericial Médica: ${puntos}`);
+    }
+
+    // 6. Informativa
+    const informativasActivas = INFORMATIVAS.filter(p => container.querySelector(`[data-informativa="${p.id}"]`).checked);
+    if (informativasActivas.length) {
+      nProb++;
+      const nBloque = nProb;
+      const subitems = informativasActivas.map((p, i) => {
+        const n = `${nBloque}.${i + 1}`;
+        if (p.id === 'demandada') {
+          return `${n}.- Se libre Oficio a la propia demandada, a fin de que remita los antecedentes del reclamo administrativo efectuado por ${d.nombre || 'la parte actora'} y las constancias de su tratamiento.`;
+        }
+        if (p.id === 'anmat') {
+          return `${n}.- Se libre Oficio a la Administración Nacional de Medicamentos, Alimentos y Tecnología Médica (ANMAT), a fin de que informe sobre el registro, aprobación y disponibilidad del tratamiento/medicación requerido.`;
+        }
+        if (p.id === 'min_salud') {
+          return `${n}.- Se libre Oficio al Ministerio de Salud que corresponda según la jurisdicción, a fin de que informe sobre la existencia, eficacia y disponibilidad del tratamiento/prestación requerido.`;
+        }
+        if (p.id === 'senadis') {
+          return `${n}.- Se libre Oficio a la Agencia Nacional de Discapacidad / Secretaría Nacional de Discapacidad (SeNaDis/ANDIS), a fin de que informe sobre los antecedentes vinculados a la cobertura reclamada.`;
+        }
+        return `${n}.- ${p.label}`;
+      }).join('\n');
+      bloquesPrueba.push(`${nProb}.- Prueba Informativa:\n${subitems}`);
+    }
+
+    if (val('am-prueba_otros')) { nProb++; bloquesPrueba.push(`${nProb}.- Otros medios de prueba: ${val('am-prueba_otros')}`); }
 
     const hechosTipo = tipo.hechos(d);
     const derechoTipo = tipo.derecho(d);
@@ -660,13 +907,7 @@ VI. MEDIDA CAUTELAR
 Que atento la urgencia expuesta, solicito a V.S. el dictado de una medida cautelar innovativa/de no innovar, en los términos del art. 230 y ccdtes. del Código Procesal Civil y Comercial de la Nación, ordenando a la demandada que, en forma inmediata y hasta tanto recaiga sentencia definitiva, brinde la cobertura/prestación objeto de la presente. Fundo la procedencia de la cautelar en que se encuentra configurada la verosimilitud del derecho invocado conforme los fundamentos expuestos en el acápite V, así como el peligro en la demora, toda vez que ${d.riesgo_salud}. ${CAUTELAR_ESTANDAR} Ofrezco caución juratoria, atento el carácter alimentario de los derechos en juego.
 
 VII. PRUEBA
-${(() => {
-  const letras = 'abcdefghijklmnopqrstuvwxyz';
-  const items = [...pruebasTexto, ...(pruebaOtros ? [`Otros medios de prueba: ${pruebaOtros}`] : [])];
-  return items.length
-    ? 'Se ofrecen los siguientes medios de prueba, sin perjuicio de los que se produzcan en el curso del proceso:\n\n' + items.map((p, i) => `${letras[i] || i + 1}) ${p}`).join('\n\n')
-    : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]';
-})()}
+${bloquesPrueba.length ? bloquesPrueba.join('\n\n') : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]'}
 
 VIII. AUTORIZACIONES
 Autorizo indistintamente a ${TODOS_ABOGADOS_TEXTO} a compulsar el expediente, tomar vista de las actuaciones, retirar y diligenciar cédulas, oficios, mandamientos, testimonios, copias y demás documentación, y a realizar cualquier otro trámite relacionado con las presentes actuaciones.
@@ -702,13 +943,29 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     container.querySelector('#am-juzgado').value = '';
     container.querySelector('#am-domicilio_procesal').value = '';
     container.querySelector('#am-prueba_otros').value = '';
-    container.querySelectorAll('.am-prueba-check').forEach(c => c.checked = false);
     selAbogado.selectedIndex = 0;
     container.querySelector('#am-caracter-letrado').selectedIndex = 0;
     wrapActoresExtra.innerHTML = '';
     wrapDemandadosExtra.innerHTML = '';
     actoresExtraCount = 0;
     demandadosExtraCount = 0;
+
+    container.querySelectorAll('.am-documental-check, .am-informativa-check').forEach(c => c.checked = false);
+    container.querySelectorAll('.am-documental-dato, .am-informativa-dato').forEach(el => { el.value = ''; el.disabled = true; el.style.display = 'none'; });
+    container.querySelector('#am-confesional_pliego').value = '';
+    container.querySelector('#am-doc_demandada_detalle').value = '';
+    container.querySelector('#am-pericial_puntos').value = '';
+    wrapTestigos.innerHTML = '';
+    testigosCount = 0; testigosActivos = 0;
+    actualizarBotonTestigo();
+    container.querySelector('#am-prueba-confesional').checked = true;
+    container.querySelector('#am-prueba-doc_demandada').checked = false;
+    container.querySelector('#am-prueba-testifical').checked = false;
+    container.querySelector('#am-prueba-pericial').checked = true;
+    container.querySelector('#am-wrap-confesional').style.display = 'block';
+    container.querySelector('#am-wrap-doc_demandada').style.display = 'none';
+    container.querySelector('#am-wrap-testifical').style.display = 'none';
+    container.querySelector('#am-wrap-pericial').style.display = 'block';
     actualizarAbogado();
     divRes.style.display = 'none';
     textarea.value = '';

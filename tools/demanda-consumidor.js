@@ -175,6 +175,26 @@ export function initDemandaConsumidor(container) {
     },
   };
 
+  // ── Prueba: documental e informativa (comunes a las tres materias) ─────
+  const DOCUMENTALES = [
+    { id: 'contrato_comprobante', label: 'Contrato, comprobante de compra/contratación, factura o resumen', pideDato: true,
+      placeholder: 'Detalle (N° de contrato/comprobante y fecha)' },
+    { id: 'telegramas',  label: 'Telegramas / cartas documento cursadas', pideDato: true,
+      placeholder: 'Detalle (fechas y N° de telegramas/CD)' },
+    { id: 'poliza',      label: 'Póliza de seguro (si corresponde a la materia)', pideDato: true,
+      placeholder: 'N° de póliza y compañía aseguradora' },
+    { id: 'otro',        label: 'Otro documento', pideDato: true,
+      placeholder: 'Detalle del documento' },
+  ];
+
+  const INFORMATIVAS = [
+    { id: 'arca',    label: 'ARCA / AFIP', pideDato: false },
+    { id: 'bcra',    label: 'Banco Central de la República Argentina (BCRA)', pideDato: false },
+    { id: 'ssn',     label: 'Superintendencia de Seguros de la Nación (SSN)', pideDato: false },
+    { id: 'bancos',  label: 'Entidad/es bancaria/s o financiera/s', pideDato: true,
+      placeholder: 'Entidad/es a oficiar' },
+  ];
+
   // ── Campos (pool compartido) ───────────────────────────────────────────
   const CAMPOS_CONFIG = [
     { id: 'nombre',          label: 'Nombre completo (consumidor/a)',    placeholder: 'Juan García',          tipo: 'text',  grupo: 'remitente' },
@@ -283,15 +303,89 @@ export function initDemandaConsumidor(container) {
       <div style="text-align:right;margin-top:10px;font-weight:700;color:var(--color-accent)">Total reclamado: $ <span id="dcons-total">0,00</span></div>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Prueba ofrecida</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="dcons-prueba-check" data-prueba="documental" style="width:auto"> Documental (comprobantes, contratos, resúmenes, pólizas, etc.)</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="dcons-prueba-check" data-prueba="telegramas" style="width:auto"> Documental — telegramas / cartas documento cursadas</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="dcons-prueba-check" data-prueba="testimonial" style="width:auto"> Testimonial</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="dcons-prueba-check" data-prueba="pericial_contable" style="width:auto"> Pericial contable</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="dcons-prueba-check" data-prueba="pericial_informatica" style="width:auto"> Pericial informática (fraudes/canales electrónicos)</label>
-        <label style="display:flex;align-items:center;gap:10px;font-weight:400"><input type="checkbox" class="dcons-prueba-check" data-prueba="informativa" style="width:auto"> Informativa (ARCA, ANSES, BCRA, SSN, bancos, etc.)</label>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:8px">
+        <p style="font-weight:700;margin:0 0 8px">1. Prueba Documental</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${DOCUMENTALES.map(p => `
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+                <input type="checkbox" class="dcons-documental-check" data-documental="${p.id}" style="width:auto"> ${p.label}
+              </label>
+              ${p.pideDato ? `<input type="text" class="dcons-documental-dato" data-documental-dato="${p.id}" placeholder="${p.placeholder}" style="display:none;margin-top:4px;width:100%" disabled>` : ''}
+            </div>`).join('')}
+        </div>
       </div>
-      <div class="field-group" style="margin-top:8px"><label for="dcons-prueba_otros">Otros medios de prueba (detallar)</label><textarea id="dcons-prueba_otros" rows="2"></textarea></div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dcons-prueba-confesional" style="width:auto" checked> 2. Prueba Confesional
+        </label>
+        <div id="dcons-wrap-confesional" style="margin-top:8px">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="dcons-sugerir-pliego" type="button">Sugerir pliego</button>
+          </div>
+          <textarea id="dcons-confesional_pliego" rows="5" style="width:100%;margin-top:6px" placeholder="a) ...que la parte actora contrató/adquirió ...; b) ...que la demandada incurrió en ...; c) ...que la parte actora efectuó reclamos previos sin obtener respuesta; d) Me reservo el derecho de ampliar."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dcons-prueba-doc_demandada" style="width:auto"> 3. Documental en poder de la demandada
+        </label>
+        <div id="dcons-wrap-doc_demandada" style="margin-top:8px;display:none">
+          <textarea id="dcons-doc_demandada_detalle" rows="3" style="width:100%" placeholder="Grabaciones de llamadas, legajo del cliente, políticas internas, condiciones generales, registros de reclamos, etc."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dcons-prueba-testifical" style="width:auto"> 4. Prueba Testifical
+        </label>
+        <div id="dcons-wrap-testifical" style="margin-top:8px;display:none">
+          <div id="dcons-testigos-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+            <button class="btn btn-ghost" id="dcons-add-testigo" type="button">+ Agregar testigo (máx. 5)</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <p style="font-weight:700;margin:0 0 8px">5. Prueba Pericial</p>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+          <input type="checkbox" id="dcons-prueba-pericial_contable" style="width:auto"> Pericial contable
+        </label>
+        <div id="dcons-wrap-pericial_contable" style="margin-top:6px;display:none">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="dcons-sugerir-pericial_contable" type="button">Sugerir puntos de pericia</button>
+          </div>
+          <textarea id="dcons-pericial_contable_puntos" rows="4" style="width:100%;margin-top:6px"></textarea>
+        </div>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400;margin-top:10px">
+          <input type="checkbox" id="dcons-prueba-pericial_informatica" style="width:auto"> Pericial informática (fraudes / canales electrónicos)
+        </label>
+        <div id="dcons-wrap-pericial_informatica" style="margin-top:6px;display:none">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="dcons-sugerir-pericial_informatica" type="button">Sugerir puntos de pericia</button>
+          </div>
+          <textarea id="dcons-pericial_informatica_puntos" rows="4" style="width:100%;margin-top:6px"></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <p style="font-weight:700;margin:0 0 8px">6. Prueba Informativa</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${INFORMATIVAS.map(p => `
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+                <input type="checkbox" class="dcons-informativa-check" data-informativa="${p.id}" style="width:auto"> ${p.label}
+              </label>
+              ${p.pideDato ? `<input type="text" class="dcons-informativa-dato" data-informativa-dato="${p.id}" placeholder="${p.placeholder}" style="display:none;margin-top:4px;width:100%" disabled>` : ''}
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:10px"><label for="dcons-prueba_otros">Otros medios de prueba (detallar)</label><textarea id="dcons-prueba_otros" rows="2"></textarea></div>
 
       <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:16px">
         <button class="btn btn-primary" id="dcons-generar">Generar demanda</button>
@@ -394,6 +488,104 @@ export function initDemandaConsumidor(container) {
       };
     }).filter(x => x.nombre);
   }
+
+  // ── Prueba: toggles de bloque y detalle por ítem ────────────────────────
+  function wireBloqueToggle(chkId, wrapId) {
+    const chk = container.querySelector(`#${chkId}`);
+    const wrap = container.querySelector(`#${wrapId}`);
+    const actualizar = () => { wrap.style.display = chk.checked ? 'block' : 'none'; };
+    chk.addEventListener('change', actualizar);
+    actualizar();
+  }
+  wireBloqueToggle('dcons-prueba-confesional', 'dcons-wrap-confesional');
+  wireBloqueToggle('dcons-prueba-doc_demandada', 'dcons-wrap-doc_demandada');
+  wireBloqueToggle('dcons-prueba-testifical', 'dcons-wrap-testifical');
+  wireBloqueToggle('dcons-prueba-pericial_contable', 'dcons-wrap-pericial_contable');
+  wireBloqueToggle('dcons-prueba-pericial_informatica', 'dcons-wrap-pericial_informatica');
+
+  container.querySelectorAll('.dcons-documental-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const input = container.querySelector(`[data-documental-dato="${chk.dataset.documental}"]`);
+      if (input) { input.disabled = !chk.checked; input.style.display = chk.checked ? 'block' : 'none'; }
+    });
+  });
+  container.querySelectorAll('.dcons-informativa-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const input = container.querySelector(`[data-informativa-dato="${chk.dataset.informativa}"]`);
+      if (input) { input.disabled = !chk.checked; input.style.display = chk.checked ? 'block' : 'none'; }
+    });
+  });
+
+  // ── Prueba testifical: testigos dinámicos (máx. 5) ──────────────────────
+  const wrapTestigos = container.querySelector('#dcons-testigos-wrapper');
+  const btnAddTestigo = container.querySelector('#dcons-add-testigo');
+  const MAX_TESTIGOS = 5;
+  let testigosCount = 0, testigosActivos = 0;
+
+  function actualizarBotonTestigo() {
+    btnAddTestigo.disabled = testigosActivos >= MAX_TESTIGOS;
+    btnAddTestigo.textContent = testigosActivos >= MAX_TESTIGOS ? 'Máximo de 5 testigos alcanzado' : '+ Agregar testigo (máx. 5)';
+  }
+
+  function agregarTestigo() {
+    if (testigosActivos >= MAX_TESTIGOS) return;
+    testigosCount++; testigosActivos++;
+    const id = testigosCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dcons-testigo-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-testigo-nombre-${id}" placeholder="Nombre y apellido"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dcons-testigo-dni-${id}" placeholder="DNI"></div>
+      <div class="field-group" style="flex:3"><input type="text" id="dcons-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-testigo="${id}">✕</button></div>`;
+    wrapTestigos.appendChild(div);
+    div.querySelector('[data-remove-testigo]').addEventListener('click', () => { div.remove(); testigosActivos--; actualizarBotonTestigo(); });
+    actualizarBotonTestigo();
+  }
+  btnAddTestigo.addEventListener('click', agregarTestigo);
+
+  function leerTestigos() {
+    return Array.from(wrapTestigos.querySelectorAll('[id^="dcons-testigo-row-"]')).map(row => {
+      const id = row.id.replace('dcons-testigo-row-', '');
+      return {
+        nombre: container.querySelector(`#dcons-testigo-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#dcons-testigo-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dcons-testigo-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(t => t.nombre);
+  }
+
+  // ── Sugerencias editables: pliego de confesional y puntos de pericia ────
+  container.querySelector('#dcons-sugerir-pliego').addEventListener('click', () => {
+    const nombreActor = val('dcons-nombre') || 'la parte actora';
+    const producto = val('dcons-producto_servicio') || '[PRODUCTO/SERVICIO]';
+    const fecha = val('dcons-fecha_operacion') ? fmtFecha(val('dcons-fecha_operacion')) : '[FECHA DE LA OPERACIÓN]';
+    container.querySelector('#dcons-confesional_pliego').value =
+`Solicito se cite al representante legal de la demandada a absolver posiciones a tenor del siguiente interrogatorio, sin perjuicio del pliego que se acompañará oportunamente:
+Jure que es cierto:
+a) ...que ${nombreActor} contrató/adquirió ${producto} con la demandada, con fecha ${fecha};
+b) ...que la demandada incurrió en el incumplimiento relatado en el punto II de la presente;
+c) ...que la parte actora efectuó reclamos previos a la demandada sin obtener respuesta satisfactoria;
+d) Me reservo el derecho de ampliar el presente interrogatorio.-`;
+  });
+
+  container.querySelector('#dcons-sugerir-pericial_contable').addEventListener('click', () => {
+    const nombreActor = val('dcons-nombre') || 'la parte actora';
+    container.querySelector('#dcons-pericial_contable_puntos').value =
+`Se designe Perito Contador/a único/a de oficio para que, previo estudio de la documentación contable e impositiva de la demandada, informe:
+a) Los movimientos, débitos, créditos y/o liquidaciones cuestionados en la presente demanda, con indicación de fechas e importes;
+b) Si los cargos/comisiones/consumos cuestionados se encuentran pactados y/o autorizados por ${nombreActor}, y en su caso, la fuente contractual;
+c) Practique liquidación de los rubros reclamados conforme las pautas expuestas en el punto IV.`;
+  });
+
+  container.querySelector('#dcons-sugerir-pericial_informatica').addEventListener('click', () => {
+    container.querySelector('#dcons-pericial_informatica_puntos').value =
+`Se designe Perito Informático/a único/a de oficio para que informe:
+a) El origen, autenticidad y trazabilidad de las operaciones y/o comunicaciones electrónicas cuestionadas en la presente demanda (IP, dispositivo, geolocalización, horarios);
+b) Las medidas de seguridad, autenticación y monitoreo de operaciones atípicas implementadas por la demandada al momento del hecho;
+c) Si existieron alertas de seguridad que debieron activarse y no lo hicieron, conforme los estándares vigentes en la materia.`;
+  });
 
   function fmtMoneda(n) { return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
@@ -541,17 +733,85 @@ export function initDemandaConsumidor(container) {
       rubrosTexto.push(`- Gastos de gestiones/intimaciones previas: $ ${fmtMoneda(m)}`);
     }
 
-    const pruebasLabels = {
-      documental: 'Documental: se acompañan los comprobantes, contratos, resúmenes, pólizas y/o demás documentación vinculada a la relación de consumo, mediante los cuales se acredita la operación cuestionada y los hechos relatados en el punto II.',
-      telegramas: 'Documental: se acompañan las piezas postales (telegramas y/o cartas documento) cursadas entre las partes, mediante las cuales se acredita el reclamo previo y la falta de respuesta satisfactoria de la demandada.',
-      testimonial: 'Testimonial: se ofrece la declaración de los/las testigos que se individualizarán en el escrito de ofrecimiento de prueba correspondiente [NÓMINA Y DOMICILIOS A COMPLETAR], quienes declararán sobre los hechos relatados en el punto II.',
-      pericial_contable: 'Pericial contable: se ofrece prueba pericial contable a fin de que el/la perito informe sobre: a) los movimientos, débitos y/o liquidaciones cuestionados; b) [PUNTOS DE PERICIA ADICIONALES A COMPLETAR SEGÚN EL CASO].',
-      pericial_informatica: 'Pericial informática: se ofrece prueba pericial informática a fin de que el/la perito informe sobre el origen, autenticidad y trazabilidad de las operaciones/comunicaciones electrónicas cuestionadas, así como sobre las medidas de seguridad implementadas por la demandada [PUNTOS DE PERICIA A COMPLETAR SEGÚN EL CASO].',
-      informativa: 'Informativa: se ofrece prueba informativa, solicitándose se libre oficio a la ARCA, ANSES, BCRA, Superintendencia de Seguros de la Nación y/o a la/s entidad/es bancaria/s o financiera/s que se indicará/n oportunamente, a fin de que informen sobre los extremos vinculados a la relación de consumo objeto de autos.',
-    };
-    const pruebasTexto = [];
-    container.querySelectorAll('.dcons-prueba-check').forEach(chk => { if (chk.checked) pruebasTexto.push(pruebasLabels[chk.dataset.prueba]); });
-    const pruebaOtros = val('dcons-prueba_otros');
+    // ── Prueba — bloques numerados según la estructura del Estudio ─────────
+    const bloquesPrueba = [];
+    let nProb = 0;
+    const letrasProb = 'abcdefghijklmnopqrstuvwxyz';
+
+    // 1. Documental
+    const documentalesActivos = DOCUMENTALES.filter(p => container.querySelector(`[data-documental="${p.id}"]`).checked);
+    if (documentalesActivos.length) {
+      nProb++;
+      const itemsDoc = documentalesActivos.map((p, i) => {
+        const dato = p.pideDato ? (container.querySelector(`[data-documental-dato="${p.id}"]`)?.value.trim() || '[COMPLETAR DATO]') : '';
+        return `${letrasProb[i]}) ${p.label}${dato ? `: ${dato}` : ''}`;
+      }).join('; ');
+      bloquesPrueba.push(`${nProb}.- Prueba Documental: Se acompaña la siguiente prueba documental: ${itemsDoc}. Se peticiona se la tenga por acompañada y por parte integrante de la presente, sin perjuicio de la que se ofrezca o produzca en el curso del proceso.`);
+    }
+
+    // 2. Confesional
+    if (container.querySelector('#dcons-prueba-confesional').checked) {
+      nProb++;
+      const pliego = val('dcons-confesional_pliego') || 'Solicito se cite al representante legal de la demandada a absolver posiciones a tenor del pliego que se acompañará oportunamente.';
+      bloquesPrueba.push(`${nProb}.- Prueba Confesional: ${pliego}`);
+    }
+
+    // 3. Documental en poder de la demandada
+    if (container.querySelector('#dcons-prueba-doc_demandada').checked) {
+      nProb++;
+      const detalleDD = val('dcons-doc_demandada_detalle') || '[DETALLAR DOCUMENTACIÓN EN PODER DE LA DEMANDADA]';
+      bloquesPrueba.push(`${nProb}.- Documental en poder de la demandada: Denuncio como documental en poder de la demandada: ${detalleDD}. Peticiono se libre cédula a fin de que la presente en autos, bajo apercibimiento de ley (arts. 385 y ccdtes., CPCC de la Provincia de Buenos Aires).`);
+    }
+
+    // 4. Testifical
+    if (container.querySelector('#dcons-prueba-testifical').checked) {
+      nProb++;
+      const testigos = leerTestigos();
+      if (testigos.length) {
+        const nomina = testigos.map((t, i) => `${letrasProb[i]}).- ${t.nombre}, DNI ${t.dni || '[DNI]'}, con domicilio en ${t.domicilio || '[DOMICILIO COMPLETO]'}`).join('; ');
+        bloquesPrueba.push(`${nProb}.- Prueba Testifical: Solicito se cite a prestar declaración testimonial a las siguientes personas: ${nomina}.-`);
+      } else {
+        bloquesPrueba.push(`${nProb}.- Prueba Testifical: Solicito se cite a prestar declaración testimonial a las personas que se individualizarán oportunamente [COMPLETAR NÓMINA DE TESTIGOS Y DOMICILIOS].`);
+      }
+    }
+
+    // 5. Pericial (contable / informática)
+    const periciaContableOn = container.querySelector('#dcons-prueba-pericial_contable').checked;
+    const periciaInformaticaOn = container.querySelector('#dcons-prueba-pericial_informatica').checked;
+    if (periciaContableOn || periciaInformaticaOn) {
+      nProb++;
+      const subPericia = [];
+      if (periciaContableOn) subPericia.push(val('dcons-pericial_contable_puntos') || 'Se designe Perito Contador/a de oficio para que informe sobre los extremos de la presente demanda [DETALLAR PUNTOS DE PERICIA].');
+      if (periciaInformaticaOn) subPericia.push(val('dcons-pericial_informatica_puntos') || 'Se designe Perito Informático/a de oficio para que informe sobre los extremos de la presente demanda [DETALLAR PUNTOS DE PERICIA].');
+      bloquesPrueba.push(`${nProb}.- Prueba Pericial: ${subPericia.join('\n\n')}`);
+    }
+
+    // 6. Informativa
+    const informativasActivas = INFORMATIVAS.filter(p => container.querySelector(`[data-informativa="${p.id}"]`).checked);
+    if (informativasActivas.length) {
+      nProb++;
+      const nBloque = nProb;
+      const subitems = informativasActivas.map((p, i) => {
+        const n = `${nBloque}.${i + 1}`;
+        if (p.id === 'arca') {
+          return `${n}.- Se libre Oficio a la Agencia de Recaudación y Control Aduanero (ARCA), a fin de que informe sobre los extremos impositivos vinculados a la relación de consumo objeto de autos.`;
+        }
+        if (p.id === 'bcra') {
+          return `${n}.- Se libre Oficio al Banco Central de la República Argentina (BCRA), a fin de que informe sobre la normativa aplicable y/o los antecedentes vinculados a la operatoria cuestionada.`;
+        }
+        if (p.id === 'ssn') {
+          return `${n}.- Se libre Oficio a la Superintendencia de Seguros de la Nación (SSN), a fin de que informe sobre los antecedentes de la póliza y/o de la compañía aseguradora demandada vinculados a los hechos de autos.`;
+        }
+        if (p.id === 'bancos') {
+          const entidad = container.querySelector('[data-informativa-dato="bancos"]')?.value.trim() || '[ENTIDAD/ES A OFICIAR]';
+          return `${n}.- Se libre Oficio a ${entidad}, a fin de que informe sobre los movimientos, acreditaciones y/o débitos vinculados a la operatoria cuestionada, y todo otro dato de interés para la causa.`;
+        }
+        return `${n}.- ${p.label}`;
+      }).join('\n');
+      bloquesPrueba.push(`${nProb}.- Prueba Informativa:\n${subitems}`);
+    }
+
+    if (val('dcons-prueba_otros')) { nProb++; bloquesPrueba.push(`${nProb}.- Otros medios de prueba: ${val('dcons-prueba_otros')}`); }
 
     const totalTexto = fmtMoneda(total);
     const hechosTipo = tipo.hechos(d);
@@ -576,13 +836,7 @@ ${rubrosTexto.length ? rubrosTexto.join('\n') : '- [DETALLAR RUBROS Y MONTOS]'}
 TOTAL RECLAMADO: $ ${totalTexto}
 
 V. PRUEBA
-${(() => {
-  const letras = 'abcdefghijklmnopqrstuvwxyz';
-  const items = [...pruebasTexto, ...(pruebaOtros ? [`Otros medios de prueba: ${pruebaOtros}`] : [])];
-  return items.length
-    ? 'Se ofrecen los siguientes medios de prueba, sin perjuicio de los que se produzcan en el curso del proceso:\n\n' + items.map((p, i) => `${letras[i] || i + 1}) ${p}`).join('\n\n')
-    : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]';
-})()}
+${bloquesPrueba.length ? bloquesPrueba.join('\n\n') : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]'}
 
 VI. BENEFICIO DE JUSTICIA GRATUITA
 Que en mi carácter de consumidor/a, invoco el beneficio de justicia gratuita previsto en el art. 25 de la Ley 13.133 y en el art. 53, tercer párrafo, de la Ley 24.240, solicitando se me exima del pago de tasas, contribuciones u otra imposición económica.
@@ -619,7 +873,6 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     CAMPOS_CONFIG.forEach(c => { const el = container.querySelector(`#dcons-${c.id}`); if (el) { el.value = ''; el.classList.remove('error'); } });
     container.querySelector('#dcons-juzgado').value = '';
     container.querySelector('#dcons-prueba_otros').value = '';
-    container.querySelectorAll('.dcons-prueba-check').forEach(c => c.checked = false);
     ['dano_moral', 'dano_punitivo', 'gastos_previos'].forEach(id => {
       container.querySelector(`#dcons-rubro-${id}`).checked = false;
       container.querySelector(`#dcons-monto-${id}`).value = '';
@@ -630,6 +883,26 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     wrapDemandadosExtra.innerHTML = '';
     actoresExtraCount = 0;
     demandadosExtraCount = 0;
+
+    container.querySelectorAll('.dcons-documental-check, .dcons-informativa-check').forEach(c => c.checked = false);
+    container.querySelectorAll('.dcons-documental-dato, .dcons-informativa-dato').forEach(el => { el.value = ''; el.disabled = true; el.style.display = 'none'; });
+    container.querySelector('#dcons-confesional_pliego').value = '';
+    container.querySelector('#dcons-doc_demandada_detalle').value = '';
+    container.querySelector('#dcons-pericial_contable_puntos').value = '';
+    container.querySelector('#dcons-pericial_informatica_puntos').value = '';
+    wrapTestigos.innerHTML = '';
+    testigosCount = 0; testigosActivos = 0;
+    actualizarBotonTestigo();
+    container.querySelector('#dcons-prueba-confesional').checked = true;
+    container.querySelector('#dcons-prueba-doc_demandada').checked = false;
+    container.querySelector('#dcons-prueba-testifical').checked = false;
+    container.querySelector('#dcons-prueba-pericial_contable').checked = false;
+    container.querySelector('#dcons-prueba-pericial_informatica').checked = false;
+    container.querySelector('#dcons-wrap-confesional').style.display = 'block';
+    container.querySelector('#dcons-wrap-doc_demandada').style.display = 'none';
+    container.querySelector('#dcons-wrap-testifical').style.display = 'none';
+    container.querySelector('#dcons-wrap-pericial_contable').style.display = 'none';
+    container.querySelector('#dcons-wrap-pericial_informatica').style.display = 'none';
     actualizarAbogado();
     actualizarTotal();
     divRes.style.display = 'none';

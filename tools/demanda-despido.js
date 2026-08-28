@@ -99,19 +99,21 @@ export function initDemandaDespido(container) {
     { id: 'otro',                label: 'Otro concepto (detallar)' },
   ];
 
-  const PRUEBAS = [
-    { id: 'documental_recibos',    label: 'Documental — recibos de sueldo',
-      texto: 'Documental: se acompañan los recibos de sueldo correspondientes a los períodos [PERÍODOS A COMPLETAR], mediante los cuales se acredita la remuneración percibida, la categoría y la registración (o falta/deficiencia de registración) de la relación laboral invocada en el punto II.' },
-    { id: 'documental_telegramas', label: 'Documental — telegramas / cartas documento cursadas',
-      texto: 'Documental: se acompañan las piezas postales (telegramas y/o cartas documento) cursadas entre las partes — intimaciones, respuestas y, en su caso, notificación de despido —, mediante las cuales se acredita el intercambio epistolar relatado en el punto II.' },
-    { id: 'documental_contrato',   label: 'Documental — contrato de trabajo / legajo',
-      texto: 'Documental: se acompaña copia del contrato de trabajo y/o legajo del/de la trabajador/a, en cuanto resulte pertinente para acreditar la fecha de ingreso, la categoría desempeñada y las condiciones pactadas de la relación laboral.' },
-    { id: 'testimonial',           label: 'Testimonial',
-      texto: 'Testimonial: se ofrece la declaración de los/las testigos que se individualizarán en el escrito de ofrecimiento de prueba correspondiente [NÓMINA Y DOMICILIOS A COMPLETAR], quienes declararán sobre los hechos relativos a la prestación de tareas, la jornada cumplida, la remuneración percibida y/o los incumplimientos patronales relatados en el punto II.' },
-    { id: 'pericial_contable',     label: 'Pericial contable',
-      texto: 'Pericial contable: se ofrece prueba pericial contable, a producirse sobre los libros y demás documentación laboral y contable de la parte demandada, a fin de que el/la perito informe sobre: a) la existencia, fecha de inicio y demás términos de la relación laboral; b) las remuneraciones efectivamente devengadas y percibidas por el/la actor/a; c) [PUNTOS DE PERICIA ADICIONALES A COMPLETAR SEGÚN EL CASO].' },
-    { id: 'informativa',           label: 'Informativa (ARCA, ANSES, bancos, etc.)',
-      texto: 'Informativa: se ofrece prueba informativa, solicitándose se libre oficio a la ARCA (Agencia de Recaudación y Control Aduanero), a la ANSES y/o a la/s entidad/es bancaria/s que se indicará/n oportunamente, a fin de que informen sobre la registración de la relación laboral, los aportes y contribuciones efectuados y/o la acreditación de haberes, según corresponda.' },
+  const DOCUMENTALES = [
+    { id: 'recibos',     label: 'Recibos de sueldo', pideDato: true,
+      placeholder: 'Períodos (ej.: enero 2024 a octubre 2026)' },
+    { id: 'telegramas',  label: 'Telegramas / cartas documento cursadas', pideDato: true,
+      placeholder: 'Detalle (fechas y N° de telegramas/CD)' },
+    { id: 'contrato',    label: 'Contrato de trabajo / legajo', pideDato: false },
+    { id: 'otro',        label: 'Otro documento', pideDato: true,
+      placeholder: 'Detalle del documento' },
+  ];
+
+  const INFORMATIVAS = [
+    { id: 'arca',    label: 'ARCA (registración y aportes)', pideDato: false },
+    { id: 'bancos',  label: 'Entidad/es bancaria/s o financiera/s', pideDato: true,
+      placeholder: 'Entidad/es a oficiar' },
+    { id: 'correo',  label: 'Correo Oficial de la República Argentina (autenticidad de piezas postales)', pideDato: false },
   ];
 
   container.innerHTML = `
@@ -250,18 +252,85 @@ export function initDemandaDespido(container) {
       <div style="text-align:right;margin-top:10px;font-weight:700;color:var(--color-accent)">Total reclamado: $ <span id="dd-total">0,00</span></div>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Prueba ofrecida — art. 31 inc. g), Ley 15.057</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${PRUEBAS.map(p => `
-          <label style="display:flex;align-items:center;gap:10px;font-weight:400">
-            <input type="checkbox" class="dd-prueba-check" data-prueba="${p.id}" style="width:auto"> ${p.label}
-          </label>`).join('')}
+      <div class="field-group"><label for="dd-actor_cuil">CUIL del actor (para oficios a ARCA / organismos de la Seguridad Social)</label><input type="text" id="dd-actor_cuil" placeholder="20-12345678-9"></div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:8px">
+        <p style="font-weight:700;margin:0 0 8px">1. Prueba Documental</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${DOCUMENTALES.map(p => `
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+                <input type="checkbox" class="dd-documental-check" data-documental="${p.id}" style="width:auto"> ${p.label}
+              </label>
+              ${p.pideDato ? `<input type="text" class="dd-documental-dato" data-documental-dato="${p.id}" placeholder="${p.placeholder}" style="display:none;margin-top:4px;width:100%" disabled>` : ''}
+            </div>`).join('')}
+        </div>
       </div>
-      <div class="field-group" style="margin-top:8px"><label for="dd-prueba_otros">Otros medios de prueba (detallar)</label><textarea id="dd-prueba_otros" rows="2"></textarea></div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dd-prueba-confesional" style="width:auto" checked> 2. Prueba Confesional
+        </label>
+        <div id="dd-wrap-confesional" style="margin-top:8px">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="dd-sugerir-pliego" type="button">Sugerir pliego</button>
+          </div>
+          <textarea id="dd-confesional_pliego" rows="5" style="width:100%;margin-top:6px" placeholder="a) ...que el actor trabajó a las órdenes de la demandada en relación de dependencia laboral; b) ...que ingresó el .../.../....; c) ...que se desempeñaba como ...; d) ...que percibía una remuneración de $ ... mensuales; e) Me reservo el derecho de ampliar."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dd-prueba-doc_demandada" style="width:auto"> 3. Documental en poder de la demandada
+        </label>
+        <div id="dd-wrap-doc_demandada" style="margin-top:8px;display:none">
+          <textarea id="dd-doc_demandada_detalle" rows="3" style="width:100%" placeholder="Libro especial art. 52 LCT, legajo personal, planillas horarias, recibos originales, registros de CARGOS SRL u otro tercero, etc."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dd-prueba-testifical" style="width:auto"> 4. Prueba Testifical
+        </label>
+        <div id="dd-wrap-testifical" style="margin-top:8px;display:none">
+          <div id="dd-testigos-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+            <button class="btn btn-ghost" id="dd-add-testigo" type="button">+ Agregar testigo (máx. 5)</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <input type="checkbox" id="dd-prueba-pericial" style="width:auto" checked> 5. Prueba Pericial Contable
+        </label>
+        <div id="dd-wrap-pericial" style="margin-top:8px">
+          <div class="form-row" style="justify-content:flex-start">
+            <button class="btn btn-ghost" id="dd-sugerir-pericial" type="button">Sugerir puntos de pericia</button>
+          </div>
+          <textarea id="dd-pericial_puntos" rows="6" style="width:100%;margin-top:6px" placeholder="Puntos de pericia a informar por el/la perito contador/a."></textarea>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--color-border);border-radius:6px;padding:12px;margin-top:10px">
+        <p style="font-weight:700;margin:0 0 8px">6. Prueba Informativa</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${INFORMATIVAS.map(p => `
+            <div>
+              <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+                <input type="checkbox" class="dd-informativa-check" data-informativa="${p.id}" style="width:auto"> ${p.label}
+              </label>
+              ${p.pideDato ? `<input type="text" class="dd-informativa-dato" data-informativa-dato="${p.id}" placeholder="${p.placeholder}" style="display:none;margin-top:4px;width:100%" disabled>` : ''}
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:10px"><label for="dd-prueba_otros">Otros medios de prueba (detallar)</label><textarea id="dd-prueba_otros" rows="2"></textarea></div>
       <div class="field-group">
         <label for="dd-archivos">Adjuntar archivos de referencia (recibos, telegramas, DNI, etc.)</label>
         <input type="file" id="dd-archivos" multiple>
         <p style="font-size:.75rem;color:var(--color-muted);margin-top:4px">
-          Nota: esta herramienta no tiene servidor propio. Los archivos NO se suben ni se incrustan en el Word — solo se listan sus nombres en la sección de prueba documental, como recordatorio de qué acompañar físicamente/digitalmente ante el juzgado.
+          Nota: esta herramienta no tiene servidor propio. Los archivos NO se suben ni se incrustan en el Word — solo se listan sus nombres en la sección de prueba, como recordatorio de qué acompañar físicamente/digitalmente ante el juzgado.
         </p>
       </div>
 
@@ -356,6 +425,99 @@ export function initDemandaDespido(container) {
       };
     }).filter(x => x.nombre);
   }
+
+  // ── Prueba: toggles de bloque y detalle por ítem ────────────────────────
+  function wireBloqueToggle(chkId, wrapId) {
+    const chk = container.querySelector(`#${chkId}`);
+    const wrap = container.querySelector(`#${wrapId}`);
+    const actualizar = () => { wrap.style.display = chk.checked ? 'block' : 'none'; };
+    chk.addEventListener('change', actualizar);
+    actualizar();
+  }
+  wireBloqueToggle('dd-prueba-confesional', 'dd-wrap-confesional');
+  wireBloqueToggle('dd-prueba-doc_demandada', 'dd-wrap-doc_demandada');
+  wireBloqueToggle('dd-prueba-testifical', 'dd-wrap-testifical');
+  wireBloqueToggle('dd-prueba-pericial', 'dd-wrap-pericial');
+
+  container.querySelectorAll('.dd-documental-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const input = container.querySelector(`[data-documental-dato="${chk.dataset.documental}"]`);
+      if (input) { input.disabled = !chk.checked; input.style.display = chk.checked ? 'block' : 'none'; }
+    });
+  });
+  container.querySelectorAll('.dd-informativa-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const input = container.querySelector(`[data-informativa-dato="${chk.dataset.informativa}"]`);
+      if (input) { input.disabled = !chk.checked; input.style.display = chk.checked ? 'block' : 'none'; }
+    });
+  });
+
+  // ── Prueba testifical: testigos dinámicos (máx. 5) ──────────────────────
+  const wrapTestigos = container.querySelector('#dd-testigos-wrapper');
+  const btnAddTestigo = container.querySelector('#dd-add-testigo');
+  const MAX_TESTIGOS = 5;
+  let testigosCount = 0, testigosActivos = 0;
+
+  function actualizarBotonTestigo() {
+    btnAddTestigo.disabled = testigosActivos >= MAX_TESTIGOS;
+    btnAddTestigo.textContent = testigosActivos >= MAX_TESTIGOS ? 'Máximo de 5 testigos alcanzado' : '+ Agregar testigo (máx. 5)';
+  }
+
+  function agregarTestigo() {
+    if (testigosActivos >= MAX_TESTIGOS) return;
+    testigosCount++; testigosActivos++;
+    const id = testigosCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dd-testigo-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dd-testigo-nombre-${id}" placeholder="Nombre y apellido"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dd-testigo-dni-${id}" placeholder="DNI"></div>
+      <div class="field-group" style="flex:3"><input type="text" id="dd-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-testigo="${id}">✕</button></div>`;
+    wrapTestigos.appendChild(div);
+    div.querySelector('[data-remove-testigo]').addEventListener('click', () => { div.remove(); testigosActivos--; actualizarBotonTestigo(); });
+    actualizarBotonTestigo();
+  }
+  btnAddTestigo.addEventListener('click', agregarTestigo);
+
+  function leerTestigos() {
+    return Array.from(wrapTestigos.querySelectorAll('[id^="dd-testigo-row-"]')).map(row => {
+      const id = row.id.replace('dd-testigo-row-', '');
+      return {
+        nombre: container.querySelector(`#dd-testigo-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#dd-testigo-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dd-testigo-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(t => t.nombre);
+  }
+
+  // ── Sugerencias editables: pliego de confesional y puntos de pericia ────
+  container.querySelector('#dd-sugerir-pliego').addEventListener('click', () => {
+    const fecha = val('dd-fecha_ingreso') ? fmtFecha(val('dd-fecha_ingreso')) : '[FECHA DE INGRESO]';
+    const categoria = val('dd-categoria_tareas') || '[CATEGORÍA Y TAREAS]';
+    const remuneracion = val('dd-remuneracion_mensual') ? `$ ${fmtMoneda(parseFloat(val('dd-remuneracion_mensual')))}` : '[MONTO]';
+    const nombreActor = val('dd-actor_nombre') || 'el/la actor/a';
+    container.querySelector('#dd-confesional_pliego').value =
+`Solicito se cite al representante legal de la demandada a absolver posiciones a tenor del siguiente interrogatorio, sin perjuicio del pliego que se acompañará oportunamente:
+Jure que es cierto:
+a) ...que ${nombreActor} trabajó a las órdenes de la demandada en relación de dependencia laboral;
+b) ...que ingresó a trabajar el día ${fecha};
+c) ...que se desempeñaba como ${categoria};
+d) ...que percibía una remuneración de ${remuneracion} mensuales;
+e) Me reservo el derecho de ampliar el presente interrogatorio.-`;
+  });
+
+  container.querySelector('#dd-sugerir-pericial').addEventListener('click', () => {
+    const nombreActor = val('dd-actor_nombre') || 'el/la actor/a';
+    container.querySelector('#dd-pericial_puntos').value =
+`Se designe Perito Contador/a único/a de oficio para que, previo estudio de la documentación laboral, contable e impositiva de la demandada, informe:
+a) Si la demandada lleva en legal forma el libro especial a que se refiere el art. 52 de la LCT; en caso afirmativo, si se encuentra rubricado, en qué fecha y a nombre de quién;
+b) Fechas de ingreso y egreso de ${nombreActor}, informando asimismo si existen registros de la prestación de servicios a través de terceros (agencias, contratistas o empresas vinculadas);
+c) Categoría laboral, tareas desempeñadas y horario cumplido por ${nombreActor};
+d) Haberes percibidos por ${nombreActor} durante toda la relación laboral, mes a mes, discriminando lo correspondiente a salario básico, premios, horas extras y demás rubros remuneratorios;
+e) Practique liquidación de los rubros reclamados en la presente demanda, conforme las pautas expuestas en el punto IV y los arts. 245 y ccdtes. de la LCT.`;
+  });
 
   function actualizarAbogado() {
     const a = ABOGADOS_BY_ID[selAbogado.value];
@@ -549,13 +711,6 @@ export function initDemandaDespido(container) {
       }
     });
 
-    // Pruebas
-    const pruebasTexto = [];
-    PRUEBAS.forEach(p => {
-      if (container.querySelector(`[data-prueba="${p.id}"]`).checked) pruebasTexto.push(p.texto);
-    });
-    const archivos = Array.from(container.querySelector('#dd-archivos').files || []).map(f => f.name);
-
     const rubroActivo = (id) => container.querySelector(`[data-rubro="${id}"]`).checked;
 
     const actoresExtra = leerActoresExtra();
@@ -603,13 +758,83 @@ export function initDemandaDespido(container) {
 
     const totalTexto = fmtMoneda(total);
 
-    const letras = 'abcdefghijklmnopqrstuvwxyz';
-    const itemsPrueba = [...pruebasTexto, ...(d.prueba_otros ? [`Otros medios de prueba: ${d.prueba_otros}`] : [])];
-    const pruebaTextoFinal = [
-      itemsPrueba.length ? 'Se ofrecen los siguientes medios de prueba, sin perjuicio de los que se produzcan en el curso del proceso:\n\n' +
-        itemsPrueba.map((p, i) => `${letras[i] || i + 1}) ${p}`).join('\n\n') : '',
-      archivos.length ? `\nArchivos acompañados como referencia: ${archivos.join(', ')}` : '',
-    ].filter(Boolean).join('\n');
+    // ── Prueba — bloques numerados según la estructura del Estudio ─────────
+    const archivos = Array.from(container.querySelector('#dd-archivos').files || []).map(f => f.name);
+    const bloquesPrueba = [];
+    let nProb = 0;
+    const letrasProb = 'abcdefghijklmnopqrstuvwxyz';
+
+    // 1. Documental
+    const documentalesActivos = DOCUMENTALES.filter(p => container.querySelector(`[data-documental="${p.id}"]`).checked);
+    if (documentalesActivos.length) {
+      nProb++;
+      const itemsDoc = documentalesActivos.map((p, i) => {
+        const dato = p.pideDato ? (container.querySelector(`[data-documental-dato="${p.id}"]`)?.value.trim() || '[COMPLETAR DATO]') : '';
+        return `${letrasProb[i]}) ${p.label}${dato ? `: ${dato}` : ''}`;
+      }).join('; ');
+      bloquesPrueba.push(`${nProb}.- Prueba Documental: Se acompaña la siguiente prueba documental: ${itemsDoc}. Se peticiona se la tenga por acompañada y por parte integrante de la presente, sin perjuicio de la que se ofrezca o produzca en el curso del proceso.`);
+    }
+
+    // 2. Confesional
+    if (container.querySelector('#dd-prueba-confesional').checked) {
+      nProb++;
+      const pliego = val('dd-confesional_pliego') || 'Solicito se cite al representante legal de la demandada a absolver posiciones a tenor del pliego que se acompañará oportunamente.';
+      bloquesPrueba.push(`${nProb}.- Prueba Confesional: ${pliego}`);
+    }
+
+    // 3. Documental en poder de la demandada
+    if (container.querySelector('#dd-prueba-doc_demandada').checked) {
+      nProb++;
+      const detalleDD = val('dd-doc_demandada_detalle') || '[DETALLAR DOCUMENTACIÓN EN PODER DE LA DEMANDADA]';
+      bloquesPrueba.push(`${nProb}.- Documental en poder de la demandada: Denuncio como documental en poder de la demandada: ${detalleDD}. Peticiono se libre cédula a fin de que la presente en autos, bajo apercibimiento de ley (arts. 385 y ccdtes., CPCC de la Provincia de Buenos Aires, de aplicación supletoria conforme art. 89, Ley 15.057).`);
+    }
+
+    // 4. Testifical
+    if (container.querySelector('#dd-prueba-testifical').checked) {
+      nProb++;
+      const testigos = leerTestigos();
+      if (testigos.length) {
+        const nomina = testigos.map((t, i) => `${letrasProb[i]}).- ${t.nombre}, DNI ${t.dni || '[DNI]'}, con domicilio en ${t.domicilio || '[DOMICILIO COMPLETO]'}`).join('; ');
+        bloquesPrueba.push(`${nProb}.- Prueba Testifical: Solicito se cite a prestar declaración testimonial a las siguientes personas: ${nomina}.-`);
+      } else {
+        bloquesPrueba.push(`${nProb}.- Prueba Testifical: Solicito se cite a prestar declaración testimonial a las personas que se individualizarán oportunamente [COMPLETAR NÓMINA DE TESTIGOS Y DOMICILIOS].`);
+      }
+    }
+
+    // 5. Pericial contable
+    if (container.querySelector('#dd-prueba-pericial').checked) {
+      nProb++;
+      const puntos = val('dd-pericial_puntos') || 'Se designe Perito Contador/a de oficio para que informe sobre los extremos de la presente demanda [DETALLAR PUNTOS DE PERICIA].';
+      bloquesPrueba.push(`${nProb}.- Prueba Pericial Contable: ${puntos}`);
+    }
+
+    // 6. Informativa
+    const informativasActivas = INFORMATIVAS.filter(p => container.querySelector(`[data-informativa="${p.id}"]`).checked);
+    if (informativasActivas.length) {
+      nProb++;
+      const nBloque = nProb;
+      const subitems = informativasActivas.map((p, i) => {
+        const n = `${nBloque}.${i + 1}`;
+        if (p.id === 'arca') {
+          const cuil = val('dd-actor_cuil') || '[CUIL DEL ACTOR]';
+          return `${n}.- Se libre Oficio a la Agencia de Recaudación y Control Aduanero (ARCA), a fin de que informe: a) si ${d.actor_nombre || 'el/la actor/a'}, CUIL ${cuil}, estuvo registrado/a como empleado/a de ${d.empleador_nombre || 'la demandada'}; b) en su caso, fechas de alta y baja de la relación laboral; c) si la demandada efectuó los aportes y contribuciones a los Organismos de la Seguridad Social durante el período comprendido entre el ${d.fecha_ingreso || '[FECHA DE INGRESO]'} y el ${d.fecha_egreso || '[FECHA DE EGRESO]'}.`;
+        }
+        if (p.id === 'bancos') {
+          const entidad = container.querySelector('[data-informativa-dato="bancos"]')?.value.trim() || '[ENTIDAD/ES A OFICIAR]';
+          return `${n}.- Se libre Oficio a ${entidad}, a fin de que informe sobre la acreditación de haberes a nombre de ${d.actor_nombre || 'el/la actor/a'} durante la relación laboral, y todo otro dato de interés para la causa.`;
+        }
+        if (p.id === 'correo') {
+          return `${n}.- Se libre Oficio al Correo Oficial de la República Argentina S.A., a fin de que informe, para el caso de desconocimiento de las piezas postales acompañadas, sobre la autenticidad de su contenido y las fechas de envío y recepción.`;
+        }
+        return `${n}.- ${p.label}`;
+      }).join('\n');
+      bloquesPrueba.push(`${nProb}.- Prueba Informativa:\n${subitems}`);
+    }
+
+    if (archivos.length) { nProb++; bloquesPrueba.push(`${nProb}.- Documental adjunta como referencia: ${archivos.join(', ')}.`); }
+    if (d.prueba_otros) { nProb++; bloquesPrueba.push(`${nProb}.- Otros medios de prueba: ${d.prueba_otros}`); }
+
+    const pruebaTextoFinal = bloquesPrueba.join('\n\n');
 
     const texto =
 `EXCMO. TRIBUNAL DEL TRABAJO${d.juzgado ? ` — ${d.juzgado}` : ''}:
@@ -681,6 +906,16 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     wrapDemandadosExtra.innerHTML = '';
     actoresExtraCount = 0;
     demandadosExtraCount = 0;
+    wrapTestigos.innerHTML = '';
+    testigosCount = 0; testigosActivos = 0;
+    actualizarBotonTestigo();
+    container.querySelector('#dd-prueba-confesional').checked = true;
+    container.querySelector('#dd-prueba-pericial').checked = true;
+    container.querySelectorAll('.dd-documental-dato, .dd-informativa-dato').forEach(el => { el.disabled = true; el.style.display = 'none'; });
+    container.querySelector('#dd-wrap-confesional').style.display = 'block';
+    container.querySelector('#dd-wrap-doc_demandada').style.display = 'none';
+    container.querySelector('#dd-wrap-testifical').style.display = 'none';
+    container.querySelector('#dd-wrap-pericial').style.display = 'block';
     actualizarAbogado();
     actualizarTotal();
     divRes.style.display = 'none';
