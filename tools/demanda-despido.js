@@ -24,6 +24,47 @@ export function initDemandaDespido(container) {
     return items.slice(0, -1).join(', ') + ' y ' + items[items.length - 1];
   }
 
+  // ── Utilidades de fecha para la justificación de rubros de la liquidación ──
+  const MESES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  function parseISODate(iso) {
+    if (!iso) return null;
+    const f = new Date(iso + 'T00:00:00');
+    return isNaN(f.getTime()) ? null : f;
+  }
+
+  function calcularAntiguedad(isoIngreso, isoCese) {
+    const ing = parseISODate(isoIngreso);
+    const egr = parseISODate(isoCese);
+    if (!ing || !egr || egr <= ing) return null;
+    let años = egr.getFullYear() - ing.getFullYear();
+    let meses = egr.getMonth() - ing.getMonth();
+    let dias = egr.getDate() - ing.getDate();
+    if (dias < 0) meses--;
+    if (meses < 0) { años--; meses += 12; }
+    return { años, meses, totalDias: Math.round((egr - ing) / 86400000) };
+  }
+
+  function añosComputablesLCT(ant) {
+    if (!ant) return null;
+    let n = ant.años;
+    if (ant.meses > 3) n += 1; // fracción mayor a tres meses computa como año entero (art. 245, LCT)
+    return Math.max(n, 1);
+  }
+
+  function diasRestantesMes(iso) {
+    const f = parseISODate(iso);
+    if (!f) return null;
+    const ultimoDia = new Date(f.getFullYear(), f.getMonth() + 1, 0).getDate();
+    return { restantes: ultimoDia - f.getDate(), mes: MESES_ES[f.getMonth()], anio: f.getFullYear() };
+  }
+
+  function semestreInfo(iso) {
+    const f = parseISODate(iso);
+    if (!f) return null;
+    return { numero: (f.getMonth() + 1) <= 6 ? 'primer' : 'segundo', anio: f.getFullYear() };
+  }
+
   const CARACTER_LETRADO = [
     { value: 'patrocinante', label: 'Letrado/a patrocinante' },
     { value: 'apoderado',    label: 'Apoderado/a' },
@@ -410,16 +451,101 @@ export function initDemandaDespido(container) {
       prueba_otros: val('dd-prueba_otros'),
     };
 
-    // Rubros
+    // ── Datos de contexto para la justificación de cada rubro ──────────────
+    const isoIngreso = val('dd-fecha_ingreso');
+    const isoCese = val('dd-fecha_egreso') || val('dd-fecha_despido') || val('dd-fecha_autodespido') || val('dd-fecha_notificacion_causa') || '';
+    const antiguedad = calcularAntiguedad(isoIngreso, isoCese);
+    const añosComp = añosComputablesLCT(antiguedad);
+    const remuneracionNum = parseFloat(val('dd-remuneracion_mensual')) || 0;
+    const infoIntegracion = diasRestantesMes(isoCese);
+    const infoSemestre = semestreInfo(isoCese);
+    const tipoEstabilidadSel = val('dd-tipo_estabilidad');
+
+    function justificarRubro(id, monto) {
+      const m = fmtMoneda(monto);
+      switch (id) {
+        case 'indemnizacion_antiguedad': {
+          const antTexto = añosComp ? `${añosComp} año${añosComp === 1 ? '' : 's'}` : '[antigüedad a determinar conforme prueba]';
+          const baseConSac = remuneracionNum * (13 / 12);
+          const baseTexto = remuneracionNum
+            ? `$ ${fmtMoneda(baseConSac)} (mejor remuneración mensual, normal y habitual de $ ${fmtMoneda(remuneracionNum)}, con más la incidencia del Sueldo Anual Complementario)`
+            : '[BASE DE CÁLCULO A DETERMINAR]';
+          return `Indemnización por antigüedad (art. 245, LCT): corresponde el pago de la indemnización por despido prevista en el art. 245 de la Ley de Contrato de Trabajo, equivalente a un mes de la mejor remuneración mensual, normal y habitual devengada durante el último año de prestación de servicios (o durante el tiempo de servicio, si éste fuera menor), con más la incidencia del Sueldo Anual Complementario sobre dicha base, conforme la doctrina de la Suprema Corte de Justicia de la Provincia de Buenos Aires [CITAR PRECEDENTE SCBA — no resulta de aplicación en esta jurisdicción el Plenario N° 322 "Tulosai" de la CNAT, que rige solo en el fuero nacional/CABA], por cada año de antigüedad o fracción mayor de tres meses. Con una antigüedad computable de ${antTexto} y una base de cálculo de ${baseTexto}, se reclama por este concepto la suma de $ ${m}.`;
+        }
+        case 'preaviso': {
+          let mesesTexto, antTexto;
+          if (antiguedad) {
+            mesesTexto = antiguedad.años > 5 ? 'dos (2) meses' : 'un (1) mes';
+            antTexto = `${antiguedad.años} año${antiguedad.años === 1 ? '' : 's'} y ${antiguedad.meses} mes${antiguedad.meses === 1 ? '' : 'es'}`;
+          } else {
+            mesesTexto = 'un (1) mes o dos (2) meses, según la antigüedad que en definitiva se acredite';
+            antTexto = '[antigüedad a verificar conforme documentación]';
+          }
+          return `Preaviso (arts. 231 y 232, LCT): la demandada omitió otorgar el preaviso de ley, por lo que corresponde el pago de la indemnización sustitutiva equivalente a ${mesesTexto} de remuneración, en virtud de la antigüedad acreditada (${antTexto} de servicio, art. 231, LCT), con más la incidencia proporcional del Sueldo Anual Complementario sobre dicho concepto (art. 233, LCT). Se reclama por este rubro la suma de $ ${m}.`;
+        }
+        case 'integracion': {
+          if (infoIntegracion && infoIntegracion.restantes > 0) {
+            return `Integración del mes de despido (art. 233, LCT): el distracto se produjo restando ${infoIntegracion.restantes} día${infoIntegracion.restantes === 1 ? '' : 's'} para la finalización del mes de ${infoIntegracion.mes} de ${infoIntegracion.anio}; en consecuencia, se reclama la integración del mes de despido equivalente a dicho lapso, con más la incidencia del Sueldo Anual Complementario (art. 233, LCT), por la suma de $ ${m}.`;
+          }
+          if (infoIntegracion) {
+            return `Integración del mes de despido (art. 233, LCT): sin perjuicio de que el distracto se produjo el último día del mes de ${infoIntegracion.mes} de ${infoIntegracion.anio} — supuesto en el cual, en principio, no correspondería este rubro conforme el art. 233, LCT —, se lo reclama a todo evento por la suma de $ ${m}, sujeto a lo que en definitiva surja de la prueba a producirse.`;
+          }
+          return `Integración del mes de despido (art. 233, LCT): se reclama la integración del mes de despido conforme el art. 233 de la LCT, por la suma de $ ${m}.`;
+        }
+        case 'sac_proporcional': {
+          if (infoSemestre) {
+            return `Sueldo Anual Complementario proporcional (art. 123, LCT): habiéndose producido el cese en el ${infoSemestre.numero} semestre del año ${infoSemestre.anio}, se reclama el Sueldo Anual Complementario proporcional al tiempo trabajado en dicho semestre, calculado sobre el cincuenta por ciento (50%) de la mayor remuneración mensual, normal y habitual devengada en el período (art. 123, LCT), por la suma de $ ${m}.`;
+          }
+          return `Sueldo Anual Complementario proporcional (art. 123, LCT): se reclama el Sueldo Anual Complementario proporcional al tiempo trabajado en el semestre respectivo, por la suma de $ ${m}.`;
+        }
+        case 'vacaciones': {
+          const anioVac = infoIntegracion ? infoIntegracion.anio : (infoSemestre ? infoSemestre.anio : '[AÑO]');
+          return `Vacaciones proporcionales no gozadas (arts. 150, 153 y 156, LCT): se reclama el pago de las vacaciones proporcionales correspondientes al año ${anioVac}, no gozadas ni abonadas a la fecha del distracto, calculadas en base a un día de descanso por cada veinte (20) días de trabajo efectivo (art. 153, LCT), con más la incidencia del Sueldo Anual Complementario (art. 156, LCT), por la suma de $ ${m}.`;
+        }
+        case 'salarios_adeudados':
+          return `Salarios adeudados: se reclama el pago de las remuneraciones devengadas y no abonadas por la demandada, correspondientes a los períodos que se acreditarán en la etapa probatoria, por la suma de $ ${m}.`;
+        case 'ley25323_art1': {
+          const tipoRegistro = d.registrado === 'no_registrada' ? 'no registrada ("en negro")' : d.registrado === 'deficiente' ? 'registrada en forma deficiente (fecha de ingreso y/o remuneración consignadas por debajo de la real)' : 'irregularmente registrada';
+          return `Daño y perjuicio por registración deficiente u omitida: la relación laboral fue ${tipoRegistro}, incumplimiento que — conforme los fundamentos desarrollados en el punto III — configura una fuente autónoma de responsabilidad civil que afecta además los aportes previsionales de la parte actora en perjuicio de su futura jubilación. A fin de cuantificar este daño, se solicita se lo gradúe en el equivalente al doble de las indemnizaciones de los arts. 232, 233 y 245 de la LCT (pauta objetiva ex art. 1, Ley 25.323, hoy derogado) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
+        }
+        case 'ley25323_art2':
+          return `Daño y perjuicio por falta de pago en término de las indemnizaciones: la demora imputable a la demandada en el pago de las indemnizaciones derivadas de la ruptura del vínculo excede el simple retraso compensable con el interés moratorio, en tanto dichas acreencias revisten carácter alimentario (arts. 103, 116 y ccdtes., LCT) y su percepción oportuna resulta indispensable para que la parte actora pueda afrontar sus necesidades básicas hasta su reinserción laboral (art. 19, CN; arts. 1708 y ss., CCCN; cfr. Ossola, Responsabilidad civil, 2ª ed., Abeledo-Perrot, 2024, p. 367). A fin de cuantificar este daño, se solicita se lo gradúe en el cincuenta por ciento (50%) de las indemnizaciones de los arts. 232, 233 y 245 de la LCT (pauta objetiva ex art. 2, Ley 25.323, hoy derogado) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
+        case 'art80_lct':
+          return `Daño y perjuicio por falta de entrega de certificados de trabajo: el incumplimiento de la demandada a su obligación de entregar el certificado de trabajo con los datos reales de la relación laboral (art. 80, LCT; art. 1° de la Ley 24.576) le genera a la parte actora la imposibilidad de acreditar su calificación profesional y experiencia frente a futuros empleadores, configurando un daño cierto y una pérdida de chance que no requieren prueba específica por hallarse la confección y entrega del certificado en cabeza exclusiva de la patronal (arts. 1737, 1738 y 1739, CCCN; SCBA, causa L. 105.726, "Mac Garrell, Esteban c/ Atento Holding Telecomunicaciones y ots. s/ Despido"; CNAT, Sala VI, Expte. N° 10785/00, "Sequeira, Pedro c/ Fomec S.A. s/ despido"). A fin de cuantificar este daño, se solicita se lo gradúe en el equivalente a tres (3) remuneraciones percibidas por la parte actora (pauta objetiva ex art. 45, Ley 25.345, hoy derogado) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
+        case 'ley24013': {
+          const tipoRegistro2 = d.registrado === 'no_registrada' ? 'no registrada' : d.registrado === 'deficiente' ? 'registrada en forma deficiente' : 'irregularmente registrada';
+          return `Daño y perjuicio por no registración o registración deficiente (Ley 24.013): sin perjuicio del rubro anterior, y en tanto la relación fue ${tipoRegistro2}, se reclama asimismo — con idéntico fundamento de derecho común expuesto en el punto III — la suma de $ ${m}, tomando como pauta objetiva de cuantificación las multas que preveían los arts. 8, 9, 10 y/o 15 de la Ley 24.013 (hoy derogados) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido.`;
+        }
+        case 'indemnizacion_especial_estabilidad': {
+          const fundamento = tipoEstabilidadSel === 'sindical'
+            ? 'el art. 52 de la Ley 23.551, con más los salarios caídos hasta la efectiva reinstalación o hasta que la parte actora opte por la indemnización'
+            : 'el art. 182 de la LCT, equivalente a trece (13) veces la remuneración mensual, normal y habitual';
+          return `Indemnización especial por estabilidad: en virtud de la protección especial invocada en el punto II, corresponde el pago de la indemnización agravada prevista en ${fundamento}, por la suma de $ ${m}.`;
+        }
+        case 'dano_moral':
+          return `Daño moral: se reclama la reparación del daño moral sufrido por mi mandante a raíz del obrar antijurídico de la demandada, en los términos de los arts. 1737, 1738 y 1741 del Código Civil y Comercial de la Nación, por la suma de $ ${m}.`;
+        case 'otro': {
+          const detalle = val('dd-otro_detalle');
+          return detalle
+            ? `${detalle}: se reclama por este concepto la suma de $ ${m}.`
+            : `Otro concepto reclamado: se reclama la suma de $ ${m}, cuyo detalle y fundamento se desarrollará conforme el caso concreto.`;
+        }
+        default:
+          return `Se reclama la suma de $ ${m}.`;
+      }
+    }
+
+    // Rubros — liquidación con justificación desarrollada de cada concepto
     let total = 0;
     const rubrosTexto = [];
+    let nRubro = 0;
     RUBROS.forEach(r => {
       const chk = container.querySelector(`[data-rubro="${r.id}"]`);
       if (chk.checked) {
         const monto = parseFloat(container.querySelector(`#dd-monto-${r.id}`).value) || 0;
         total += monto;
-        const label = r.id === 'otro' && val('dd-otro_detalle') ? val('dd-otro_detalle') : r.label;
-        rubrosTexto.push(`- ${label}: $ ${fmtMoneda(monto)}`);
+        nRubro++;
+        rubrosTexto.push(`${nRubro}.- ${justificarRubro(r.id, monto)}`);
       }
     });
 
@@ -471,7 +597,7 @@ export function initDemandaDespido(container) {
     }
     const reclamaDanioDerogado = rubroActivo('ley25323_art1') || rubroActivo('ley25323_art2') || rubroActivo('art80_lct') || rubroActivo('ley24013');
     if (reclamaDanioDerogado) {
-      derecho += `. Los rubros de registración deficiente, mora en el pago y/o falta de entrega de certificados se fundan en la responsabilidad civil de derecho común (arts. 1716, 1717, 1738 y 1740 del Código Civil y Comercial de la Nación), tomando como pauta objetiva de cuantificación del daño las fórmulas que preveían los arts. 1 y 2 de la Ley 25.323 (derogada por art. 55, DNU 70/2023, B.O. 21/12/2023, ratificado por Ley 27.742, B.O. 8/7/2024), los arts. 8, 9, 10 y 15 de la Ley 24.013 (derogados por arts. 99-100, Ley 27.742) y el art. 45 de la Ley 25.345 (derogado por art. 99, Ley 27.742), normas hoy sin vigencia como sanción estatutaria pero cuyo quantum se invoca como medida objetiva y razonable del perjuicio sufrido`;
+      derecho += `. En cuanto a los daños y perjuicios reclamados por registración deficiente u omitida, mora en el pago y/o falta de entrega de certificados de trabajo, cabe destacar que la indemnización tarifada del art. 245 de la LCT no repara cabal y completamente todos los daños padecidos por la parte actora, en particular aquellos cuyo origen es el incumplimiento de las obligaciones registrales y documentales que la legislación laboral pone en cabeza del empleador (arts. 7, 8, 9, 10, 52 y ccdtes., LCT; arts. 7 y 12, Ley 24.013). La eliminación de las denominadas "multas" laborales de los arts. 8, 9, 10 y 15 de la Ley 24.013, del art. 45 de la Ley 25.345 y de los arts. 1 y 2 de la Ley 25.323 (arts. 99, 100 y 55, Ley 27.742/DNU 70/2023) no elimina la obligación de reparar el daño causado, que subsiste con fundamento en el derecho común, quedando habilitada su reclamación con sustento en los arts. 1716, 1717, 1722, 1737, 1738, 1739, 1740 y 1741 del Código Civil y Comercial de la Nación (cfr. Ackerman, "Algunas posibles consecuencias de la eliminación o cambio de destino de las mal llamadas multas de las Leyes 24.013 y 25.323 y del artículo 80 de la Ley de Contrato de Trabajo", Revista de Derecho Laboral. Actualidad, n° 2018-I, Rubinzal-Culzoni, p. 119, esp. p. 122). Las fórmulas que preveían dichas normas hoy derogadas se invocan, en cada caso, como pauta objetiva y razonable de cuantificación del daño, sin perjuicio de que V.E. fije el monto que considere una justa recomposición del perjuicio sufrido`;
     }
     derecho += `. En cuanto a los requisitos formales de la presente, se estará a lo dispuesto por el art. 31 de la Ley 15.057 de Procedimiento Laboral de la Provincia de Buenos Aires, siendo de aplicación supletoria el Código Procesal Civil y Comercial de la Provincia de Buenos Aires conforme lo dispone el art. 89 de la citada ley.`;
 
@@ -502,8 +628,10 @@ III. EL DERECHO
 ${derecho}
 
 IV. LIQUIDACIÓN
-Practico liquidación de los rubros reclamados, sin perjuicio de su reajuste conforme la prueba a producirse:
-${rubrosTexto.length ? rubrosTexto.join('\n') : '- [DETALLAR RUBROS Y MONTOS]'}
+Que en virtud de lo expuesto, se practica a continuación la liquidación de los rubros indemnizatorios y sus diferencias, sin perjuicio de su reajuste conforme la prueba a producirse:
+
+${rubrosTexto.length ? rubrosTexto.join('\n\n') : '- [DETALLAR RUBROS Y MONTOS]'}
+
 TOTAL RECLAMADO: $ ${totalTexto}
 
 V. PRUEBA
@@ -533,7 +661,8 @@ Recordatorios previos a la presentación (no forman parte del escrito):
 - Verificar la exención de tasa de justicia conforme el beneficio de gratuidad invocado (art. 27, Ley 15.057).
 - Verificar el Juzgado del Trabajo y Departamento Judicial competente según el domicilio del demandado o el lugar de prestación de tareas.
 - Cotejar la liquidación practicada con las herramientas "Liquidación LCT", "Daños — Empleo No Registrado" y "Daños — Registro y Mora" del sitio.${reclamaDanioDerogado ? `
-- ADVERTENCIA: se reclaman rubros de daño y perjuicio (registración deficiente, mora en el pago y/o falta de certificados) fundados en pautas de leyes hoy derogadas (Ley 25.323, arts. 8/9/10/15 Ley 24.013, art. 45 Ley 25.345). El art. 245 LCT (texto según art. 51, Ley 27.802) dispone que la indemnización por despido es "la única reparación procedente frente a la extinción sin justa causa... incluidos los reclamos de naturaleza civil". Entendemos que esta cláusula no alcanza a estos rubros por tratarse de incumplimientos autónomos y no de la extinción en sí, pero es una norma sin desarrollo jurisprudencial propio (vigente desde marzo de 2026): evaluar este riesgo interpretativo antes de presentar.` : ''}${(actoresExtra.length || demandadosExtra.length) ? `
+- ADVERTENCIA: se reclaman rubros de daño y perjuicio (registración deficiente, mora en el pago y/o falta de certificados) fundados en pautas de leyes hoy derogadas (Ley 25.323, arts. 8/9/10/15 Ley 24.013, art. 45 Ley 25.345). El art. 245 LCT (texto según art. 51, Ley 27.802) dispone que la indemnización por despido es "la única reparación procedente frente a la extinción sin justa causa... incluidos los reclamos de naturaleza civil". Entendemos que esta cláusula no alcanza a estos rubros por tratarse de incumplimientos autónomos y no de la extinción en sí, pero es una norma sin desarrollo jurisprudencial propio (vigente desde marzo de 2026): evaluar este riesgo interpretativo antes de presentar.
+- Las citas de doctrina y jurisprudencia incorporadas en la justificación de los rubros de daño (Ackerman, Ossola, SCBA "Mac Garrell", CNAT "Sequeira") son un modelo orientativo: verificar su vigencia y pertinencia, y completar el relato con los datos fácticos del caso (intimaciones cursadas, fechas, medio y N° de telegrama/CD, etc.) antes de presentar.` : ''}${(actoresExtra.length || demandadosExtra.length) ? `
 - LITISCONSORCIO: se cargaron ${actoresExtra.length} coactor/es y ${demandadosExtra.length} codemandado/s adicional/es. El relato de HECHOS, EL DERECHO y la LIQUIDACIÓN fueron redactados sobre los datos del actor y del demandado principales — revisar y adaptar manualmente esos puntos si los coactores/codemandados tuvieran datos, antigüedad, remuneración o rubros propios.` : ''}`;
 
     ultimoTextoGenerado = texto;
