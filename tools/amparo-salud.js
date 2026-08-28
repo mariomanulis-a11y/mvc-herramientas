@@ -23,6 +23,19 @@ export function initAmparoSalud(container) {
     { id: 'poggi',      nombre: 'Camila Susana Poggi',        domicilioElectronico: '27388231705@notificaciones.scba.gov.ar', celular: '1138224662', matricula: 'T° 55 F° 255 CASI' },
   ];
   const ABOGADOS_BY_ID = Object.fromEntries(ABOGADOS.map(a => [a.id, a]));
+  const TODOS_ABOGADOS_TEXTO = 'los Dres./Dras. ' + ABOGADOS.map(a => `${a.nombre} (${a.matricula})`).join(' y/o ');
+
+  function joinConY(arr) {
+    const items = arr.filter(Boolean);
+    if (items.length === 0) return '';
+    if (items.length === 1) return items[0];
+    return items.slice(0, -1).join(', ') + ' y ' + items[items.length - 1];
+  }
+
+  const CARACTER_LETRADO = [
+    { value: 'patrocinante', label: 'Letrado/a patrocinante' },
+    { value: 'apoderado',    label: 'Apoderado/a' },
+  ];
 
   // ── Fundamento común (transversal a todas las materias) ────────────────
   const FUNDAMENTO_COMUN = `La tutela del derecho a la salud es una manda consagrada por la Constitución Nacional (arts. 42 y 75, inc. 22) y por los tratados internacionales con jerarquía constitucional (art. 12 del Pacto Internacional de Derechos Económicos, Sociales y Culturales; arts. 4 y 5 de la Convención Americana sobre Derechos Humanos), que implica la obligación impostergable del Estado y de los demás sujetos obligados de garantizarlo mediante acciones positivas (CSJN, Fallos: 345:549; 344:1557; 330:4160). El derecho a la salud, máxime cuando se trata de enfermedades graves, está íntimamente relacionado con el derecho a la vida, primer derecho de la persona humana reconocido por la Constitución Nacional (Fallos: 329:4918; 329:1638).`;
@@ -350,8 +363,12 @@ export function initAmparoSalud(container) {
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Profesional actuante y trámite</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
         <div class="field-group">
-          <label for="am-abogado-select">Abogado/a patrocinante / apoderado/a</label>
+          <label for="am-abogado-select">Abogado/a actuante</label>
           <select id="am-abogado-select">${ABOGADOS.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}</select>
+        </div>
+        <div class="field-group">
+          <label for="am-caracter-letrado">Carácter</label>
+          <select id="am-caracter-letrado">${CARACTER_LETRADO.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}</select>
         </div>
         <div class="field-group"><label for="am-matricula">Matrícula (Tomo/Folio y Colegio)</label><input type="text" id="am-matricula"></div>
       </div>
@@ -366,10 +383,14 @@ export function initAmparoSalud(container) {
         <div>
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del actor</div>
           <div id="am-grupo-actor"></div>
+          <div id="am-actores-extra-wrapper" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+          <button class="btn btn-ghost" id="am-add-actor" type="button" style="margin-top:4px">+ Agregar coactor/a</button>
         </div>
         <div>
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos de la demandada</div>
           <div id="am-grupo-demandado"></div>
+          <div id="am-demandados-extra-wrapper" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+          <button class="btn btn-ghost" id="am-add-demandado" type="button" style="margin-top:4px">+ Agregar codemandado/a</button>
         </div>
         <div style="grid-column:1/-1">
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del hecho</div>
@@ -431,6 +452,65 @@ export function initAmparoSalud(container) {
   const divRes      = container.querySelector('#am-resultado');
   const textarea    = container.querySelector('#am-texto');
   let ultimoTextoGenerado = '';
+
+  const wrapActoresExtra = container.querySelector('#am-actores-extra-wrapper');
+  const wrapDemandadosExtra = container.querySelector('#am-demandados-extra-wrapper');
+  let actoresExtraCount = 0, demandadosExtraCount = 0;
+
+  function agregarActorExtra() {
+    actoresExtraCount++;
+    const id = actoresExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `am-actor-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="am-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="am-actor-extra-dni-${id}" placeholder="DNI"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="am-actor-extra-domicilio-${id}" placeholder="Domicilio real"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-actor="${id}">✕</button></div>`;
+    wrapActoresExtra.appendChild(div);
+    div.querySelector('[data-remove-actor]').addEventListener('click', () => div.remove());
+  }
+
+  function agregarDemandadoExtra() {
+    demandadosExtraCount++;
+    const id = demandadosExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `am-demandado-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="am-demandado-extra-nombre-${id}" placeholder="Razón social / nombre del/de la codemandado/a"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="am-demandado-extra-domicilio-${id}" placeholder="Domicilio"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="am-demandado-extra-afiliado-${id}" placeholder="N° de afiliado (opcional)"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-demandado="${id}">✕</button></div>`;
+    wrapDemandadosExtra.appendChild(div);
+    div.querySelector('[data-remove-demandado]').addEventListener('click', () => div.remove());
+  }
+
+  container.querySelector('#am-add-actor').addEventListener('click', agregarActorExtra);
+  container.querySelector('#am-add-demandado').addEventListener('click', agregarDemandadoExtra);
+
+  function leerActoresExtra() {
+    return Array.from(wrapActoresExtra.querySelectorAll('[id^="am-actor-extra-row-"]')).map(row => {
+      const id = row.id.replace('am-actor-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#am-actor-extra-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#am-actor-extra-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#am-actor-extra-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(a => a.nombre);
+  }
+
+  function leerDemandadosExtra() {
+    return Array.from(wrapDemandadosExtra.querySelectorAll('[id^="am-demandado-extra-row-"]')).map(row => {
+      const id = row.id.replace('am-demandado-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#am-demandado-extra-nombre-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#am-demandado-extra-domicilio-${id}`)?.value.trim() || '',
+        afiliado: container.querySelector(`#am-demandado-extra-afiliado-${id}`)?.value.trim() || '',
+      };
+    }).filter(x => x.nombre);
+  }
 
   function fmtMoneda(n) { return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
@@ -527,9 +607,21 @@ export function initAmparoSalud(container) {
     const abogadoSel = ABOGADOS_BY_ID[selAbogado.value];
     const matricula = val('am-matricula') || 'T° __ F° __';
     const abogadoTexto = `Dr./Dra. ${abogadoSel.nombre}, ${matricula}`;
+    const caracterLetradoValor = val('am-caracter-letrado');
+    const caracterLetradoTexto = caracterLetradoValor === 'apoderado' ? 'apoderado/a' : 'patrocinante';
     const juzgado = val('am-juzgado');
     const domicilioProcesal = val('am-domicilio_procesal') || '[DOMICILIO PROCESAL A CONSTITUIR]';
     const emailNotif = val('am-email_notificaciones') || abogadoSel.domicilioElectronico;
+
+    const actoresExtra = leerActoresExtra();
+    const demandadosExtra = leerDemandadosExtra();
+    const coactoresTexto = joinConY(actoresExtra.map(a => `${a.nombre}, DNI ${a.dni || '[DNI]'}${a.domicilio ? `, con domicilio real en ${a.domicilio}` : ''}`));
+    const demandadosNombres = [d.razon_social, ...demandadosExtra.map(x => x.nombre)];
+    const demandadosTextoObjeto = joinConY([
+      `${d.razon_social}, con domicilio en ${d.dom_destinatario}${d.numero_afiliado ? ` (N° de afiliado ${d.numero_afiliado})` : ''}`,
+      ...demandadosExtra.map(x => `${x.nombre}, con domicilio en ${x.domicilio || '[DOMICILIO]'}${x.afiliado ? ` (N° de afiliado ${x.afiliado})` : ''}`),
+    ]);
+    const demandadosTextoPetitorio = joinConY(demandadosNombres);
 
     const pruebasLabels = {
       documental: 'Documental: se acompaña la historia clínica, prescripciones médicas, estudios complementarios y la negativa por escrito de la demandada (o constancia de la solicitud efectuada sin respuesta), mediante los cuales se acredita el diagnóstico, el tratamiento prescripto y la falta de cobertura relatada en el punto II.',
@@ -547,10 +639,10 @@ export function initAmparoSalud(container) {
     const texto =
 `SEÑOR JUEZ${juzgado ? ` — ${juzgado}` : ''}:
 
-${abogadoTexto}, en mi carácter de patrocinante/apoderado/a de ${d.nombre}, DNI ${d.dni}, con domicilio real en ${d.domicilio}, constituyendo domicilio procesal en ${domicilioProcesal} y domicilio electrónico en ${emailNotif} (art. 40, CPCC), a V.S. respetuosamente me presento y digo:
+${abogadoTexto}, en mi carácter de ${caracterLetradoTexto} de ${d.nombre}, DNI ${d.dni}, con domicilio real en ${d.domicilio}${coactoresTexto ? `, y de ${coactoresTexto}` : ''}, constituyendo domicilio procesal en ${domicilioProcesal} y domicilio electrónico en ${emailNotif} (art. 40, CPCC), a V.S. respetuosamente me presento y digo:
 
 I. OBJETO
-Que vengo por el presente a promover ACCIÓN DE AMPARO (art. 43, Constitución Nacional; Ley 16.986) CON MEDIDA CAUTELAR contra ${d.razon_social}, con domicilio en ${d.dom_destinatario}${d.numero_afiliado ? ` (N° de afiliado ${d.numero_afiliado})` : ''}, a fin de que se condene a la demandada a brindar la cobertura/prestación reclamada, por resultar la negativa/omisión de ${materia.encuadreDemandado} manifiestamente arbitraria e ilegítima y lesiva de los derechos constitucionales a la salud y a la vida de la parte actora, con más sus costas.
+Que vengo por el presente a promover ACCIÓN DE AMPARO (art. 43, Constitución Nacional; Ley 16.986) CON MEDIDA CAUTELAR contra ${demandadosTextoObjeto}, a fin de que se condene a la demandada a brindar la cobertura/prestación reclamada, por resultar la negativa/omisión de ${materia.encuadreDemandado} manifiestamente arbitraria e ilegítima y lesiva de los derechos constitucionales a la salud y a la vida de la parte actora, con más sus costas.
 
 II. HECHOS
 ${hechosTipo}
@@ -576,13 +668,17 @@ ${(() => {
     : '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]';
 })()}
 
-VIII. PETITORIO
+VIII. AUTORIZACIONES
+Autorizo indistintamente a ${TODOS_ABOGADOS_TEXTO} a compulsar el expediente, tomar vista de las actuaciones, retirar y diligenciar cédulas, oficios, mandamientos, testimonios, copias y demás documentación, y a realizar cualquier otro trámite relacionado con las presentes actuaciones.
+
+IX. PETITORIO
 Por lo expuesto, a V.S. solicito:
 1) Me tenga por presentado, por parte y por constituido el domicilio procesal indicado.
-2) Se tenga por promovida la presente acción de amparo contra ${d.razon_social}.
+2) Se tenga por promovida la presente acción de amparo contra ${demandadosTextoPetitorio}.
 3) Se dicte la medida cautelar solicitada en el acápite VI, con carácter urgente e inaudita parte.
 4) Se tenga presente la prueba ofrecida y se provea oportunamente su producción.
-5) Oportunamente, se haga lugar a la demanda en todas sus partes, condenando a la demandada a brindar la cobertura/prestación reclamada, con más sus costas.
+5) Se tengan presentes las autorizaciones conferidas en el punto VIII.
+6) Oportunamente, se haga lugar a la demanda en todas sus partes, condenando a la demandada a brindar la cobertura/prestación reclamada, con más sus costas.
 
 PROVEER DE CONFORMIDAD,
 SERÁ JUSTICIA.
@@ -592,7 +688,8 @@ Recordatorios previos a la presentación (no forman parte del escrito):
 - Verificar el Juzgado/Fuero competente conforme el sujeto demandado (federal o provincial) y, en su caso, la Ley 13.928 (Amparo PBA) si tramita ante fuero provincial — extremo no verificado en esta versión.
 - Acompañar toda la documentación médica que acredite el diagnóstico, la prescripción y la negativa/omisión de la demandada.
 - Verificar el articulado específico de la normativa citada en los supuestos marcados como pendientes de revisión (TRHA, salud mental, HIV, cannabis medicinal, trasplante, migrantes, ART, DNU 70/2023).
-- Confirmar si corresponde el pago de tasa de justicia o si resulta aplicable alguna exención (beneficio de litigar sin gastos).`;
+- Confirmar si corresponde el pago de tasa de justicia o si resulta aplicable alguna exención (beneficio de litigar sin gastos).${(actoresExtra.length || demandadosExtra.length) ? `
+- LITISCONSORCIO: se cargaron ${actoresExtra.length} coactor/es y ${demandadosExtra.length} codemandado/s adicional/es. El relato de HECHOS, EL DERECHO y la MEDIDA CAUTELAR fueron redactados sobre los datos del actor y de la demandada principales — revisar y adaptar manualmente esos puntos si los coactores/codemandados tuvieran datos, diagnóstico o riesgo de salud propios.` : ''}`;
 
     ultimoTextoGenerado = texto;
     textarea.value = texto;
@@ -607,6 +704,11 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     container.querySelector('#am-prueba_otros').value = '';
     container.querySelectorAll('.am-prueba-check').forEach(c => c.checked = false);
     selAbogado.selectedIndex = 0;
+    container.querySelector('#am-caracter-letrado').selectedIndex = 0;
+    wrapActoresExtra.innerHTML = '';
+    wrapDemandadosExtra.innerHTML = '';
+    actoresExtraCount = 0;
+    demandadosExtraCount = 0;
     actualizarAbogado();
     divRes.style.display = 'none';
     textarea.value = '';
@@ -633,7 +735,7 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     if (!texto) return;
     const htmlBody = texto.split('\n').map(linea => {
       if (!linea.trim()) return '<p>&nbsp;</p>';
-      const negrita = /^(SEÑOR JUEZ|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|VIII\.|PROVEER|SERÁ JUSTICIA|Recordatorios)/.test(linea.trim());
+      const negrita = /^(SEÑOR JUEZ|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|VIII\.|IX\.|PROVEER|SERÁ JUSTICIA|Recordatorios)/.test(linea.trim());
       const esc = linea.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return `<p style="margin:0 0 8pt 0;${negrita ? 'font-weight:bold;' : ''}">${esc}</p>`;
     }).join('\n');

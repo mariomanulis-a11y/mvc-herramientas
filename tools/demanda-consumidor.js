@@ -18,6 +18,19 @@ export function initDemandaConsumidor(container) {
     { id: 'poggi',      nombre: 'Camila Susana Poggi',        domicilioElectronico: '27388231705@notificaciones.scba.gov.ar', celular: '1138224662', matricula: 'T° 55 F° 255 CASI' },
   ];
   const ABOGADOS_BY_ID = Object.fromEntries(ABOGADOS.map(a => [a.id, a]));
+  const TODOS_ABOGADOS_TEXTO = 'los Dres./Dras. ' + ABOGADOS.map(a => `${a.nombre} (${a.matricula})`).join(' y/o ');
+
+  function joinConY(arr) {
+    const items = arr.filter(Boolean);
+    if (items.length === 0) return '';
+    if (items.length === 1) return items[0];
+    return items.slice(0, -1).join(', ') + ' y ' + items[items.length - 1];
+  }
+
+  const CARACTER_LETRADO = [
+    { value: 'patrocinante', label: 'Letrado/a patrocinante' },
+    { value: 'apoderado',    label: 'Apoderado/a' },
+  ];
 
   // ── Materias y tipos de demanda ────────────────────────────────────────
   const MATERIAS = {
@@ -214,8 +227,12 @@ export function initDemandaConsumidor(container) {
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Profesional actuante y trámite</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
         <div class="field-group">
-          <label for="dcons-abogado-select">Abogado/a patrocinante / apoderado/a</label>
+          <label for="dcons-abogado-select">Abogado/a actuante</label>
           <select id="dcons-abogado-select">${ABOGADOS.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}</select>
+        </div>
+        <div class="field-group">
+          <label for="dcons-caracter-letrado">Carácter</label>
+          <select id="dcons-caracter-letrado">${CARACTER_LETRADO.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}</select>
         </div>
         <div class="field-group"><label for="dcons-matricula">Matrícula (Tomo/Folio y Colegio)</label><input type="text" id="dcons-matricula"></div>
       </div>
@@ -230,10 +247,14 @@ export function initDemandaConsumidor(container) {
         <div>
           <div class="form-section-title" id="dcons-titulo-remitente" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del actor (consumidor/a)</div>
           <div id="dcons-grupo-remitente"></div>
+          <div id="dcons-actores-extra-wrapper" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+          <button class="btn btn-ghost" id="dcons-add-actor" type="button" style="margin-top:4px">+ Agregar coactor/a</button>
         </div>
         <div>
           <div class="form-section-title" id="dcons-titulo-destinatario" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos de la demandada</div>
           <div id="dcons-grupo-destinatario"></div>
+          <div id="dcons-demandados-extra-wrapper" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+          <button class="btn btn-ghost" id="dcons-add-demandado" type="button" style="margin-top:4px">+ Agregar codemandado/a</button>
         </div>
         <div style="grid-column:1/-1">
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del hecho</div>
@@ -314,6 +335,65 @@ export function initDemandaConsumidor(container) {
   const textarea    = container.querySelector('#dcons-texto');
   const totalSpan   = container.querySelector('#dcons-total');
   let ultimoTextoGenerado = '';
+
+  const wrapActoresExtra = container.querySelector('#dcons-actores-extra-wrapper');
+  const wrapDemandadosExtra = container.querySelector('#dcons-demandados-extra-wrapper');
+  let actoresExtraCount = 0, demandadosExtraCount = 0;
+
+  function agregarActorExtra() {
+    actoresExtraCount++;
+    const id = actoresExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dcons-actor-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dcons-actor-extra-dni-${id}" placeholder="DNI"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-actor-extra-domicilio-${id}" placeholder="Domicilio real"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-actor="${id}">✕</button></div>`;
+    wrapActoresExtra.appendChild(div);
+    div.querySelector('[data-remove-actor]').addEventListener('click', () => div.remove());
+  }
+
+  function agregarDemandadoExtra() {
+    demandadosExtraCount++;
+    const id = demandadosExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dcons-demandado-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-demandado-extra-nombre-${id}" placeholder="Razón social / nombre del/de la codemandado/a"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-demandado-extra-domicilio-${id}" placeholder="Domicilio"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dcons-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-demandado="${id}">✕</button></div>`;
+    wrapDemandadosExtra.appendChild(div);
+    div.querySelector('[data-remove-demandado]').addEventListener('click', () => div.remove());
+  }
+
+  container.querySelector('#dcons-add-actor').addEventListener('click', agregarActorExtra);
+  container.querySelector('#dcons-add-demandado').addEventListener('click', agregarDemandadoExtra);
+
+  function leerActoresExtra() {
+    return Array.from(wrapActoresExtra.querySelectorAll('[id^="dcons-actor-extra-row-"]')).map(row => {
+      const id = row.id.replace('dcons-actor-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#dcons-actor-extra-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#dcons-actor-extra-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dcons-actor-extra-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(a => a.nombre);
+  }
+
+  function leerDemandadosExtra() {
+    return Array.from(wrapDemandadosExtra.querySelectorAll('[id^="dcons-demandado-extra-row-"]')).map(row => {
+      const id = row.id.replace('dcons-demandado-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#dcons-demandado-extra-nombre-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dcons-demandado-extra-domicilio-${id}`)?.value.trim() || '',
+        cuit: container.querySelector(`#dcons-demandado-extra-cuit-${id}`)?.value.trim() || '',
+      };
+    }).filter(x => x.nombre);
+  }
 
   function fmtMoneda(n) { return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
@@ -421,9 +501,21 @@ export function initDemandaConsumidor(container) {
     const abogadoSel = ABOGADOS_BY_ID[selAbogado.value];
     const matricula = val('dcons-matricula') || 'T° __ F° __';
     const abogadoTexto = `Dr./Dra. ${abogadoSel.nombre}, ${matricula}`;
+    const caracterLetradoValor = val('dcons-caracter-letrado');
+    const caracterLetradoTexto = caracterLetradoValor === 'apoderado' ? 'apoderado/a' : 'patrocinante';
     const juzgado = val('dcons-juzgado');
     const domicilioProcesal = val('dcons-domicilio_procesal') || '[DOMICILIO PROCESAL A CONSTITUIR]';
     const emailNotif = val('dcons-email_notificaciones') || abogadoSel.domicilioElectronico;
+
+    const actoresExtra = leerActoresExtra();
+    const demandadosExtra = leerDemandadosExtra();
+    const coactoresTexto = joinConY(actoresExtra.map(a => `${a.nombre}, DNI ${a.dni || '[DNI]'}${a.domicilio ? `, con domicilio real en ${a.domicilio}` : ''}`));
+    const demandadosNombres = [d.razon_social, ...demandadosExtra.map(x => x.nombre)];
+    const demandadosTextoObjeto = joinConY([
+      `${d.razon_social}, con domicilio en ${d.dom_destinatario}${d.cuit ? `, CUIT ${d.cuit}` : ''}`,
+      ...demandadosExtra.map(x => `${x.nombre}, con domicilio en ${x.domicilio || '[DOMICILIO]'}${x.cuit ? `, CUIT ${x.cuit}` : ''}`),
+    ]);
+    const demandadosTextoPetitorio = joinConY(demandadosNombres);
 
     // Rubros
     let total = parseFloat(d.monto_reclamado) || 0;
@@ -468,10 +560,10 @@ export function initDemandaConsumidor(container) {
     const texto =
 `SEÑOR JUEZ${juzgado ? ` — ${juzgado}` : ''}:
 
-${abogadoTexto}, en mi carácter de patrocinante/apoderado/a de ${d.nombre}, DNI ${d.dni}, con domicilio real en ${d.domicilio}, constituyendo domicilio procesal en ${domicilioProcesal} y domicilio electrónico en ${emailNotif} (art. 40, CPCC de la Provincia de Buenos Aires), a V.S. respetuosamente me presento y digo:
+${abogadoTexto}, en mi carácter de ${caracterLetradoTexto} de ${d.nombre}, DNI ${d.dni}, con domicilio real en ${d.domicilio}${coactoresTexto ? `, y de ${coactoresTexto}` : ''}, constituyendo domicilio procesal en ${domicilioProcesal} y domicilio electrónico en ${emailNotif} (art. 40, CPCC de la Provincia de Buenos Aires), a V.S. respetuosamente me presento y digo:
 
 I. OBJETO
-Que vengo por el presente a promover demanda por trámite sumarísimo (art. 53, Ley 24.240) contra ${d.razon_social}, con domicilio en ${d.dom_destinatario}${d.cuit ? `, CUIT ${d.cuit}` : ''}, ${materia.encuadre}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}) y/o lo que en más o en menos resulte de la prueba a producirse, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
+Que vengo por el presente a promover demanda por trámite sumarísimo (art. 53, Ley 24.240) contra ${demandadosTextoObjeto}, ${materia.encuadre}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}) y/o lo que en más o en menos resulte de la prueba a producirse, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
 
 II. HECHOS
 ${hechosTipo}
@@ -495,13 +587,17 @@ ${(() => {
 VI. BENEFICIO DE JUSTICIA GRATUITA
 Que en mi carácter de consumidor/a, invoco el beneficio de justicia gratuita previsto en el art. 25 de la Ley 13.133 y en el art. 53, tercer párrafo, de la Ley 24.240, solicitando se me exima del pago de tasas, contribuciones u otra imposición económica.
 
-VII. PETITORIO
+VII. AUTORIZACIONES
+Autorizo indistintamente a ${TODOS_ABOGADOS_TEXTO} a compulsar el expediente, tomar vista de las actuaciones, retirar y diligenciar cédulas, oficios, mandamientos, testimonios, copias y demás documentación, y a realizar cualquier otro trámite relacionado con las presentes actuaciones.
+
+VIII. PETITORIO
 Por lo expuesto, a V.S. solicito:
 1) Me tenga por presentado, por parte y por constituido el domicilio procesal indicado.
-2) Se tenga por promovida la presente demanda por trámite sumarísimo contra ${d.razon_social}.
+2) Se tenga por promovida la presente demanda por trámite sumarísimo contra ${demandadosTextoPetitorio}.
 3) Se tenga presente la prueba ofrecida y se provea oportunamente su producción.
 4) Se tenga presente el beneficio de justicia gratuita invocado (art. 25, Ley 13.133).
-5) Oportunamente, se haga lugar a la demanda en todas sus partes, condenando a la demandada al pago de la suma reclamada de $ ${totalTexto}, o lo que en más o en menos resulte de la prueba producida, con más sus intereses y costas.
+5) Se tengan presentes las autorizaciones conferidas en el punto VII.
+6) Oportunamente, se haga lugar a la demanda en todas sus partes, condenando a la demandada al pago de la suma reclamada de $ ${totalTexto}, o lo que en más o en menos resulte de la prueba producida, con más sus intereses y costas.
 
 PROVEER DE CONFORMIDAD,
 SERÁ JUSTICIA.
@@ -510,7 +606,8 @@ SERÁ JUSTICIA.
 Recordatorios previos a la presentación (no forman parte del escrito):
 - Verificar y acompañar el Bono de Derecho Fijo (Ley 8480), salvo exención aplicable.
 - Confirmar el Juzgado/Fuero competente según el monto reclamado (Juzgado de Paz Letrado o Civil y Comercial) y el domicilio de la demandada.
-- Verificar el cumplimiento de la mediación prejudicial obligatoria (Ley 13.951), previa a la radicación de la demanda, salvo que se invoque una excepción aplicable.`;
+- Verificar el cumplimiento de la mediación prejudicial obligatoria (Ley 13.951), previa a la radicación de la demanda, salvo que se invoque una excepción aplicable.${(actoresExtra.length || demandadosExtra.length) ? `
+- LITISCONSORCIO: se cargaron ${actoresExtra.length} coactor/es y ${demandadosExtra.length} codemandado/s adicional/es. El relato de HECHOS, EL DERECHO y la LIQUIDACIÓN fueron redactados sobre los datos del actor y de la demandada principales — revisar y adaptar manualmente esos puntos si los coactores/codemandados tuvieran datos, hechos o rubros propios.` : ''}`;
 
     ultimoTextoGenerado = texto;
     textarea.value = texto;
@@ -528,6 +625,11 @@ Recordatorios previos a la presentación (no forman parte del escrito):
       container.querySelector(`#dcons-monto-${id}`).value = '';
     });
     selAbogado.selectedIndex = 0;
+    container.querySelector('#dcons-caracter-letrado').selectedIndex = 0;
+    wrapActoresExtra.innerHTML = '';
+    wrapDemandadosExtra.innerHTML = '';
+    actoresExtraCount = 0;
+    demandadosExtraCount = 0;
     actualizarAbogado();
     actualizarTotal();
     divRes.style.display = 'none';
@@ -555,7 +657,7 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     if (!texto) return;
     const htmlBody = texto.split('\n').map(linea => {
       if (!linea.trim()) return '<p>&nbsp;</p>';
-      const negrita = /^(SEÑOR JUEZ|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|PROVEER|SERÁ JUSTICIA|TOTAL RECLAMADO|Recordatorios)/.test(linea.trim());
+      const negrita = /^(SEÑOR JUEZ|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|VIII\.|PROVEER|SERÁ JUSTICIA|TOTAL RECLAMADO|Recordatorios)/.test(linea.trim());
       const esc = linea.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return `<p style="margin:0 0 8pt 0;${negrita ? 'font-weight:bold;' : ''}">${esc}</p>`;
     }).join('\n');

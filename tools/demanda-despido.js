@@ -15,6 +15,19 @@ export function initDemandaDespido(container) {
     { id: 'poggi',      nombre: 'Camila Susana Poggi',        domicilioElectronico: '27388231705@notificaciones.scba.gov.ar', celular: '1138224662', matricula: 'T° 55 F° 255 CASI' },
   ];
   const ABOGADOS_BY_ID = Object.fromEntries(ABOGADOS.map(a => [a.id, a]));
+  const TODOS_ABOGADOS_TEXTO = 'los Dres./Dras. ' + ABOGADOS.map(a => `${a.nombre} (${a.matricula})`).join(' y/o ');
+
+  function joinConY(arr) {
+    const items = arr.filter(Boolean);
+    if (items.length === 0) return '';
+    if (items.length === 1) return items[0];
+    return items.slice(0, -1).join(', ') + ' y ' + items[items.length - 1];
+  }
+
+  const CARACTER_LETRADO = [
+    { value: 'patrocinante', label: 'Letrado/a patrocinante' },
+    { value: 'apoderado',    label: 'Apoderado/a' },
+  ];
 
   const CAUSALES = [
     { value: 'incausado',          label: 'Despido incausado (art. 245 LCT)' },
@@ -79,9 +92,15 @@ export function initDemandaDespido(container) {
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Profesional actuante y trámite</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
         <div class="field-group">
-          <label for="dd-abogado-select">Abogado/a patrocinante / apoderado/a</label>
+          <label for="dd-abogado-select">Abogado/a actuante</label>
           <select id="dd-abogado-select">
             ${ABOGADOS.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="dd-caracter-letrado">Carácter</label>
+          <select id="dd-caracter-letrado">
+            ${CARACTER_LETRADO.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
           </select>
         </div>
         <div class="field-group"><label for="dd-matricula">Matrícula (Tomo/Folio y Colegio)</label><input type="text" id="dd-matricula" placeholder="T° __ F° __ CALZ / CASI"></div>
@@ -103,6 +122,11 @@ export function initDemandaDespido(container) {
         <div class="field-group"><label for="dd-actor_estado_civil">Estado civil</label><input type="text" id="dd-actor_estado_civil" placeholder="soltero/a, casado/a, etc."></div>
         <div class="field-group"><label for="dd-actor_profesion">Profesión / oficio</label><input type="text" id="dd-actor_profesion" placeholder="operario/a, administrativo/a, etc."></div>
       </div>
+      <div id="dd-actores-extra-wrapper" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+      <div class="form-row" style="justify-content:flex-start;margin-top:4px">
+        <button class="btn btn-ghost" id="dd-add-actor" type="button">+ Agregar coactor/a</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--color-muted);margin-top:4px">Los coactores agregados se listan en el encabezamiento y en el objeto de la demanda. El relato de hechos y la liquidación siguen los datos laborales del actor principal cargado arriba — ajustar manualmente si cada coactor tuviera antigüedad/remuneración propias.</p>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del demandado (empleador) — art. 31 inc. b), Ley 15.057</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
@@ -110,6 +134,11 @@ export function initDemandaDespido(container) {
         <div class="field-group"><label for="dd-empleador_domicilio">Domicilio</label><input type="text" id="dd-empleador_domicilio" placeholder="calle 456, localidad"></div>
         <div class="field-group"><label for="dd-empleador_cuit">CUIT (opcional, para prueba informativa)</label><input type="text" id="dd-empleador_cuit" placeholder="30-12345678-9"></div>
       </div>
+      <div id="dd-demandados-extra-wrapper" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+      <div class="form-row" style="justify-content:flex-start;margin-top:4px">
+        <button class="btn btn-ghost" id="dd-add-demandado" type="button">+ Agregar codemandado/a</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--color-muted);margin-top:4px">Los codemandados agregados se listan en el encabezamiento y en el objeto de la demanda. El relato de hechos y la liquidación siguen los datos del demandado principal cargado arriba — ajustar manualmente si cada codemandado tuviera responsabilidad o datos propios.</p>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Relación laboral</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
@@ -228,6 +257,65 @@ export function initDemandaDespido(container) {
   const wrapOtroDet  = container.querySelector('#dd-wrap-otro_detalle');
   let ultimoTextoGenerado = '';
 
+  const wrapActoresExtra = container.querySelector('#dd-actores-extra-wrapper');
+  const wrapDemandadosExtra = container.querySelector('#dd-demandados-extra-wrapper');
+  let actoresExtraCount = 0, demandadosExtraCount = 0;
+
+  function agregarActorExtra() {
+    actoresExtraCount++;
+    const id = actoresExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dd-actor-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dd-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dd-actor-extra-dni-${id}" placeholder="DNI"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-actor-extra-domicilio-${id}" placeholder="Domicilio real"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-actor="${id}">✕</button></div>`;
+    wrapActoresExtra.appendChild(div);
+    div.querySelector('[data-remove-actor]').addEventListener('click', () => div.remove());
+  }
+
+  function agregarDemandadoExtra() {
+    demandadosExtraCount++;
+    const id = demandadosExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dd-demandado-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dd-demandado-extra-nombre-${id}" placeholder="Nombre / razón social del/de la codemandado/a"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-demandado-extra-domicilio-${id}" placeholder="Domicilio"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dd-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-demandado="${id}">✕</button></div>`;
+    wrapDemandadosExtra.appendChild(div);
+    div.querySelector('[data-remove-demandado]').addEventListener('click', () => div.remove());
+  }
+
+  container.querySelector('#dd-add-actor').addEventListener('click', agregarActorExtra);
+  container.querySelector('#dd-add-demandado').addEventListener('click', agregarDemandadoExtra);
+
+  function leerActoresExtra() {
+    return Array.from(wrapActoresExtra.querySelectorAll('[id^="dd-actor-extra-row-"]')).map(row => {
+      const id = row.id.replace('dd-actor-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#dd-actor-extra-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#dd-actor-extra-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dd-actor-extra-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(a => a.nombre);
+  }
+
+  function leerDemandadosExtra() {
+    return Array.from(wrapDemandadosExtra.querySelectorAll('[id^="dd-demandado-extra-row-"]')).map(row => {
+      const id = row.id.replace('dd-demandado-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#dd-demandado-extra-nombre-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dd-demandado-extra-domicilio-${id}`)?.value.trim() || '',
+        cuit: container.querySelector(`#dd-demandado-extra-cuit-${id}`)?.value.trim() || '',
+      };
+    }).filter(x => x.nombre);
+  }
+
   function actualizarAbogado() {
     const a = ABOGADOS_BY_ID[selAbogado.value];
     if (!a) return;
@@ -289,8 +377,11 @@ export function initDemandaDespido(container) {
 
     const abogadoSel = ABOGADOS_BY_ID[selAbogado.value];
     const matricula = val('dd-matricula') || 'T° __ F° __';
+    const caracterLetradoValor = val('dd-caracter-letrado') || 'patrocinante';
+    const caracterLetradoTexto = caracterLetradoValor === 'apoderado' ? 'apoderado/a' : 'patrocinante';
     const d = {
       abogado: `Dr./Dra. ${abogadoSel.nombre}, ${matricula}`,
+      caracter_letrado: caracterLetradoTexto,
       juzgado: val('dd-juzgado'),
       domicilio_procesal: val('dd-domicilio_procesal') || '[DOMICILIO PROCESAL A CONSTITUIR]',
       email_notificaciones: val('dd-email_notificaciones') || abogadoSel.domicilioElectronico,
@@ -341,6 +432,16 @@ export function initDemandaDespido(container) {
 
     const rubroActivo = (id) => container.querySelector(`[data-rubro="${id}"]`).checked;
 
+    const actoresExtra = leerActoresExtra();
+    const demandadosExtra = leerDemandadosExtra();
+    const coactoresTexto = joinConY(actoresExtra.map(a => `${a.nombre}, DNI ${a.dni || '[DNI]'}${a.domicilio ? `, con domicilio real en ${a.domicilio}` : ''}`));
+    const demandadosNombres = [d.empleador_nombre, ...demandadosExtra.map(x => x.nombre)];
+    const demandadosTextoObjeto = joinConY([
+      `${d.empleador_nombre}, con domicilio en ${d.empleador_domicilio}${d.empleador_cuit ? `, CUIT ${d.empleador_cuit}` : ''}`,
+      ...demandadosExtra.map(x => `${x.nombre}, con domicilio en ${x.domicilio || '[DOMICILIO]'}${x.cuit ? `, CUIT ${x.cuit}` : ''}`),
+    ]);
+    const demandadosTextoPetitorio = joinConY(demandadosNombres);
+
     // ── Hechos según causal ──────────────────────────────────────────────
     const registradoTexto = {
       registrada: 'encontrándose la relación debidamente registrada',
@@ -387,10 +488,10 @@ export function initDemandaDespido(container) {
     const texto =
 `EXCMO. TRIBUNAL DEL TRABAJO${d.juzgado ? ` — ${d.juzgado}` : ''}:
 
-${d.abogado}, en mi carácter de patrocinante/apoderado/a de ${d.actor_nombre}, DNI ${d.actor_dni}, con domicilio real en ${d.actor_domicilio_real}, constituyendo domicilio procesal en ${d.domicilio_procesal} y domicilio electrónico en ${d.email_notificaciones} (art. 40, CPCC de la Provincia de Buenos Aires, de aplicación supletoria conforme art. 89, Ley 15.057), a V.E. respetuosamente me presento y digo:
+${d.abogado}, en mi carácter de ${d.caracter_letrado} de ${d.actor_nombre}, DNI ${d.actor_dni}, con domicilio real en ${d.actor_domicilio_real}${coactoresTexto ? `, y de ${coactoresTexto}` : ''}, constituyendo domicilio procesal en ${d.domicilio_procesal} y domicilio electrónico en ${d.email_notificaciones} (art. 40, CPCC de la Provincia de Buenos Aires, de aplicación supletoria conforme art. 89, Ley 15.057), a V.E. respetuosamente me presento y digo:
 
 I. OBJETO
-Que vengo por el presente a promover demanda laboral contra ${d.empleador_nombre}, con domicilio en ${d.empleador_domicilio}${d.empleador_cuit ? `, CUIT ${d.empleador_cuit}` : ''}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}), o lo que en más o en menos resulte de la prueba a producirse en autos, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
+Que vengo por el presente a promover demanda laboral contra ${demandadosTextoObjeto}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}), o lo que en más o en menos resulte de la prueba a producirse en autos, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
 
 II. HECHOS
 Que ${d.actor_nombre}, DNI ${d.actor_dni}, de ${d.actor_edad || '[EDAD]'} años de edad, de nacionalidad ${d.actor_nacionalidad}, de estado civil ${d.actor_estado_civil || '[ESTADO CIVIL]'}, de profesión/oficio ${d.actor_profesion || '[PROFESIÓN U OFICIO]'}, ingresó a trabajar en relación de dependencia para la demandada con fecha ${d.fecha_ingreso}, desempeñando tareas de ${d.categoria_tareas}, cumpliendo una jornada de ${d.jornada}, percibiendo una remuneración mensual, normal y habitual de $ ${d.remuneracion_mensual ? fmtMoneda(parseFloat(d.remuneracion_mensual)) : '[MONTO]'}, ${registradoTexto}.
@@ -411,13 +512,17 @@ ${pruebaTextoFinal || '- [DETALLAR MEDIOS DE PRUEBA OFRECIDOS]'}
 VI. BENEFICIO DE GRATUIDAD
 Que en mi carácter de trabajador/a, invoco el beneficio de gratuidad previsto en el art. 27 de la Ley 15.057, solicitando se me exima del pago de tasas por servicios judiciales, así como de toda caución real o personal para el pago de costas, gastos, honorarios o por la responsabilidad derivada de eventuales medidas cautelares.
 
-VII. PETITORIO
+VII. AUTORIZACIONES
+Autorizo indistintamente a ${TODOS_ABOGADOS_TEXTO} a compulsar el expediente, tomar vista de las actuaciones, retirar y diligenciar cédulas, oficios, mandamientos, testimonios, copias y demás documentación, y a realizar cualquier otro trámite relacionado con las presentes actuaciones.
+
+VIII. PETITORIO
 Por lo expuesto, a V.E. solicito:
 1) Me tenga por presentado, por parte y por constituido el domicilio procesal indicado.
-2) Se tenga por promovida la presente demanda laboral contra ${d.empleador_nombre}.
+2) Se tenga por promovida la presente demanda laboral contra ${demandadosTextoPetitorio}.
 3) Se tenga presente la prueba ofrecida y se provea oportunamente su producción.
 4) Se tenga presente el beneficio de gratuidad invocado (art. 27, Ley 15.057).
-5) Oportunamente, se haga lugar a la demanda en todas sus partes, condenando a la parte demandada al pago de la suma reclamada de $ ${totalTexto}, o lo que en más o en menos resulte de la prueba producida, con más sus intereses y costas.
+5) Se tengan presentes las autorizaciones conferidas en el punto VII.
+6) Oportunamente, se haga lugar a la demanda en todas sus partes, condenando a la parte demandada al pago de la suma reclamada de $ ${totalTexto}, o lo que en más o en menos resulte de la prueba producida, con más sus intereses y costas.
 
 PROVEER DE CONFORMIDAD,
 SERÁ JUSTICIA.
@@ -428,7 +533,8 @@ Recordatorios previos a la presentación (no forman parte del escrito):
 - Verificar la exención de tasa de justicia conforme el beneficio de gratuidad invocado (art. 27, Ley 15.057).
 - Verificar el Juzgado del Trabajo y Departamento Judicial competente según el domicilio del demandado o el lugar de prestación de tareas.
 - Cotejar la liquidación practicada con las herramientas "Liquidación LCT", "Daños — Empleo No Registrado" y "Daños — Registro y Mora" del sitio.${reclamaDanioDerogado ? `
-- ADVERTENCIA: se reclaman rubros de daño y perjuicio (registración deficiente, mora en el pago y/o falta de certificados) fundados en pautas de leyes hoy derogadas (Ley 25.323, arts. 8/9/10/15 Ley 24.013, art. 45 Ley 25.345). El art. 245 LCT (texto según art. 51, Ley 27.802) dispone que la indemnización por despido es "la única reparación procedente frente a la extinción sin justa causa... incluidos los reclamos de naturaleza civil". Entendemos que esta cláusula no alcanza a estos rubros por tratarse de incumplimientos autónomos y no de la extinción en sí, pero es una norma sin desarrollo jurisprudencial propio (vigente desde marzo de 2026): evaluar este riesgo interpretativo antes de presentar.` : ''}`;
+- ADVERTENCIA: se reclaman rubros de daño y perjuicio (registración deficiente, mora en el pago y/o falta de certificados) fundados en pautas de leyes hoy derogadas (Ley 25.323, arts. 8/9/10/15 Ley 24.013, art. 45 Ley 25.345). El art. 245 LCT (texto según art. 51, Ley 27.802) dispone que la indemnización por despido es "la única reparación procedente frente a la extinción sin justa causa... incluidos los reclamos de naturaleza civil". Entendemos que esta cláusula no alcanza a estos rubros por tratarse de incumplimientos autónomos y no de la extinción en sí, pero es una norma sin desarrollo jurisprudencial propio (vigente desde marzo de 2026): evaluar este riesgo interpretativo antes de presentar.` : ''}${(actoresExtra.length || demandadosExtra.length) ? `
+- LITISCONSORCIO: se cargaron ${actoresExtra.length} coactor/es y ${demandadosExtra.length} codemandado/s adicional/es. El relato de HECHOS, EL DERECHO y la LIQUIDACIÓN fueron redactados sobre los datos del actor y del demandado principales — revisar y adaptar manualmente esos puntos si los coactores/codemandados tuvieran datos, antigüedad, remuneración o rubros propios.` : ''}`;
 
     ultimoTextoGenerado = texto;
     textarea.value = texto;
@@ -441,6 +547,11 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     container.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
     container.querySelector('#dd-registrado').selectedIndex = 0;
     selAbogado.selectedIndex = 0;
+    container.querySelector('#dd-caracter-letrado').selectedIndex = 0;
+    wrapActoresExtra.innerHTML = '';
+    wrapDemandadosExtra.innerHTML = '';
+    actoresExtraCount = 0;
+    demandadosExtraCount = 0;
     actualizarAbogado();
     actualizarTotal();
     divRes.style.display = 'none';
@@ -468,7 +579,7 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     if (!texto) return;
     const htmlBody = texto.split('\n').map(linea => {
       if (!linea.trim()) return '<p>&nbsp;</p>';
-      const negrita = /^(EXCMO\. TRIBUNAL|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|PROVEER|SERÁ JUSTICIA|TOTAL RECLAMADO|Recordatorios)/.test(linea.trim());
+      const negrita = /^(EXCMO\. TRIBUNAL|I\.|II\.|III\.|IV\.|V\.|VI\.|VII\.|VIII\.|PROVEER|SERÁ JUSTICIA|TOTAL RECLAMADO|Recordatorios)/.test(linea.trim());
       const esc = linea.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return `<p style="margin:0 0 8pt 0;${negrita ? 'font-weight:bold;' : ''}">${esc}</p>`;
     }).join('\n');
