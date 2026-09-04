@@ -656,13 +656,43 @@ export function initLiquidacionIntegral(container) {
 
     // — Exportar PDF
     container.querySelector('#lid-pdf').addEventListener('click', () => {
+      // Nota: filasLiq/filas25323/filas24013 (arriba) están pensadas para la pantalla de la
+      // app (tema oscuro: la columna "Base de cálculo" usa color rgba(255,255,255,.45)).
+      // El PDF se imprime sobre fondo blanco, así que acá se arman filas propias con un color
+      // oscuro (#777) para que la base de cálculo sea legible — y se le pregunta al usuario si
+      // quiere incluirla o no antes de generar el documento.
+      const incluirBase = confirm('¿Incluir el detalle de la base de cálculo (fórmula) de cada rubro en el PDF?\n\nAceptar = incluir el detalle. Cancelar = solo concepto y monto.');
+      const baseTd = (texto) => `<td style="font-size:11px;color:#777">${incluirBase ? (texto || '') : ''}</td>`;
+
+      let pdfFilasLiq = '';
+      for (const c of conceptosLiq) {
+        const montoStr = c.esDescuento ? `<span style="color:#c00">${fmt(c.monto)}</span>` : fmt(c.monto);
+        pdfFilasLiq += `<tr><td>${c.label}</td><td class="monto">${montoStr}</td>${baseTd(c.base)}</tr>`;
+      }
+      pdfFilasLiq += `<tr class="total-row"><td>Subtotal liquidación</td><td class="monto">${fmt(totalLiq)}</td><td></td></tr>`;
+
+      let pdfFilas25323 = '';
+      if (l25art1 || l25art2) {
+        if (l25art1) pdfFilas25323 += `<tr><td>Daño por falta/deficiente registración (ex art. 1 Ley 25.323 — Ind. 245 duplicada)</td><td class="monto">+ ${fmt(recargo1)}</td>${baseTd(`${fmt(ind245)} × 100%`)}</tr>`;
+        if (l25art2) pdfFilas25323 += `<tr><td>Daño por mora en el pago (ex art. 2 Ley 25.323)</td><td class="monto">+ ${fmt(recargo2)}</td>${baseTd(`${fmt(baseDanio25)} × 50%`)}</tr>`;
+        pdfFilas25323 += `<tr class="total-row"><td>Subtotal daños ex Ley 25.323</td><td class="monto">${fmt(total25323)}</td><td></td></tr>`;
+      }
+
+      let pdfFilas24013 = '';
+      if ((l24art8 || l24art9 || l24art10) && !l24Regularizo) {
+        if (l24art8)  pdfFilas24013 += `<tr><td>Daño por falta de registración (ex art. 8, Ley 24.013)${l24art11 ? ' (×2 obstaculización)' : ''}</td><td class="monto">+ ${fmt(multa8)}</td>${baseTd(multa8Base)}</tr>`;
+        if (l24art9)  pdfFilas24013 += `<tr><td>Daño por subregistro de fecha de ingreso (ex art. 9, Ley 24.013)${l24art11 ? ' (×2 obstaculización)' : ''}</td><td class="monto">+ ${fmt(multa9)}</td>${baseTd(multa9Base)}</tr>`;
+        if (l24art10) pdfFilas24013 += `<tr><td>Daño por subregistro de remuneración (ex art. 10, Ley 24.013)${l24art11 ? ' (×2 obstaculización)' : ''}</td><td class="monto">+ ${fmt(multa10)}</td>${baseTd(multa10Base)}</tr>`;
+        pdfFilas24013 += `<tr class="total-row"><td>Subtotal daños ex Ley 24.013${l24art11 ? ' (período no registrado ' + mesesNRDisplay + ' mes(es))' : ''}</td><td class="monto">${fmt(total24013)}</td><td></td></tr>`;
+      }
+
       const seccionHtml = (titulo, filasHtml) => filasHtml
         ? `<tr class="total-row"><td colspan="3" style="background:#f5f0e0;font-weight:700">${titulo}</td></tr>${filasHtml}`
         : '';
       const tablaHtml = `
-        ${seccionHtml('1. Liquidación (LCT)', filasLiq)}
-        ${seccionHtml('2. Daños — Registración deficiente y mora (ex Ley 25.323)', filas25323)}
-        ${seccionHtml('3. Daños — Empleo no registrado / subregistro (ex Ley 24.013)', filas24013)}
+        ${seccionHtml('1. Liquidación (LCT)', pdfFilasLiq)}
+        ${seccionHtml('2. Daños — Registración deficiente y mora (ex Ley 25.323)', pdfFilas25323)}
+        ${seccionHtml('3. Daños — Empleo no registrado / subregistro (ex Ley 24.013)', pdfFilas24013)}
         <tr class="total-row"><td>TOTAL GENERAL</td><td class="monto">${fmt(granTotal)}</td><td></td></tr>`;
       const html = `
         ${autoCaratula ? `<div class="info-box"><strong>Carátula:</strong> ${autoCaratula}</div>` : ''}
