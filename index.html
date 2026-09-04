@@ -30,6 +30,9 @@
     <button class="nav-item" data-tool="ley25323">
       <span class="nav-icon">➕</span> Daños — Registro y Mora
     </button>
+    <button class="nav-item" data-tool="liquidacion-integral">
+      <span class="nav-icon">🧮</span> Liquidación Integral con Daños
+    </button>
 
     <div class="nav-label">Cálculos Judiciales</div>
     <button class="nav-item" data-tool="intereses">
@@ -101,6 +104,7 @@
     liquidacion:      { label: 'Liquidación Laboral — LCT',          load: () => import('./tools/liquidacion.js').then(m => m.initLiquidacion) },
     ley24013:         { label: 'Daños y Perjuicios — Empleo No Registrado (ex Ley 24.013)', load: () => import('./tools/ley24013.js').then(m => m.initLey24013) },
     ley25323:         { label: 'Daños y Perjuicios — Registro y Mora (ex Ley 25.323)',       load: () => import('./tools/ley25323.js').then(m => m.initLey25323) },
+    'liquidacion-integral': { label: 'Calculadora Liquidación Integral con Daños', load: () => import('./tools/liquidacion-integral.js').then(m => m.initLiquidacionIntegral) },
     intereses:        { label: 'Intereses Judiciales — BPBA',        load: () => import('./tools/intereses.js').then(m => m.initIntereses) },
     actualizacion:    { label: 'Actualización Monetaria',            load: () => import('./tools/actualizacion.js').then(m => m.initActualizacion) },
     plazos:           { label: 'Plazos Procesales',                  load: () => import('./tools/plazos.js').then(m => m.initPlazos) },
@@ -118,7 +122,7 @@
   };
 
   const ICONS = {
-    liquidacion:'⚖️', ley24013:'📋', ley25323:'➕',
+    liquidacion:'⚖️', ley24013:'📋', ley25323:'➕', 'liquidacion-integral':'🧮',
     intereses:'📈', actualizacion:'💹', plazos:'📅',
     incapacidad:'🩺', 'danio-punitivo':'⚠️', 'carta-documento':'✉️',
     'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️', 'demanda-consumidor':'🛡️',
@@ -129,7 +133,7 @@
   };
 
   const CATS = {
-    'Derecho Laboral':    ['liquidacion','ley24013','ley25323'],
+    'Derecho Laboral':    ['liquidacion','ley24013','ley25323','liquidacion-integral'],
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
     'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','presupuestos','documentacion','convenio-honorarios'],
