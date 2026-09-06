@@ -921,4 +921,58 @@ export function initPresupuestos(container) {
       banner.remove();
     });
   })();
+
+  // ── Prefill desde Generador de Escrito de Sucesión ──────────────────────
+  (function detectarPrefillSucesion() {
+    let payload;
+    try { payload = JSON.parse(localStorage.getItem('mvc_prefill_presupuesto_sucesion') || 'null'); } catch { payload = null; }
+    if (!payload || !payload.campos) return;
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#e8f4ea;border:1px solid #7ab88a;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px';
+    banner.innerHTML = `<span>📋 Hay datos de un Escrito de Sucesión cargados el ${payload.fecha || ''} — ¿los cargamos en este presupuesto?</span>
+      <span style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="pr-prefill-sucesion-cargar" type="button">Cargar</button>
+        <button class="btn btn-ghost" id="pr-prefill-sucesion-descartar" type="button">Descartar</button>
+      </span>`;
+    container.querySelector('.tool-card').insertBefore(banner, container.querySelector('.tool-card').children[1]);
+
+    banner.querySelector('#pr-prefill-sucesion-cargar').addEventListener('click', () => {
+      selRama.value = 'sucesiones';
+      alcanceTocadoManualmente = false;
+      enfoqueTocadoManualmente = false;
+      costoInaccionTocadoManualmente = false;
+      selModalidad.value = 'unico';
+      selCalculo.value = 'manual';
+      actualizarRama();
+      actualizarVisibilidadBase();
+
+      if (payload.subtipo && RAMAS.sucesiones.subtipos[payload.subtipo]) {
+        selSubtipo.value = payload.subtipo;
+        alcanceTocadoManualmente = false;
+        enfoqueTocadoManualmente = false;
+        costoInaccionTocadoManualmente = false;
+        actualizarAlcance();
+        actualizarEnfoque();
+        actualizarCostoInaccion();
+        renderFilasHonorarios();
+      }
+
+      Object.entries(payload.campos).forEach(([id, valor]) => {
+        const el = container.querySelector(`#pr-${id}`);
+        if (el && valor) el.value = valor;
+      });
+
+      if (payload.conflictoHerederos !== undefined) {
+        const chk = container.querySelector('#pr-conflicto_herederos');
+        if (chk) chk.checked = !!payload.conflictoHerederos;
+      }
+
+      localStorage.removeItem('mvc_prefill_presupuesto_sucesion');
+      banner.remove();
+    });
+    banner.querySelector('#pr-prefill-sucesion-descartar').addEventListener('click', () => {
+      localStorage.removeItem('mvc_prefill_presupuesto_sucesion');
+      banner.remove();
+    });
+  })();
 }

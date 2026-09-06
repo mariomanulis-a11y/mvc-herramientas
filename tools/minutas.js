@@ -16,11 +16,17 @@ export function initMinutas(container) {
   ];
 
   const RAMAS = {
-    despido:    { label: 'Despido / Derecho Laboral', destino: 'demanda-despido',    prefillKey: 'mvc_prefill_despido' },
-    consumidor: { label: 'Derecho del Consumidor',    destino: 'demanda-consumidor', prefillKey: 'mvc_prefill_consumidor' },
-    amparo:     { label: 'Amparo de Salud',           destino: 'amparo-salud',       prefillKey: 'mvc_prefill_amparo' },
-    art:        { label: 'ART — Riesgos del Trabajo', destino: 'demanda-art',        prefillKey: 'mvc_prefill_art' },
+    despido:    { label: 'Despido / Derecho Laboral', destino: 'demanda-despido',    prefillKey: 'mvc_prefill_despido',    destinoLabel: 'Generador de Demanda por Despido' },
+    consumidor: { label: 'Derecho del Consumidor',    destino: 'demanda-consumidor', prefillKey: 'mvc_prefill_consumidor', destinoLabel: 'Generador de Demanda por Consumidor' },
+    amparo:     { label: 'Amparo de Salud',           destino: 'amparo-salud',       prefillKey: 'mvc_prefill_amparo',     destinoLabel: 'Generador de Amparo por Salud' },
+    art:        { label: 'ART — Riesgos del Trabajo', destino: 'demanda-art',        prefillKey: 'mvc_prefill_art',        destinoLabel: 'Generador de Demanda ART' },
+    sucesiones: { label: 'Sucesiones',                destino: 'escrito-sucesion',   prefillKey: 'mvc_prefill_sucesion',   destinoLabel: 'Generador de Escrito de Sucesión' },
   };
+
+  const SUCESIONES_SUBTIPOS = [
+    { value: 'ab_intestato',  label: 'Ab Intestato' },
+    { value: 'testamentaria', label: 'Testamentaria' },
+  ];
 
   const CAUSALES_DESPIDO = [
     { value: 'incausado',           label: 'Despido incausado (art. 245 LCT)' },
@@ -131,11 +137,13 @@ export function initMinutas(container) {
         <div class="field-group"><label for="mn-cliente_profesion">Profesión</label><input type="text" id="mn-cliente_profesion"></div>
       </div>
 
-      <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Contraparte</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
-        <div class="field-group"><label for="mn-contraparte_nombre">Nombre / Razón social</label><input type="text" id="mn-contraparte_nombre"></div>
-        <div class="field-group"><label for="mn-contraparte_cuit">CUIT (opcional)</label><input type="text" id="mn-contraparte_cuit"></div>
-        <div class="field-group" style="grid-column:1/-1"><label for="mn-contraparte_domicilio">Domicilio</label><input type="text" id="mn-contraparte_domicilio"></div>
+      <div id="mn-bloque-contraparte">
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Contraparte</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+          <div class="field-group"><label for="mn-contraparte_nombre">Nombre / Razón social</label><input type="text" id="mn-contraparte_nombre"></div>
+          <div class="field-group"><label for="mn-contraparte_cuit">CUIT (opcional)</label><input type="text" id="mn-contraparte_cuit"></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-contraparte_domicilio">Domicilio</label><input type="text" id="mn-contraparte_domicilio"></div>
+        </div>
       </div>
 
       <!-- ══ Bloques específicos por rama ══ -->
@@ -300,6 +308,73 @@ export function initMinutas(container) {
         </div>
       </div>
 
+      <div id="mn-bloque-sucesiones" class="mn-bloque-rama" style="display:none">
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Sucesión — datos específicos</div>
+        <div class="form-row">
+          <div class="field-group" style="flex:1">
+            <label for="mn-suc_subtipo">Tipo de sucesión</label>
+            <select id="mn-suc_subtipo">${SUCESIONES_SUBTIPOS.map(s => `<option value="${s.value}">${s.label}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+          <div class="field-group"><label for="mn-suc_causante_nombre">Nombre completo del/de la causante</label><input type="text" id="mn-suc_causante_nombre"></div>
+          <div class="field-group"><label for="mn-suc_causante_dni">DNI del/de la causante (opcional)</label><input type="text" id="mn-suc_causante_dni"></div>
+          <div class="field-group"><label for="mn-suc_fecha_fallecimiento">Fecha de fallecimiento</label><input type="date" id="mn-suc_fecha_fallecimiento"></div>
+          <div class="field-group"><label for="mn-suc_lugar_fallecimiento">Lugar de fallecimiento (opcional)</label><input type="text" id="mn-suc_lugar_fallecimiento"></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-suc_ultimo_domicilio">Último domicilio del/de la causante</label><input type="text" id="mn-suc_ultimo_domicilio"></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-suc_bienes_registrables">Bienes registrables denunciados (opcional)</label><textarea id="mn-suc_bienes_registrables" rows="2"></textarea></div>
+          <div class="field-group"><label for="mn-suc_jurisdiccion">Juzgado / jurisdicción (opcional)</label><input type="text" id="mn-suc_jurisdiccion"></div>
+          <div class="field-group" style="align-self:flex-end">
+            <label class="checkbox-label"><input type="checkbox" id="mn-suc_conflicto_herederos"> ¿Hay conflicto entre herederos?</label>
+          </div>
+        </div>
+
+        <div id="mn-suc-bloque-testamento" style="display:none">
+          <div class="display-box" style="margin-top:10px">
+            <strong>Datos del testamento</strong>
+            <div class="form-row" style="margin-top:8px">
+              <div class="field-group"><label for="mn-suc_forma_testamento">Forma del testamento (art. 2462, CCCN)</label>
+                <select id="mn-suc_forma_testamento">
+                  <option value="ologrofo">Ológrafo</option>
+                  <option value="acto_publico">Por acto público</option>
+                </select>
+              </div>
+              <div class="field-group"><label for="mn-suc_fecha_testamento">Fecha de otorgamiento</label><input type="date" id="mn-suc_fecha_testamento"></div>
+            </div>
+            <div id="mn-suc-wrap-acto_publico" style="display:none">
+              <div class="form-row">
+                <div class="field-group"><label for="mn-suc_escribano">Escribano/a interviniente</label><input type="text" id="mn-suc_escribano"></div>
+                <div class="field-group"><label for="mn-suc_registro_notarial">N° de Registro Notarial (opcional)</label><input type="text" id="mn-suc_registro_notarial"></div>
+              </div>
+            </div>
+            <div id="mn-suc-wrap-ologrofo">
+              <div class="form-row">
+                <div class="field-group"><label for="mn-suc_testigo1_testamento">Testigo 1 (reconocimiento de firma y letra)</label><input type="text" id="mn-suc_testigo1_testamento"></div>
+                <div class="field-group"><label for="mn-suc_testigo2_testamento">Testigo 2 (reconocimiento de firma y letra)</label><input type="text" id="mn-suc_testigo2_testamento"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Herederos denunciados</div>
+        <div id="mn-suc-herederos-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+          <button class="btn btn-ghost" id="mn-add-suc-heredero" type="button">+ Agregar heredero/a (máx. 15)</button>
+        </div>
+
+        <div class="display-box" style="margin-top:14px">
+          <strong>Administrador/a provisional (opcional)</strong>
+          <div class="check-row" style="margin-top:8px">
+            <input type="checkbox" id="mn-suc_administrador_check">
+            <label for="mn-suc_administrador_check">Proponer administrador/a provisional</label>
+          </div>
+          <div class="field-group" id="mn-suc-wrap-administrador" style="display:none;margin-top:6px">
+            <label for="mn-suc_administrador_nombre">Nombre y vínculo del/de la propuesto/a</label>
+            <input type="text" id="mn-suc_administrador_nombre" placeholder="Ej: Juan García, hijo del causante">
+          </div>
+        </div>
+      </div>
+
       <!-- ══ Bloque común: cronología, documentación, testigos, gestiones, valoración ══ -->
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:22px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Cronología de hechos</div>
       <div id="mn-cronologia-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -365,7 +440,9 @@ export function initMinutas(container) {
     consumidor: container.querySelector('#mn-bloque-consumidor'),
     amparo: container.querySelector('#mn-bloque-amparo'),
     art: container.querySelector('#mn-bloque-art'),
+    sucesiones: container.querySelector('#mn-bloque-sucesiones'),
   };
+  const bloqueContraparte = container.querySelector('#mn-bloque-contraparte');
   const divRes = container.querySelector('#mn-resultado');
   const textarea = container.querySelector('#mn-texto');
   const divEnviarConf = container.querySelector('#mn-enviar-confirmacion');
@@ -380,9 +457,32 @@ export function initMinutas(container) {
   function actualizarBloqueRama() {
     ramaActual = selRama.value;
     Object.entries(bloques).forEach(([k, el]) => { el.style.display = k === ramaActual ? 'block' : 'none'; });
+    bloqueContraparte.style.display = ramaActual === 'sucesiones' ? 'none' : 'block';
   }
   selRama.addEventListener('change', actualizarBloqueRama);
   actualizarBloqueRama();
+
+  // ── Sucesiones: forma del testamento y administrador provisional ────────
+  const selSucSubtipo = container.querySelector('#mn-suc_subtipo');
+  const bloqueSucTestamento = container.querySelector('#mn-suc-bloque-testamento');
+  const selSucFormaTestamento = container.querySelector('#mn-suc_forma_testamento');
+  const wrapSucActoPublico = container.querySelector('#mn-suc-wrap-acto_publico');
+  const wrapSucOlografo = container.querySelector('#mn-suc-wrap-ologrofo');
+  const chkSucAdministrador = container.querySelector('#mn-suc_administrador_check');
+  const wrapSucAdministrador = container.querySelector('#mn-suc-wrap-administrador');
+
+  function actualizarBloqueTestamentoMinuta() {
+    const esTestamentaria = selSucSubtipo.value === 'testamentaria';
+    bloqueSucTestamento.style.display = esTestamentaria ? 'block' : 'none';
+    const esOlografo = selSucFormaTestamento.value === 'ologrofo';
+    wrapSucActoPublico.style.display = esOlografo ? 'none' : 'block';
+    wrapSucOlografo.style.display = esOlografo ? 'block' : 'none';
+  }
+  selSucSubtipo.addEventListener('change', actualizarBloqueTestamentoMinuta);
+  selSucFormaTestamento.addEventListener('change', actualizarBloqueTestamentoMinuta);
+  actualizarBloqueTestamentoMinuta();
+
+  chkSucAdministrador.addEventListener('change', () => { wrapSucAdministrador.style.display = chkSucAdministrador.checked ? 'block' : 'none'; });
 
   // ── Consumidor: tipos dependientes de la materia ────────────────────────
   const selCMateria = container.querySelector('#mn-c_materia');
@@ -445,6 +545,18 @@ export function initMinutas(container) {
   ];
   container.querySelector('#mn-add-gestion').addEventListener('click', () =>
     crearFilaDinamica({ wrapper: wrapGestiones(), prefix: 'mn-ges', campos: GES_CAMPOS, max: MAX_GES, contadorRef: gesContador }));
+
+  const wrapSucHerederos = () => container.querySelector('#mn-suc-herederos-wrapper');
+  const sucHerederosContador = { count: 0, activos: 0 };
+  const MAX_SUC_HEREDEROS = 15;
+  const SUC_HEREDERO_CAMPOS = [
+    { id: 'nombre', tipo: 'text', placeholder: 'Nombre y apellido', flex: 2 },
+    { id: 'dni', tipo: 'text', placeholder: 'DNI', flex: 1 },
+    { id: 'vinculo', tipo: 'text', placeholder: 'Vínculo (hijo/a, cónyuge...)', flex: 1 },
+    { id: 'domicilio', tipo: 'text', placeholder: 'Domicilio real', flex: 2 },
+  ];
+  container.querySelector('#mn-add-suc-heredero').addEventListener('click', () =>
+    crearFilaDinamica({ wrapper: wrapSucHerederos(), prefix: 'mn-suc-heredero', campos: SUC_HEREDERO_CAMPOS, max: MAX_SUC_HEREDEROS, contadorRef: sucHerederosContador }));
 
   function leerLista(wrapper, prefix, camposIds) {
     return Array.from(wrapper.querySelectorAll(`[id^="${prefix}-row-"]`)).map(row => {
@@ -563,6 +675,38 @@ Fecha de notificación del dictamen de Comisión Médica: ${fmtFechaISO(val('mn-
 Contenido del dictamen: ${val('mn-art_contenido_dictamen') || '-'}
 Opción del art. 4, Ley 26.773: ${container.querySelector('#mn-art_opcion_ley26773').selectedOptions[0].textContent}`;
     }
+    if (ramaActual === 'sucesiones') {
+      const herederos = leerLista(wrapSucHerederos(), 'mn-suc-heredero', ['nombre', 'dni', 'vinculo', 'domicilio']);
+      const herederosTexto = herederos.length
+        ? herederos.map(h => `- ${h.nombre || '[NOMBRE]'} — DNI: ${h.dni || '-'} — Vínculo: ${h.vinculo || '-'} — Domicilio: ${h.domicilio || '-'}`).join('\n')
+        : '- (sin herederos cargados)';
+      const esTestamentaria = val('mn-suc_subtipo') === 'testamentaria';
+      let bloqueTestamentoTexto = '';
+      if (esTestamentaria) {
+        const esOlografo = container.querySelector('#mn-suc_forma_testamento').value === 'ologrofo';
+        bloqueTestamentoTexto = `
+Forma del testamento: ${container.querySelector('#mn-suc_forma_testamento').selectedOptions[0].textContent}
+Fecha de otorgamiento: ${fmtFechaISO(val('mn-suc_fecha_testamento')) || '-'}
+${esOlografo
+  ? `Testigo 1: ${val('mn-suc_testigo1_testamento') || '-'}\nTestigo 2: ${val('mn-suc_testigo2_testamento') || '-'}`
+  : `Escribano/a interviniente: ${val('mn-suc_escribano') || '-'}\nN° de Registro Notarial: ${val('mn-suc_registro_notarial') || '-'}`}`;
+      }
+      return `SUCESIÓN — DATOS ESPECÍFICOS
+Tipo de sucesión: ${container.querySelector('#mn-suc_subtipo').selectedOptions[0].textContent}
+Causante: ${val('mn-suc_causante_nombre') || '-'}
+DNI del causante: ${val('mn-suc_causante_dni') || '-'}
+Fecha de fallecimiento: ${fmtFechaISO(val('mn-suc_fecha_fallecimiento')) || '-'}
+Lugar de fallecimiento: ${val('mn-suc_lugar_fallecimiento') || '-'}
+Último domicilio del causante: ${val('mn-suc_ultimo_domicilio') || '-'}
+Bienes registrables denunciados: ${val('mn-suc_bienes_registrables') || '-'}
+Juzgado / jurisdicción: ${val('mn-suc_jurisdiccion') || '-'}
+¿Conflicto entre herederos?: ${container.querySelector('#mn-suc_conflicto_herederos').checked ? 'Sí' : 'No'}${bloqueTestamentoTexto}
+
+Herederos denunciados:
+${herederosTexto}
+
+Administrador/a provisional propuesto/a: ${chkSucAdministrador.checked ? (val('mn-suc_administrador_nombre') || '(a designar)') : 'No se solicita'}`;
+    }
     return '';
   }
 
@@ -652,6 +796,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     wrapCronologia().innerHTML = ''; cronContador.count = 0; cronContador.activos = 0;
     wrapTestigos().innerHTML = ''; testContador.count = 0; testContador.activos = 0;
     wrapGestiones().innerHTML = ''; gesContador.count = 0; gesContador.activos = 0;
+    wrapSucHerederos().innerHTML = ''; sucHerederosContador.count = 0; sucHerederosContador.activos = 0;
     container.querySelector('#mn-d_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-c_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-a_plazo_resultado').innerHTML = '';
@@ -659,6 +804,9 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     container.querySelector('#mn-art_plazo_resultado_presc').innerHTML = '';
     container.querySelector('#mn-a_plazo_feria').checked = true;
     container.querySelector('#mn-art_plazo_feria').checked = true;
+    chkSucAdministrador.checked = false;
+    wrapSucAdministrador.style.display = 'none';
+    actualizarBloqueTestamentoMinuta();
     actualizarBloqueRama();
     divRes.style.display = 'none';
     divEnviarConf.style.display = 'none';
@@ -797,6 +945,32 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
         },
       };
     }
+    if (ramaActual === 'sucesiones') {
+      const herederos = leerLista(wrapSucHerederos(), 'mn-suc-heredero', ['nombre', 'dni', 'vinculo', 'domicilio']);
+      return {
+        ...base,
+        subtipo: val('mn-suc_subtipo') || container.querySelector('#mn-suc_subtipo').value,
+        campos: {
+          causante_nombre: val('mn-suc_causante_nombre'),
+          causante_dni: val('mn-suc_causante_dni'),
+          fecha_fallecimiento: val('mn-suc_fecha_fallecimiento'),
+          lugar_fallecimiento: val('mn-suc_lugar_fallecimiento'),
+          ultimo_domicilio: val('mn-suc_ultimo_domicilio'),
+          bienes_registrables: val('mn-suc_bienes_registrables'),
+          forma_testamento: container.querySelector('#mn-suc_forma_testamento').value,
+          fecha_testamento: val('mn-suc_fecha_testamento'),
+          escribano: val('mn-suc_escribano'),
+          registro_notarial: val('mn-suc_registro_notarial'),
+          testigo1_testamento: val('mn-suc_testigo1_testamento'),
+          testigo2_testamento: val('mn-suc_testigo2_testamento'),
+          juzgado: val('mn-suc_jurisdiccion'),
+          administrador_nombre: chkSucAdministrador.checked ? val('mn-suc_administrador_nombre') : '',
+        },
+        conflictoHerederos: container.querySelector('#mn-suc_conflicto_herederos').checked,
+        administradorCheck: chkSucAdministrador.checked,
+        herederos,
+      };
+    }
     return base;
   }
 
@@ -812,7 +986,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     }
     divEnviarConf.style.display = 'block';
     divEnviarConf.innerHTML = `<div class="display-box" style="background:#e8f4ea;border-color:#7ab88a">
-      ✅ Datos enviados. Abrí el <strong>${rama.label === RAMAS.art.label ? 'Generador de Demanda ART' : `Generador de Demanda — ${rama.label}`}</strong> y aceptá el banner para cargarlos.
+      ✅ Datos enviados. Abrí el <strong>${rama.destinoLabel || `Generador de Demanda — ${rama.label}`}</strong> y aceptá el banner para cargarlos.
       <div style="margin-top:8px"><button class="btn btn-primary" id="mn-ir-a-demanda" type="button">Ir ahora</button></div>
     </div>`;
     container.querySelector('#mn-ir-a-demanda').addEventListener('click', () => { location.hash = rama.destino; });
