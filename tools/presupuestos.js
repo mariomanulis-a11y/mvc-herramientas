@@ -69,6 +69,19 @@ export function initPresupuestos(container) {
       enfoque: (sub) => 'Su objetivo es obtener la reparación integral del daño sufrido de la manera más eficiente posible, evitando que el paso del tiempo perjudique la prueba disponible o el cobro efectivo de la indemnización. Para lograrlo, nos encargamos de:',
       costoInaccion: (sub) => 'El paso del tiempo juega en contra del reclamante: la prueba testimonial se deteriora, la documental puede extraviarse o volverse inaccesible, y corren los plazos de prescripción de la acción. A la vez, el eventual monto de condena se incrementa por los intereses devengados desde la fecha del hecho o la mora hasta el efectivo pago. Iniciar el reclamo a tiempo preserva la prueba disponible y maximiza el valor efectivamente recuperable.',
     },
+    asesoramiento_pyme: {
+      label: 'Asesoramiento Integral PYME (Laboral, RRHH, Compliance y Control Interno)',
+      campos: ['empresa_cliente', 'rubro_pyme', 'cant_empleados_pyme'],
+      alcance: () => 'Diagnóstico integral inicial de la empresa en materia laboral, de recursos humanos, compliance y control interno; elaboración de un plan de acción priorizado con plazos sugeridos; acompañamiento en la implementación de las medidas correctivas y preventivas identificadas; seguimiento y control periódico del grado de cumplimiento normativo e interno alcanzado.',
+      etapas: () => [
+        'Diagnóstico y relevamiento inicial',
+        'Implementación del plan de acción',
+        'Seguimiento y control periódico',
+      ],
+      baseDesc: 'Honorario mensual / abono por servicio de asesoramiento integral',
+      enfoque: () => 'Su objetivo es contar con una gestión laboral, de recursos humanos y de control interno ordenada, que reduzca la exposición a contingencias (laborales, administrativas y reputacionales) y sostenga el cumplimiento normativo en el tiempo. Para lograrlo, nos encargamos de:',
+      costoInaccion: () => 'La ausencia de un control preventivo en materia laboral, de recursos humanos y de compliance expone a la empresa a contingencias que se acumulan silenciosamente: relaciones laborales mal instrumentadas o no registradas, incumplimientos a normativa de higiene y seguridad, ausencia de canales de denuncia y códigos de ética exigibles en determinados regímenes, y debilidades de control interno que facilitan errores o irregularidades no detectadas a tiempo. Estas contingencias, cuando se detectan tardíamente (por ejemplo, ante una inspección, un reclamo laboral o una denuncia), resultan considerablemente más costosas de resolver que si se hubieran prevenido mediante un diagnóstico y un plan de acción oportunos.',
+    },
   };
 
   // ── Campos específicos por rama (id único por campo) ────────────────────────
@@ -92,6 +105,9 @@ export function initPresupuestos(container) {
     { id: 'monto_estimado_danio',  label: 'Monto estimado de la demanda (opcional)',    tipo: 'number', opcional: true },
     { id: 'instancia_previa',      label: '¿Instancia previa (COPREC / mediación) iniciada?', tipo: 'checkbox' },
     { id: 'aseguradora',           label: 'Aseguradora identificada (aplica a tránsito)', tipo: 'text', opcional: true },
+
+    { id: 'rubro_pyme',            label: 'Rubro / actividad de la empresa',            tipo: 'text',   opcional: true, placeholder: 'Comercio, industria, servicios, etc.' },
+    { id: 'cant_empleados_pyme',   label: 'Cantidad de empleados',                      tipo: 'entero', opcional: true },
   ];
 
   const CAMPO_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
@@ -862,4 +878,47 @@ export function initPresupuestos(container) {
     return String(s ?? '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
+
+  // ── Prefill desde Diagnóstico Integral PYME ─────────────────────────────
+  (function detectarPrefill() {
+    let payload;
+    try { payload = JSON.parse(localStorage.getItem('mvc_prefill_presupuesto_pyme') || 'null'); } catch { payload = null; }
+    if (!payload || !payload.campos) return;
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#e8f4ea;border:1px solid #7ab88a;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px';
+    banner.innerHTML = `<span>📋 Hay datos de un Diagnóstico Integral PYME cargados el ${payload.fecha || ''} — ¿los cargamos en este presupuesto?</span>
+      <span style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="pr-prefill-cargar" type="button">Cargar</button>
+        <button class="btn btn-ghost" id="pr-prefill-descartar" type="button">Descartar</button>
+      </span>`;
+    container.querySelector('.tool-card').insertBefore(banner, container.querySelector('.tool-card').children[1]);
+
+    banner.querySelector('#pr-prefill-cargar').addEventListener('click', () => {
+      selRama.value = 'asesoramiento_pyme';
+      alcanceTocadoManualmente = false;
+      enfoqueTocadoManualmente = false;
+      costoInaccionTocadoManualmente = false;
+      selModalidad.value = 'unico';
+      selCalculo.value = 'manual';
+      actualizarRama();
+      actualizarVisibilidadBase();
+
+      Object.entries(payload.campos).forEach(([id, valor]) => {
+        const el = container.querySelector(`#pr-${id}`);
+        if (el && valor) el.value = valor;
+      });
+
+      if (payload.alcance) {
+        taAlcance.value = payload.alcance;
+        alcanceTocadoManualmente = true;
+      }
+
+      localStorage.removeItem('mvc_prefill_presupuesto_pyme');
+      banner.remove();
+    });
+    banner.querySelector('#pr-prefill-descartar').addEventListener('click', () => {
+      localStorage.removeItem('mvc_prefill_presupuesto_pyme');
+      banner.remove();
+    });
+  })();
 }
