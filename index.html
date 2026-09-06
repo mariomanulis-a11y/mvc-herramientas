@@ -69,6 +69,12 @@
     <button class="nav-item" data-tool="amparo-salud">
       <span class="nav-icon">🏥</span> Amparo por Salud c/Cautelar
     </button>
+    <button class="nav-item" data-tool="demanda-art">
+      <span class="nav-icon">🦺</span> Demanda / Recurso ART
+    </button>
+    <button class="nav-item" data-tool="minutas">
+      <span class="nav-icon">📝</span> Minutas de Caso
+    </button>
     <button class="nav-item" data-tool="presupuestos">
       <span class="nav-icon">🧾</span> Presupuestos
     </button>
@@ -115,6 +121,8 @@
     'demanda-despido': { label: 'Generador de Demanda por Despido (PBA)', load: () => import('./tools/demanda-despido.js').then(m => m.initDemandaDespido) },
     'demanda-consumidor': { label: 'Generador de Demanda por Consumidor (PBA)', load: () => import('./tools/demanda-consumidor.js').then(m => m.initDemandaConsumidor) },
     'amparo-salud':   { label: 'Generador de Amparo por Salud con Medida Cautelar', load: () => import('./tools/amparo-salud.js').then(m => m.initAmparoSalud) },
+    'demanda-art':    { label: 'Generador de Demanda / Recurso — ART', load: () => import('./tools/demanda-art.js').then(m => m.initDemandaArt) },
+    minutas:          { label: 'Generador de Minutas de Caso',        load: () => import('./tools/minutas.js').then(m => m.initMinutas) },
     presupuestos:     { label: 'Generador de Presupuestos',          load: () => import('./tools/presupuestos.js').then(m => m.initPresupuestos) },
     documentacion:    { label: 'Generador de Documentación Requerida', load: () => import('./tools/documentacion.js').then(m => m.initDocumentacion) },
     'convenio-honorarios': { label: 'Generador de Convenios de Honorarios', load: () => import('./tools/convenio-honorarios.js').then(m => m.initConvenioHonorarios) },
@@ -126,7 +134,7 @@
     intereses:'📈', actualizacion:'💹', plazos:'📅',
     incapacidad:'🩺', 'danio-punitivo':'⚠️', 'carta-documento':'✉️',
     'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️', 'demanda-consumidor':'🛡️',
-    'amparo-salud':'🏥',
+    'amparo-salud':'🏥', 'demanda-art':'🦺', minutas:'📝',
     presupuestos:'🧾', documentacion:'📑',
     'convenio-honorarios':'🤝',
     dalmacio:'🤖'
@@ -136,7 +144,7 @@
     'Derecho Laboral':    ['liquidacion','ley24013','ley25323','liquidacion-integral'],
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
-    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','presupuestos','documentacion','convenio-honorarios'],
+    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','demanda-art','minutas','presupuestos','documentacion','convenio-honorarios'],
     'Asistente IA':       ['dalmacio'],
   };
 

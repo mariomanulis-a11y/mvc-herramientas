@@ -1005,4 +1005,35 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     const lineas = texto.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     exportarPDF(`Amparo salud — ${val('am-nombre') || 'actor'} c. ${val('am-razon_social') || 'demandado'}`, `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>`);
   });
+
+  // ── Prefill desde Generador de Minutas ──────────────────────────────────
+  (function detectarPrefill() {
+    let payload;
+    try { payload = JSON.parse(localStorage.getItem('mvc_prefill_amparo') || 'null'); } catch { payload = null; }
+    if (!payload || !payload.campos) return;
+
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#e8f4ea;border:1px solid #7ab88a;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:.85rem;color:#1f4d2c;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap';
+    banner.innerHTML = `
+      <span>📋 Hay datos de una minuta cargados el ${payload.fecha || ''} — ¿los cargamos en este formulario?</span>
+      <span style="display:flex;gap:8px">
+        <button class="btn btn-success" id="am-prefill-cargar" type="button">Cargar</button>
+        <button class="btn btn-ghost" id="am-prefill-descartar" type="button">Descartar</button>
+      </span>`;
+    container.querySelector('.tool-card').insertBefore(banner, container.querySelector('.tool-card').children[1]);
+
+    banner.querySelector('#am-prefill-cargar').addEventListener('click', () => {
+      if (payload.materia && MATERIAS[payload.materia]) { selMateria.value = payload.materia; onMateriaChange(); }
+      Object.entries(payload.campos).forEach(([id, valor]) => {
+        const el = container.querySelector(`#am-${id}`);
+        if (el && valor) el.value = valor;
+      });
+      localStorage.removeItem('mvc_prefill_amparo');
+      banner.remove();
+    });
+    banner.querySelector('#am-prefill-descartar').addEventListener('click', () => {
+      localStorage.removeItem('mvc_prefill_amparo');
+      banner.remove();
+    });
+  })();
 }
