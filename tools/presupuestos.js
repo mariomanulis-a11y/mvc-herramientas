@@ -28,6 +28,8 @@ export function initPresupuestos(container) {
         'Inscripción y Partición',
       ],
       baseDesc: 'Monto del acervo hereditario / valor de los bienes a adjudicar',
+      enfoque: (sub) => 'Su objetivo es asegurar la transmisión ordenada del patrimonio del causante a los herederos, evitando conflictos entre las partes y protegiendo el valor de los bienes hasta su adjudicación definitiva. Para lograrlo, nos encargamos de:',
+      costoInaccion: (sub) => 'Mientras no se inicie y concluya el proceso sucesorio, los bienes registrables del causante permanecen inmovilizados: no pueden venderse, no pueden ofrecerse en garantía ni ser objeto de créditos hipotecarios, y su administración (cobro de alquileres, pago de expensas e impuestos) queda en una situación de hecho que expone a los herederos a reclamos de terceros. Cuanto más se demore el inicio del trámite, mayor es el riesgo de acumulación de deudas impagas sobre los bienes del acervo (impuestos, expensas, servicios) y de aparición de nuevos reclamantes o controversias entre herederos.',
     },
     laboral_demandada: {
       label: 'Laboral — Representación de la parte demandada (empleadora)',
@@ -48,6 +50,8 @@ export function initPresupuestos(container) {
             'Instancia recursiva (Cámara de Apelaciones)',
           ],
       baseDesc: 'Monto reclamado / monto de sentencia o acuerdo',
+      enfoque: (sub) => 'Su objetivo como empleador es resolver el conflicto laboral planteado minimizando la exposición económica y reputacional de la empresa, evitando que el paso del tiempo agrave la contingencia. Para lograrlo, nos encargamos de:',
+      costoInaccion: (sub) => 'La falta de una defensa técnica oportuna expone a la empresa a que el reclamo prospere en su totalidad, monto que se incrementa además por los intereses devengados desde la mora hasta el efectivo pago (conforme la tasa que fije la Suprema Corte de la Provincia de Buenos Aires o el fuero interviniente) y, eventualmente, por sanciones conminatorias o multas procesales derivadas de incomparecencias o incumplimientos. Una defensa técnica adecuada, en cambio, permite explorar salidas conciliatorias tempranas y acotar la contingencia.',
     },
     danios: {
       label: 'Daños y Perjuicios',
@@ -62,6 +66,8 @@ export function initPresupuestos(container) {
         'Sentencia / acuerdo homologatorio y ejecución',
       ],
       baseDesc: 'Monto estimado de la demanda / monto de sentencia o acuerdo',
+      enfoque: (sub) => 'Su objetivo es obtener la reparación integral del daño sufrido de la manera más eficiente posible, evitando que el paso del tiempo perjudique la prueba disponible o el cobro efectivo de la indemnización. Para lograrlo, nos encargamos de:',
+      costoInaccion: (sub) => 'El paso del tiempo juega en contra del reclamante: la prueba testimonial se deteriora, la documental puede extraviarse o volverse inaccesible, y corren los plazos de prescripción de la acción. A la vez, el eventual monto de condena se incrementa por los intereses devengados desde la fecha del hecho o la mora hasta el efectivo pago. Iniciar el reclamo a tiempo preserva la prueba disponible y maximiza el valor efectivamente recuperable.',
     },
   };
 
@@ -89,6 +95,15 @@ export function initPresupuestos(container) {
   ];
 
   const CAMPO_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
+
+  // ── Equipo (para el apartado opcional "Profesionales intervinientes") ──────
+  // Bios sintéticas, enfocadas en el ejercicio privado (se omite lo estatal/auditoría
+  // por no ser relevante para el cliente que recibe el presupuesto).
+  const EQUIPO = {
+    mario:   { nombre: 'Mario Manulis',    bio: 'Derecho administrativo, derecho del consumidor, contratos y compliance corporativo.' },
+    soledad: { nombre: 'Soledad Velazquez', bio: '25 años de trayectoria en derecho civil y laboral; contratos y negociación estratégica.' },
+    camila:  { nombre: 'Camila Poggi',      bio: 'Derecho civil, sucesiones, contratos, familia, accidentes de tránsito y derecho del consumidor.' },
+  };
 
   const fmtMoney = n => '$ ' + (Number(n) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtJus   = n => (Number(n) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Jus';
@@ -134,6 +149,14 @@ export function initPresupuestos(container) {
       </div>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Alcance del servicio</div>
+      <div class="check-row">
+        <input type="checkbox" id="pr-incluir-enfoque">
+        <label for="pr-incluir-enfoque">Anteponer enfoque problema → solución (opcional)</label>
+      </div>
+      <div class="field-group" id="pr-enfoque-wrap" style="display:none;margin-bottom:10px">
+        <label for="pr-enfoque">Texto de apertura — "Su objetivo" (editable)</label>
+        <textarea id="pr-enfoque" rows="3"></textarea>
+      </div>
       <div class="field-group">
         <label for="pr-alcance">Descripción del servicio incluido (editable)</label>
         <textarea id="pr-alcance" rows="3"></textarea>
@@ -177,9 +200,66 @@ export function initPresupuestos(container) {
 
       <div id="pr-honor-totales" class="info-box-local" style="background:var(--color-bg);border:1px solid var(--color-input-border);border-radius:8px;padding:12px 16px;margin-top:8px;font-size:.9rem"></div>
 
+      <div class="check-row" style="margin-top:10px">
+        <input type="checkbox" id="pr-incluir-roi">
+        <label for="pr-incluir-roi">Incluir relación honorario / monto en juego (opcional)</label>
+      </div>
+      <div id="pr-roi-nota" style="display:none;font-size:.78rem;color:var(--color-muted);margin-top:2px"></div>
+
       <div class="field-group" style="margin-top:10px">
         <label for="pr-honor-aclaraciones">Aclaraciones / limitaciones sobre los honorarios (opcional)</label>
         <textarea id="pr-honor-aclaraciones" rows="2" placeholder="Ej: el componente variable es estimado y se determinará en forma definitiva conforme al resultado del proceso."></textarea>
+      </div>
+
+      <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Valor agregado (opcional)</div>
+
+      <div class="check-row">
+        <input type="checkbox" id="pr-incluir-costo-inaccion">
+        <label for="pr-incluir-costo-inaccion">Incluir apartado de costo de la inacción</label>
+      </div>
+      <div id="pr-costo-inaccion-wrap" style="display:none;margin:8px 0 10px">
+        <div class="field-group">
+          <label for="pr-costo-inaccion">Texto (editable)</label>
+          <textarea id="pr-costo-inaccion" rows="4"></textarea>
+        </div>
+        <div class="form-row" id="pr-ci-numerico-wrap" style="display:none">
+          <div class="field-group">
+            <label for="pr-ci-meses">Meses estimados de demora</label>
+            <input type="number" id="pr-ci-meses" min="0" step="1" placeholder="Ej: 12">
+          </div>
+          <div class="field-group">
+            <label for="pr-ci-tasa">Tasa mensual estimada (%)</label>
+            <input type="number" id="pr-ci-tasa" min="0" step="0.01" placeholder="Ej: 3.5 — verificar tasa vigente">
+          </div>
+        </div>
+      </div>
+
+      <div class="check-row">
+        <input type="checkbox" id="pr-incluir-institucional">
+        <label for="pr-incluir-institucional">Incluir "Por qué MVC Abogados" (opcional)</label>
+      </div>
+      <div class="field-group" id="pr-institucional-wrap" style="display:none;margin-top:6px">
+        <label for="pr-institucional">Texto (editable)</label>
+        <textarea id="pr-institucional" rows="3"></textarea>
+      </div>
+
+      <div class="check-row" style="margin-top:10px">
+        <input type="checkbox" id="pr-incluir-equipo">
+        <label for="pr-incluir-equipo">Incluir profesionales intervinientes (opcional)</label>
+      </div>
+      <div class="field-group" id="pr-equipo-wrap" style="display:none;margin:6px 0 10px">
+        <div class="check-row" style="margin-bottom:4px">
+          <input type="checkbox" class="pr-equipo-check" id="pr-equipo-mario" data-id="mario">
+          <label for="pr-equipo-mario">Mario Manulis</label>
+        </div>
+        <div class="check-row" style="margin-bottom:4px">
+          <input type="checkbox" class="pr-equipo-check" id="pr-equipo-soledad" data-id="soledad">
+          <label for="pr-equipo-soledad">Soledad Velazquez</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" class="pr-equipo-check" id="pr-equipo-camila" data-id="camila">
+          <label for="pr-equipo-camila">Camila Poggi</label>
+        </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-top:16px">
@@ -246,6 +326,22 @@ export function initPresupuestos(container) {
   const selSubtipo      = container.querySelector('#pr-subtipo');
   const wrapSubtipo     = container.querySelector('#pr-subtipo-wrap');
   const taAlcance       = container.querySelector('#pr-alcance');
+  const chkEnfoque      = container.querySelector('#pr-incluir-enfoque');
+  const wrapEnfoque     = container.querySelector('#pr-enfoque-wrap');
+  const taEnfoque       = container.querySelector('#pr-enfoque');
+  const chkRoi          = container.querySelector('#pr-incluir-roi');
+  const divRoiNota      = container.querySelector('#pr-roi-nota');
+  const chkCostoInaccion   = container.querySelector('#pr-incluir-costo-inaccion');
+  const wrapCostoInaccion  = container.querySelector('#pr-costo-inaccion-wrap');
+  const taCostoInaccion    = container.querySelector('#pr-costo-inaccion');
+  const wrapCiNumerico     = container.querySelector('#pr-ci-numerico-wrap');
+  const inpCiMeses         = container.querySelector('#pr-ci-meses');
+  const inpCiTasa          = container.querySelector('#pr-ci-tasa');
+  const chkInstitucional   = container.querySelector('#pr-incluir-institucional');
+  const wrapInstitucional  = container.querySelector('#pr-institucional-wrap');
+  const taInstitucional    = container.querySelector('#pr-institucional');
+  const chkEquipo          = container.querySelector('#pr-incluir-equipo');
+  const wrapEquipo         = container.querySelector('#pr-equipo-wrap');
   const selModalidad    = container.querySelector('#pr-honor-modalidad');
   const selCalculo      = container.querySelector('#pr-honor-calculo');
   const inpBaseDesc     = container.querySelector('#pr-honor-base-desc');
@@ -264,8 +360,21 @@ export function initPresupuestos(container) {
   let ultimoTextoGenerado = '';
   let ultimoResultadoHonorarios = null;
   let alcanceTocadoManualmente = false;
+  let enfoqueTocadoManualmente = false;
+  let costoInaccionTocadoManualmente = false;
 
   taAlcance.addEventListener('input', () => { alcanceTocadoManualmente = true; });
+  taEnfoque.addEventListener('input', () => { enfoqueTocadoManualmente = true; });
+  taCostoInaccion.addEventListener('input', () => { costoInaccionTocadoManualmente = true; });
+
+  // Texto institucional fijo — no depende de la rama. Editable antes de generar.
+  taInstitucional.value = 'MVC Abogados cuenta con más de 25 años de trayectoria en el ejercicio profesional, sustentada en un proceso de capacitación permanente del equipo y en el desarrollo de herramientas propias de LegalTech —como Mi Expediente—, que le permiten al cliente acceder a información actualizada y en tiempo real sobre el estado de su causa.';
+
+  chkEnfoque.addEventListener('change', () => { wrapEnfoque.style.display = chkEnfoque.checked ? '' : 'none'; });
+  chkCostoInaccion.addEventListener('change', () => { wrapCostoInaccion.style.display = chkCostoInaccion.checked ? '' : 'none'; });
+  chkInstitucional.addEventListener('change', () => { wrapInstitucional.style.display = chkInstitucional.checked ? '' : 'none'; });
+  chkEquipo.addEventListener('change', () => { wrapEquipo.style.display = chkEquipo.checked ? '' : 'none'; });
+  chkRoi.addEventListener('change', actualizarNotaRoi);
 
   // ── Actualizar subtipo + campos visibles + alcance por defecto ─────────────
   function actualizarRama() {
@@ -288,6 +397,8 @@ export function initPresupuestos(container) {
 
     inpBaseDesc.value = rama.baseDesc;
     actualizarAlcance();
+    actualizarEnfoque();
+    actualizarCostoInaccion();
     renderFilasHonorarios();
   }
 
@@ -299,8 +410,52 @@ export function initPresupuestos(container) {
     taAlcance.value = rama.alcance(subtipoKey);
   }
 
-  selRama.addEventListener('change', () => { alcanceTocadoManualmente = false; actualizarRama(); });
-  selSubtipo.addEventListener('change', () => { alcanceTocadoManualmente = false; actualizarAlcance(); renderFilasHonorarios(); });
+  function actualizarEnfoque() {
+    if (enfoqueTocadoManualmente) return;
+    const ramaKey = selRama.value;
+    const rama = RAMAS[ramaKey];
+    const subtipoKey = rama.subtipos ? selSubtipo.value : null;
+    taEnfoque.value = rama.enfoque ? rama.enfoque(subtipoKey) : '';
+  }
+
+  // El costo de inacción admite una proyección numérica de intereses solo en las ramas
+  // donde la demora efectivamente devenga intereses sobre un monto de condena/reclamo
+  // (laboral y daños). En sucesiones el costo es cualitativo (bloqueo patrimonial).
+  function actualizarCostoInaccion() {
+    if (costoInaccionTocadoManualmente) return;
+    const ramaKey = selRama.value;
+    const rama = RAMAS[ramaKey];
+    const subtipoKey = rama.subtipos ? selSubtipo.value : null;
+    taCostoInaccion.value = rama.costoInaccion ? rama.costoInaccion(subtipoKey) : '';
+    wrapCiNumerico.style.display = (ramaKey === 'laboral_demandada' || ramaKey === 'danios') ? '' : 'none';
+  }
+
+  function actualizarNotaRoi() {
+    if (!chkRoi.checked) { divRoiNota.style.display = 'none'; return; }
+    const baseMontoNum = parseFloat(inpBaseMonto.value) || 0;
+    if (baseMontoNum <= 0) {
+      divRoiNota.style.display = '';
+      divRoiNota.textContent = 'Para calcular esta relación, cargá un Monto base en Honorarios (cálculo automático).';
+    } else {
+      divRoiNota.style.display = 'none';
+    }
+  }
+
+  selRama.addEventListener('change', () => {
+    alcanceTocadoManualmente = false;
+    enfoqueTocadoManualmente = false;
+    costoInaccionTocadoManualmente = false;
+    actualizarRama();
+  });
+  selSubtipo.addEventListener('change', () => {
+    alcanceTocadoManualmente = false;
+    enfoqueTocadoManualmente = false;
+    costoInaccionTocadoManualmente = false;
+    actualizarAlcance();
+    actualizarEnfoque();
+    actualizarCostoInaccion();
+    renderFilasHonorarios();
+  });
 
   // ── Honorarios: filas dinámicas (1 o 3) ─────────────────────────────────────
   function etiquetasFilas() {
@@ -420,11 +575,12 @@ export function initPresupuestos(container) {
 
   selModalidad.addEventListener('change', renderFilasHonorarios);
   selCalculo.addEventListener('change', () => { actualizarVisibilidadBase(); recalcHonorarios(); });
-  inpBaseMonto.addEventListener('input', recalcHonorarios);
+  inpBaseMonto.addEventListener('input', () => { recalcHonorarios(); actualizarNotaRoi(); });
   inpJusValor.addEventListener('input', recalcHonorarios);
 
   actualizarRama();
   actualizarVisibilidadBase();
+  actualizarNotaRoi();
 
   // ── Generar ──────────────────────────────────────────────────────────────────
   btnGen.addEventListener('click', () => {
@@ -471,6 +627,35 @@ export function initPresupuestos(container) {
 
     const tituloTramite = subtipoLabel ? `${rama.label} — ${subtipoLabel}` : rama.label;
 
+    // — Valor agregado (opcional): enfoque problema→solución, ROI del honorario,
+    //   costo de la inacción e institucional. Cada bloque se omite si su checkbox
+    //   no está tildado, y todo el texto queda editable antes de generar.
+    const enfoqueTexto = chkEnfoque.checked ? taEnfoque.value.trim() : '';
+
+    const baseMontoNum = parseFloat(inpBaseMonto.value) || 0;
+    const roiPct = (chkRoi.checked && baseMontoNum > 0 && h.totalGeneral > 0)
+      ? (h.totalGeneral / baseMontoNum * 100) : null;
+    const roiLinea = roiPct != null
+      ? `El honorario total representa aproximadamente el ${roiPct.toFixed(1)}% del monto en juego (${fmtMoney(baseMontoNum)}).`
+      : '';
+
+    const costoInaccionTexto = chkCostoInaccion.checked ? taCostoInaccion.value.trim() : '';
+    const admiteNumericoCI = ramaKey === 'laboral_demandada' || ramaKey === 'danios';
+    const ciMeses = parseFloat(inpCiMeses.value) || 0;
+    const ciTasa  = parseFloat(inpCiTasa.value) || 0;
+    const ciProyeccion = (chkCostoInaccion.checked && admiteNumericoCI && baseMontoNum > 0 && ciMeses > 0 && ciTasa > 0)
+      ? baseMontoNum * (ciTasa / 100) * ciMeses : null;
+    const ciProyeccionLinea = ciProyeccion != null
+      ? `Solo en concepto de intereses, una demora estimada de ${ciMeses} mes(es) representaría un costo adicional aproximado de ${fmtMoney(ciProyeccion)} (estimación ilustrativa a tasa simple sobre el monto base; no vinculante — verificar la tasa vigente aplicable).`
+      : '';
+
+    const institucionalTexto = chkInstitucional.checked ? taInstitucional.value.trim() : '';
+
+    const equipoSeleccionado = chkEquipo.checked
+      ? Array.from(container.querySelectorAll('.pr-equipo-check:checked')).map(el => EQUIPO[el.dataset.id])
+      : [];
+    const equipoLineas = equipoSeleccionado.map(p => `• ${p.nombre} — ${p.bio}`);
+
     const lineasHonorarios = h.filas.map(f => {
       const partes = [`  ${f.label}: ${fmtMoney(f.fijo)} fijo`];
       if (f.pct > 0) partes.push(`+ ${f.pct}% s/ ${h.baseDesc || 'base a definir'}${f.variableMonto != null ? ` (≈ ${fmtMoney(f.variableMonto)})` : ' (a determinar)'}`);
@@ -493,16 +678,30 @@ export function initPresupuestos(container) {
       'DATOS DEL CASO',
       ...detalles.map(d => `${d.label}: ${d.valor}`),
       '',
+      enfoqueTexto ? 'SU OBJETIVO' : null,
+      enfoqueTexto ? enfoqueTexto : null,
+      enfoqueTexto ? '' : null,
       'ALCANCE DEL SERVICIO',
       alcance,
       '',
       'HONORARIOS' + (h.modalidad === 'etapas' ? ' — POR ETAPAS' : ''),
       ...lineasHonorarios,
       `TOTAL GENERAL: ${fmtMoney(h.totalGeneral)}${h.jusTotal != null ? ` (≈ ${fmtJus(h.jusTotal)} — valor Jus: ${fmtMoney(h.jusValor)})` : ''}`,
+      roiLinea ? roiLinea : null,
       notaTotal ? notaTotal : null,
       honorAclaraciones ? `Aclaraciones sobre los honorarios: ${honorAclaraciones}` : null,
       `Forma de pago: ${formaPago}`,
       gastos ? `Gastos y aranceles estimados (no incluidos en el honorario): ${gastos}` : null,
+      costoInaccionTexto ? '' : null,
+      costoInaccionTexto ? 'COSTO DE LA INACCIÓN' : null,
+      costoInaccionTexto ? costoInaccionTexto : null,
+      ciProyeccionLinea ? ciProyeccionLinea : null,
+      institucionalTexto ? '' : null,
+      institucionalTexto ? 'POR QUÉ MVC ABOGADOS' : null,
+      institucionalTexto ? institucionalTexto : null,
+      equipoLineas.length ? '' : null,
+      equipoLineas.length ? 'PROFESIONALES INTERVINIENTES' : null,
+      ...equipoLineas,
       '',
       `VALIDEZ DE ESTE PRESUPUESTO: ${validez} días corridos desde la fecha de emisión.`,
       observaciones ? '' : null,
@@ -527,6 +726,12 @@ export function initPresupuestos(container) {
     textarea.dataset.gastos = gastos;
     textarea.dataset.validez = validez;
     textarea.dataset.observaciones = observaciones;
+    textarea.dataset.enfoqueTexto = enfoqueTexto;
+    textarea.dataset.roiLinea = roiLinea;
+    textarea.dataset.costoInaccionTexto = costoInaccionTexto;
+    textarea.dataset.ciProyeccionLinea = ciProyeccionLinea;
+    textarea.dataset.institucionalTexto = institucionalTexto;
+    textarea.dataset.equipoLineas = JSON.stringify(equipoLineas);
   });
 
   btnLimp.addEventListener('click', () => {
@@ -549,6 +754,21 @@ export function initPresupuestos(container) {
     container.querySelector('#pr-validez').value = '30';
     container.querySelector('#pr-observaciones').value = '';
     alcanceTocadoManualmente = false;
+    enfoqueTocadoManualmente = false;
+    costoInaccionTocadoManualmente = false;
+    chkEnfoque.checked = false;
+    wrapEnfoque.style.display = 'none';
+    chkRoi.checked = false;
+    divRoiNota.style.display = 'none';
+    chkCostoInaccion.checked = false;
+    wrapCostoInaccion.style.display = 'none';
+    inpCiMeses.value = '';
+    inpCiTasa.value = '';
+    chkInstitucional.checked = false;
+    wrapInstitucional.style.display = 'none';
+    chkEquipo.checked = false;
+    wrapEquipo.style.display = 'none';
+    container.querySelectorAll('.pr-equipo-check').forEach(el => { el.checked = false; });
     actualizarRama();
     actualizarVisibilidadBase();
     divRes.style.display = 'none';
@@ -598,6 +818,8 @@ export function initPresupuestos(container) {
         </tbody>
       </table>
 
+      ${textarea.dataset.enfoqueTexto ? `<div class="info-box"><strong>Su objetivo:</strong><br>${esc(textarea.dataset.enfoqueTexto).replace(/\n/g, '<br>')}</div>` : ''}
+
       <div class="info-box"><strong>Alcance del servicio:</strong><br>${esc(taAlcance.value).replace(/\n/g, '<br>')}</div>
 
       <table>
@@ -607,6 +829,7 @@ export function initPresupuestos(container) {
           <tr class="total-row"><td>TOTAL GENERAL</td><td></td><td></td><td class="monto">${fmtMoney(h.totalGeneral)}</td><td class="monto">${h.jusTotal != null ? fmtJus(h.jusTotal) : '—'}</td></tr>
         </tbody>
       </table>
+      ${textarea.dataset.roiLinea ? `<p class="nota"><strong>${esc(textarea.dataset.roiLinea)}</strong></p>` : ''}
       <p class="nota">Base de referencia del variable: ${esc(h.baseDesc || '—')}${h.baseMonto ? ` — Monto base utilizado: ${fmtMoney(h.baseMonto)}` : ''}. Valor del Jus considerado: ${fmtMoney(h.jusValor || 0)} (verificar vigencia).</p>
       ${notaTotalGeneral(h) ? `<p class="nota"><strong>${esc(notaTotalGeneral(h))}</strong></p>` : ''}
       ${textarea.dataset.honorAclaraciones ? `<div class="info-box"><strong>Aclaraciones sobre los honorarios:</strong><br>${esc(textarea.dataset.honorAclaraciones).replace(/\n/g, '<br>')}</div>` : ''}
@@ -618,6 +841,17 @@ export function initPresupuestos(container) {
           <tr><td>Validez del presupuesto</td><td>${esc(textarea.dataset.validez)} días corridos desde la fecha de emisión</td></tr>
         </tbody>
       </table>
+
+      ${textarea.dataset.costoInaccionTexto ? `<div class="info-box"><strong>Costo de la inacción:</strong><br>${esc(textarea.dataset.costoInaccionTexto).replace(/\n/g, '<br>')}${textarea.dataset.ciProyeccionLinea ? `<br><br>${esc(textarea.dataset.ciProyeccionLinea)}` : ''}</div>` : ''}
+
+      ${textarea.dataset.institucionalTexto ? `<div class="info-box"><strong>Por qué MVC Abogados:</strong><br>${esc(textarea.dataset.institucionalTexto).replace(/\n/g, '<br>')}</div>` : ''}
+
+      ${(() => {
+        const equipoLineas = JSON.parse(textarea.dataset.equipoLineas || '[]');
+        return equipoLineas.length
+          ? `<div class="info-box"><strong>Profesionales intervinientes:</strong><br>${equipoLineas.map(esc).join('<br>')}</div>`
+          : '';
+      })()}
 
       ${textarea.dataset.observaciones ? `<div class="info-box"><strong>Observaciones:</strong><br>${esc(textarea.dataset.observaciones).replace(/\n/g, '<br>')}</div>` : ''}
     `;
