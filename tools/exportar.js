@@ -29,7 +29,8 @@ export function exportarPDF(titulo, htmlBody, opts = {}) {
   <title>${escHtml(titulo)} — MVC Abogados</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; margin: 0; padding: 28px 32px; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; margin: 0; padding: 28px 32px; text-align: justify; word-break: normal; overflow-wrap: break-word; hyphens: auto; }
+    h1, h2, h3, .mvc-header, .mvc-footer, .no-print, th, .monto, .result-big { text-align: initial; }
     .mvc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #c9a84c; padding-bottom: 14px; margin-bottom: 22px; }
     .mvc-logo  { font-size: 22px; font-weight: 800; letter-spacing: -.5px; color: #1a1a1a; line-height: 1.1; }
     .mvc-logo span { color: #c9a84c; }

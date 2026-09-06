@@ -420,7 +420,9 @@ input[type="range"] {
   padding: 14px 18px;
   font-size: 1rem;
   color: var(--color-text);
-  word-break: break-all;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
   min-height: 48px;
 }
 

@@ -1,5 +1,5 @@
 // diagnostico-pyme.js — Diagnóstico Integral PYME (Laboral, RRHH, Compliance y Control Interno)
-// Cuestionario tipo test (14 preguntas, 4 áreas) que produce un semáforo de riesgo por
+// Cuestionario tipo test (16 preguntas, 4 áreas) que produce un semáforo de riesgo por
 // área y un plan de acción editable, con envío opcional al Generador de Presupuestos
 // para convertir el plan de acción en una propuesta económica.
 import { exportarPDF } from './exportar.js';
@@ -22,8 +22,10 @@ export function initDiagnosticoPyme(container) {
 
   // ── Cuestionario ──────────────────────────────────────────────────────────
   // Cada pregunta tiene 3 opciones con puntaje 2 (cumple) / 1 (parcial) / 0 (no cumple).
+  // q11 (UIF) suma además la opción 'na' (no aplica / no alcanzada), que se excluye
+  // del numerador y del denominador al calcular el porcentaje de cumplimiento.
   const QUESTIONS = [
-    { id: 'q1', area: 'laboral', texto: '¿Todo el personal se encuentra debidamente registrado (art. 7 y sgtes., Ley 24.013)?', opciones: [
+    { id: 'q1', area: 'laboral', texto: '¿Todo el personal se encuentra debidamente registrado conforme la normativa laboral y previsional vigente?', opciones: [
       { score: 2, label: 'Sí, el 100% del personal está registrado' },
       { score: 1, label: 'Parcialmente — hay personal con registración deficiente' },
       { score: 0, label: 'No, hay personal no registrado' },
@@ -42,6 +44,16 @@ export function initDiagnosticoPyme(container) {
       { score: 2, label: 'Sí, con sistema de control auditable' },
       { score: 1, label: 'Control informal, sin sistema' },
       { score: 0, label: 'No hay control de jornada ni de horas extra' },
+    ]},
+    { id: 'q15', area: 'laboral', texto: '¿Existen juicios laborales en trámite contra la empresa?', opciones: [
+      { score: 2, label: 'No, no hay juicios laborales en trámite' },
+      { score: 1, label: 'Sí, hay uno o dos juicios en trámite, de escasa entidad' },
+      { score: 0, label: 'Sí, hay tres o más juicios en trámite, o de alta exposición económica' },
+    ]},
+    { id: 'q16', area: 'laboral', texto: '¿Existen reclamos extrajudiciales, intimaciones o cartas documento de índole laboral pendientes de resolución?', opciones: [
+      { score: 2, label: 'No hay reclamos pendientes' },
+      { score: 1, label: 'Sí, hay reclamos aislados en gestión' },
+      { score: 0, label: 'Sí, hay reclamos reiterados, sin gestión, o de alto monto' },
     ]},
     { id: 'q5', area: 'rrhh', texto: '¿Los procesos de selección e inducción de personal están formalizados?', opciones: [
       { score: 2, label: 'Sí, formalizados y documentados' },
@@ -77,6 +89,7 @@ export function initDiagnosticoPyme(container) {
       { score: 2, label: 'Sí, programa vigente y actualizado' },
       { score: 1, label: 'Es sujeto obligado pero el programa está desactualizado o incompleto' },
       { score: 0, label: 'Es o podría ser sujeto obligado y no tiene programa (o no lo sabe)' },
+      { score: 'na', label: 'No aplica / no alcanzada — la actividad no la constituye en sujeto obligado ante la UIF' },
     ]},
     { id: 'q12', area: 'control_interno', texto: '¿Existe segregación de funciones en el circuito de pagos y compras?', opciones: [
       { score: 2, label: 'Sí, funciones separadas entre distintas personas' },
@@ -99,7 +112,7 @@ export function initDiagnosticoPyme(container) {
   // ── Catálogo de acciones sugeridas por pregunta, según el puntaje obtenido ──
   const ACCIONES = {
     q1: {
-      0: { texto: 'Regularizar la registración del personal no registrado (art. 7 y sgtes., Ley 24.013), evaluando los regímenes de regularización vigentes.', prioridad: 'alta', plazo: '30 días' },
+      0: { texto: 'Regularizar la registración del personal no registrado, evaluando los regímenes de regularización vigentes.', prioridad: 'alta', plazo: '30 días' },
       1: { texto: 'Auditar los legajos con registración deficiente y regularizar diferencias salariales u horarias no reflejadas.', prioridad: 'media', plazo: '60 días' },
     },
     q2: {
@@ -113,6 +126,14 @@ export function initDiagnosticoPyme(container) {
     q4: {
       0: { texto: 'Implementar un sistema de control horario y de registro de horas extra (Ley 11.544) para evitar contingencias por pago insuficiente.', prioridad: 'media', plazo: '60 días' },
       1: { texto: 'Formalizar el control de horas extra ya existente con un sistema auditable.', prioridad: 'baja', plazo: '90 días' },
+    },
+    q15: {
+      0: { texto: 'Relevar el estado procesal de cada juicio laboral en trámite, cuantificar la contingencia (capital, intereses y honorarios) y evaluar la constitución de previsiones contables acordes al riesgo.', prioridad: 'alta', plazo: '30 días' },
+      1: { texto: 'Realizar seguimiento periódico de los juicios laborales en trámite y evaluar alternativas de resolución (audiencias de conciliación, acuerdos) para reducir la exposición.', prioridad: 'media', plazo: '60 días' },
+    },
+    q16: {
+      0: { texto: 'Responder y gestionar en forma urgente los reclamos extrajudiciales e intimaciones laborales pendientes, evaluando la conveniencia de una respuesta formal para evitar el agravamiento de la contingencia.', prioridad: 'alta', plazo: '15 días' },
+      1: { texto: 'Formalizar un protocolo de seguimiento y respuesta de reclamos extrajudiciales laborales para evitar que se judicialicen.', prioridad: 'media', plazo: '60 días' },
     },
     q5: {
       0: { texto: 'Diseñar un proceso formal de selección e inducción de personal, con checklist de documentación a solicitar al ingreso.', prioridad: 'baja', plazo: '90 días' },
@@ -219,6 +240,11 @@ export function initDiagnosticoPyme(container) {
         </div>
 
         <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:16px">
+          <button class="btn btn-ghost" id="dp-cronograma" type="button">📅 Generar cronograma visible</button>
+        </div>
+        <div id="dp-cronograma-wrap" style="display:none;margin-top:10px"></div>
+
+        <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:16px">
           <button class="btn btn-primary" id="dp-generar">Generar informe</button>
         </div>
       </div>
@@ -255,12 +281,14 @@ export function initDiagnosticoPyme(container) {
   }
 
   let ultimoDiagnostico = null;
+  let ultimoCronogramaPlan = null;
 
   function leerRespuestas() {
     const respuestas = {};
     QUESTIONS.forEach(q => {
       const checked = container.querySelector(`input[name="dp-${q.id}"]:checked`);
-      respuestas[q.id] = checked ? parseInt(checked.value, 10) : null;
+      if (!checked) { respuestas[q.id] = null; return; }
+      respuestas[q.id] = checked.value === 'na' ? 'na' : parseInt(checked.value, 10);
     });
     return respuestas;
   }
@@ -281,8 +309,13 @@ export function initDiagnosticoPyme(container) {
     let totalPuntos = 0, totalMax = 0;
     Object.keys(AREAS).forEach(areaKey => {
       const preguntasArea = QUESTIONS.filter(q => q.area === areaKey);
-      const puntos = preguntasArea.reduce((acc, q) => acc + respuestas[q.id], 0);
-      const max = preguntasArea.length * 2;
+      let puntos = 0, max = 0;
+      preguntasArea.forEach(q => {
+        const r = respuestas[q.id];
+        if (r === 'na') return; // no aplica: se excluye del numerador y del denominador
+        puntos += r;
+        max += 2;
+      });
       const pct = max > 0 ? (puntos / max * 100) : 0;
       porArea[areaKey] = { puntos, max, pct };
       totalPuntos += puntos;
@@ -375,6 +408,7 @@ export function initDiagnosticoPyme(container) {
     QUESTIONS.forEach(q => {
       const score = ultimoDiagnostico.respuestas[q.id];
       if (score === 2) return; // cumple, no requiere acción
+      if (score === 'na') return; // no aplica / no alcanzada
       if (sugeridasAgregadas.has(q.id)) return;
       const accion = ACCIONES[q.id] && ACCIONES[q.id][score];
       if (!accion) return;
@@ -399,6 +433,85 @@ export function initDiagnosticoPyme(container) {
     const a = ABOGADOS.find(x => x.value === value);
     return a ? a.label : 'Sin asignar';
   }
+
+  // ── Cronograma visible del plan de acción ───────────────────────────────────
+  const PRIORIDAD_COLOR = {
+    alta:  { bg: '#fdeaea', bar: '#d97a7a', text: '#7a2020' },
+    media: { bg: '#fff3cd', bar: '#ffc107', text: '#856404' },
+    baja:  { bg: '#e8f4ea', bar: '#7ab88a', text: '#1f7a3d' },
+  };
+
+  function parsePlazoDias(plazo) {
+    if (!plazo) return null;
+    const m = String(plazo).match(/(\d+)\s*(d[ií]as?|mes(?:es)?|semanas?)/i);
+    if (!m) return null;
+    const n = parseInt(m[1], 10);
+    if (isNaN(n)) return null;
+    const unidad = m[2].toLowerCase();
+    if (unidad.startsWith('mes')) return n * 30;
+    if (unidad.startsWith('sem')) return n * 7;
+    return n;
+  }
+
+  function escCron(s) { return String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function generarCronogramaHTML(plan, { forPdf = false } = {}) {
+    const wrapClass = forPdf ? 'info-box' : 'display-box';
+    const muted = forPdf ? '#888' : 'var(--color-muted)';
+    if (!plan.length) {
+      return `<div class="${wrapClass}">No hay líneas cargadas en el plan de acción.</div>`;
+    }
+    const conDias = plan.map(p => ({ ...p, dias: parsePlazoDias(p.plazo) }));
+    const conocidos = conDias.filter(p => p.dias !== null).sort((a, b) => a.dias - b.dias);
+    const sinDefinir = conDias.filter(p => p.dias === null);
+    const maxDias = conocidos.length ? Math.max(...conocidos.map(p => p.dias)) : 0;
+
+    const filasConocidas = conocidos.map(p => {
+      const col = PRIORIDAD_COLOR[p.prioridad] || PRIORIDAD_COLOR.media;
+      const widthPct = maxDias > 0 ? Math.max(4, (p.dias / maxDias * 100)) : 100;
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;gap:10px;font-size:.8rem;margin-bottom:3px">
+          <span>${escCron(p.accion)}</span>
+          <span style="font-weight:700;color:${col.text};white-space:nowrap">${p.dias} días</span>
+        </div>
+        <div style="background:#eee;border-radius:4px;overflow:hidden;height:14px">
+          <div style="width:${widthPct}%;height:100%;background:${col.bar}"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const filasSinDefinir = sinDefinir.length
+      ? `<div style="margin-top:10px;font-size:.8rem;color:${muted}">
+          <strong>Plazo sin definir:</strong>
+          <ul style="margin:6px 0 0 18px">
+            ${sinDefinir.map(p => `<li>${escCron(p.accion)}</li>`).join('')}
+          </ul>
+        </div>`
+      : '';
+
+    const leyenda = `<div style="display:flex;gap:16px;margin-top:12px;font-size:.75rem;color:${muted}">
+      <span><span style="display:inline-block;width:10px;height:10px;background:${PRIORIDAD_COLOR.alta.bar};border-radius:2px;margin-right:4px"></span>Alta</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:${PRIORIDAD_COLOR.media.bar};border-radius:2px;margin-right:4px"></span>Media</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:${PRIORIDAD_COLOR.baja.bar};border-radius:2px;margin-right:4px"></span>Baja</span>
+    </div>`;
+
+    return `<div class="${wrapClass}">
+      <strong>Cronograma de implementación</strong>
+      <div style="margin-top:12px">${filasConocidas || `<p style="font-size:.8rem;color:${muted}">Ningún plazo pudo interpretarse como cantidad de días.</p>`}</div>
+      ${filasSinDefinir}
+      ${leyenda}
+      <p style="font-size:.72rem;color:${muted};font-style:italic;margin-top:10px">Eje temporal ilustrativo, calculado a partir del texto del plazo cargado en cada línea (ej. "30 días", "2 meses"). No representa fechas calendario exactas.</p>
+    </div>`;
+  }
+
+  container.querySelector('#dp-cronograma').addEventListener('click', () => {
+    const plan = leerPlan();
+    ultimoCronogramaPlan = plan;
+    const wrap = container.querySelector('#dp-cronograma-wrap');
+    wrap.style.display = 'block';
+    wrap.innerHTML = generarCronogramaHTML(plan, { forPdf: false });
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
 
   // ── Generar informe ───────────────────────────────────────────────────────
   container.querySelector('#dp-generar').addEventListener('click', () => {
@@ -469,6 +582,9 @@ Diagnóstico orientativo en base a las respuestas cargadas por la empresa/el/la 
     planCount = 0; planActivos = 0;
     sugeridasAgregadas.clear();
     ultimoDiagnostico = null;
+    ultimoCronogramaPlan = null;
+    container.querySelector('#dp-cronograma-wrap').style.display = 'none';
+    container.querySelector('#dp-cronograma-wrap').innerHTML = '';
     divRes.style.display = 'none';
     divEnviarConf.style.display = 'none';
     textarea.value = '';
@@ -489,7 +605,11 @@ Diagnóstico orientativo en base a las respuestas cargadas por la empresa/el/la 
     const texto = textarea.value;
     if (!texto) return;
     const lineas = texto.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-    exportarPDF(`Diagnóstico Integral PYME — ${val('dp-empresa') || 'empresa'}`, `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>`);
+    let bodyHtml = `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>`;
+    if (ultimoCronogramaPlan) {
+      bodyHtml += `<h1 class="titulo" style="font-size:14px;margin:18px 0 10px">Cronograma de implementación</h1>${generarCronogramaHTML(ultimoCronogramaPlan, { forPdf: true })}`;
+    }
+    exportarPDF(`Diagnóstico Integral PYME — ${val('dp-empresa') || 'empresa'}`, bodyHtml);
   });
 
   // ── Enviar a Generador de Presupuestos ───────────────────────────────────
