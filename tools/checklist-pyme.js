@@ -164,6 +164,85 @@ export function initChecklistPyme(container) {
     return { nivel: 'Incompleto', color: '#7a2020', bg: '#fdeaea', borde: '#d97a7a' };
   }
 
+  // ── Gráficos SVG (pantalla + PDF opcional) ──────────────────────────────
+  function construirBarrasSvg(filas) {
+    const rowH = 40, barMaxW = 240, barX = 150, chartWidth = barX + barMaxW + 50, chartHeight = filas.length * rowH + 10;
+    let inner = '';
+    filas.forEach((f, i) => {
+      const y = 10 + i * rowH;
+      const barW = Math.max(2, (f.pct / 100) * barMaxW);
+      inner += `<text x="0" y="${y + 18}" font-family="Arial, sans-serif" font-size="12" fill="#1a1a1a">${esc(f.label)}</text>`;
+      inner += `<rect x="${barX}" y="${y + 4}" width="${barMaxW}" height="20" rx="4" fill="#eee"/>`;
+      inner += `<rect x="${barX}" y="${y + 4}" width="${barW}" height="20" rx="4" fill="${f.color}"/>`;
+      inner += `<text x="${barX + barMaxW + 10}" y="${y + 18}" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="${f.color}">${f.pct.toFixed(0)}%</text>`;
+    });
+    return `<div><div style="font-weight:700;font-size:12px;margin-bottom:8px;color:#1a1a1a">Cumplimiento por área</div>
+      <svg width="${chartWidth}" height="${chartHeight}" viewBox="0 0 ${chartWidth} ${chartHeight}" xmlns="http://www.w3.org/2000/svg">${inner}</svg></div>`;
+  }
+
+  function construirDonaSvg(pctGlobal, nivel) {
+    const size = 160, r = 60, cx = size / 2, cy = size / 2, grosor = 18;
+    const circunferencia = 2 * Math.PI * r;
+    const progreso = (Math.max(0, Math.min(100, pctGlobal)) / 100) * circunferencia;
+    return `<div><div style="font-weight:700;font-size:12px;margin-bottom:8px;color:#1a1a1a">Estado global</div>
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#eee" stroke-width="${grosor}"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${nivel.color}" stroke-width="${grosor}" stroke-dasharray="${progreso} ${circunferencia}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+        <text x="${cx}" y="${cy + 7}" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="${nivel.color}">${pctGlobal.toFixed(0)}%</text>
+      </svg>
+      <div style="text-align:center;font-size:11px;color:${nivel.color};font-weight:700;margin-top:2px">${esc(nivel.nivel)}</div>
+    </div>`;
+  }
+
+  function construirRadarSvg(filas) {
+    const width = 380, height = 320, cx = width / 2, cy = height / 2, rMax = 80;
+    const n = filas.length;
+    const angleFor = i => (Math.PI * 2 * i / n) - Math.PI / 2;
+    const puntoEn = (i, frac) => {
+      const a = angleFor(i);
+      return [cx + Math.cos(a) * rMax * frac, cy + Math.sin(a) * rMax * frac];
+    };
+    let grid = '';
+    [0.25, 0.5, 0.75, 1].forEach(frac => {
+      const pts = filas.map((_, i) => puntoEn(i, frac).join(',')).join(' ');
+      grid += `<polygon points="${pts}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+    });
+    let axes = '';
+    filas.forEach((f, i) => {
+      const a = angleFor(i);
+      const cosA = Math.cos(a), sinA = Math.sin(a);
+      const [x, y] = puntoEn(i, 1);
+      const [lx, ly] = puntoEn(i, 1.22);
+      const anchor = Math.abs(cosA) < 0.3 ? 'middle' : (cosA > 0 ? 'start' : 'end');
+      const dy = sinA < -0.3 ? -2 : (sinA > 0.3 ? 10 : 4);
+      axes += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#ddd" stroke-width="1"/>`;
+      axes += `<text x="${lx}" y="${ly + dy}" text-anchor="${anchor}" font-family="Arial, sans-serif" font-size="11" fill="#1a1a1a">${esc(f.labelCorto || f.label)}</text>`;
+    });
+    const dataPts = filas.map((f, i) => puntoEn(i, Math.max(0.03, f.pct / 100)).join(',')).join(' ');
+    const dataShape = `<polygon points="${dataPts}" fill="#c9a84c" fill-opacity="0.35" stroke="#c9a84c" stroke-width="2"/>`;
+    const dots = filas.map((f, i) => { const [x, y] = puntoEn(i, Math.max(0.03, f.pct / 100)); return `<circle cx="${x}" cy="${y}" r="3.5" fill="${f.color}"/>`; }).join('');
+    return `<div><div style="font-weight:700;font-size:12px;margin-bottom:8px;color:#1a1a1a">Perfil comparativo por área</div>
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">${grid}${axes}${dataShape}${dots}</svg></div>`;
+  }
+
+  const RADAR_LABEL_CORTO = { laboral: 'Laboral', rrhh: 'RRHH', compliance: 'Compliance', control_interno: 'Ctrl. Interno' };
+
+  function construirGraficosHtml(porArea, pctGlobal) {
+    const filas = Object.entries(AREAS).map(([areaKey, area]) => {
+      const a = porArea[areaKey];
+      const n = nivelDe(a.pct);
+      return { label: area.label, labelCorto: RADAR_LABEL_CORTO[areaKey] || area.label, pct: a.pct, color: n.color };
+    });
+    const nGlobal = nivelDe(pctGlobal);
+    return `<div style="background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;padding:16px 20px">
+      <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+        ${construirBarrasSvg(filas)}
+        ${construirDonaSvg(pctGlobal, nGlobal)}
+      </div>
+      <div style="margin-top:18px">${construirRadarSvg(filas)}</div>
+    </div>`;
+  }
+
   container.querySelector('#cp-calcular').addEventListener('click', () => {
     const estados = leerEstados();
     const sinResponder = ITEMS.filter(it => !estados[it.id]);
@@ -226,6 +305,12 @@ export function initChecklistPyme(container) {
         <div style="margin-top:14px;padding:10px 14px;background:${nGlobal.bg};border:1px solid ${nGlobal.borde};border-radius:6px;color:${nGlobal.color}">
           <strong>Estado global: ${pctGlobal.toFixed(0)}% — ${nGlobal.nivel}</strong>${totalFalta ? ` — ${totalFalta} ítem(s) pendiente(s)` : ''}
         </div>
+      </div>
+      <div class="display-box" style="margin-top:14px">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;margin-bottom:14px">
+          <input type="checkbox" id="cp-incluir-graficos" checked style="width:auto"> Incluir estos gráficos en el PDF
+        </label>
+        ${construirGraficosHtml(porArea, pctGlobal)}
       </div>`;
 
     btnGenerar.style.display = '';
@@ -303,7 +388,14 @@ Checklist orientativo de verificación documental en base a la documentación ef
     const texto = textarea.value;
     if (!texto) return;
     const lineas = texto.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-    exportarPDF(`Checklist de Verificación Documental PYME — ${val('cp-empresa') || 'empresa'}`, `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>`);
+    const incluirGraficos = container.querySelector('#cp-incluir-graficos');
+    const graficosHtml = (incluirGraficos && incluirGraficos.checked && ultimoResumen)
+      ? `<div style="margin-top:22px;page-break-inside:avoid">
+          <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:#1a1a1a">GRÁFICOS — ESTADO DOCUMENTAL</div>
+          ${construirGraficosHtml(ultimoResumen.porArea, ultimoResumen.pctGlobal)}
+        </div>`
+      : '';
+    exportarPDF(`Checklist de Verificación Documental PYME — ${val('cp-empresa') || 'empresa'}`, `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>${graficosHtml}`);
   });
 
   // ── Prefill desde Diagnóstico Integral PYME ─────────────────────────────
