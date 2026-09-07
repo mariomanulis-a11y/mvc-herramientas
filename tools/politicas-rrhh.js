@@ -29,6 +29,44 @@ export function initPoliticasRrhh(container) {
 
   const ROMANOS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
+  const METODOLOGIAS = [
+    { id: 'objetivos',    label: 'Evaluación por objetivos/metas cuantificables (OKR/KPI)',
+      texto: 'evaluación por objetivos y metas cuantificables (OKR/KPI)' },
+    { id: 'competencias', label: 'Evaluación por competencias (técnicas y blandas)',
+      texto: 'evaluación por competencias técnicas y blandas' },
+    { id: 'autoeval',     label: 'Autoevaluación previa del trabajador',
+      texto: 'una autoevaluación previa por parte del trabajador' },
+    { id: 'superior',     label: 'Evaluación a cargo del superior directo',
+      texto: 'la evaluación a cargo del superior directo' },
+    { id: '360',          label: 'Evaluación 360° (superiores, pares y colaboradores a cargo)',
+      texto: 'una evaluación de tipo 360°, con intervención de superiores, pares y, en su caso, colaboradores a cargo' },
+    { id: 'devolucion',   label: 'Instancia de devolución individual (feedback estructurado)',
+      texto: 'una instancia de devolución individual (feedback estructurado) con el trabajador evaluado' },
+    { id: 'planmejora',   label: 'Plan de mejora o desarrollo posterior a la evaluación',
+      texto: 'la elaboración de un plan de mejora o desarrollo posterior a la evaluación' },
+    { id: 'vinculacion',  label: 'Vinculación con incrementos salariales o promociones (no automática)',
+      texto: 'la posibilidad de considerar sus resultados a los fines de incrementos salariales o promociones, sin que ello implique automaticidad alguna' },
+  ];
+
+  const ETICA_ITEMS = [
+    { id: 'dadivas',              label: 'Prohibición de recibir dádivas, regalos o beneficios de proveedores/clientes',
+      texto: 'la prohibición de recibir dádivas, regalos o beneficios de proveedores o clientes' },
+    { id: 'conflicto_interes',    label: 'Política de conflictos de interés (deber de declarar vinculaciones)',
+      texto: 'el deber de declarar situaciones de conflicto de interés derivadas de vinculaciones personales o económicas' },
+    { id: 'confidencialidad',     label: 'Protocolo de confidencialidad de información de clientes y terceros',
+      texto: 'un protocolo de confidencialidad respecto de la información de clientes y terceros' },
+    { id: 'redes_sociales',       label: 'Uso de redes sociales y comunicaciones institucionales',
+      texto: 'pautas de uso de redes sociales y comunicaciones institucionales' },
+    { id: 'recursos_tecnologicos',label: 'Uso de recursos tecnológicos, correo corporativo y dispositivos',
+      texto: 'pautas de uso de los recursos tecnológicos, el correo corporativo y los dispositivos provistos por la empresa' },
+    { id: 'info_privilegiada',    label: 'Prohibición de uso de información privilegiada o reservada',
+      texto: 'la prohibición de utilizar información privilegiada o reservada de la empresa en beneficio propio o de terceros' },
+    { id: 'regalos_institucionales', label: 'Régimen de regalos institucionales (dar/recibir en nombre de la empresa)',
+      texto: 'el régimen aplicable al otorgamiento o recepción de regalos institucionales en nombre de la empresa' },
+    { id: 'vinculos_jerarquicos', label: 'Vínculos jerárquicos entre familiares o parejas (conflicto de interés)',
+      texto: 'el deber de informar vínculos familiares o de pareja dentro de una misma línea jerárquica, a fin de prevenir conflictos de interés' },
+  ];
+
   // ── HTML ──────────────────────────────────────────────────────────────────
   container.innerHTML = `
     <div class="tool-card">
@@ -78,15 +116,29 @@ export function initPoliticasRrhh(container) {
           </div>
         </div>
         <div class="field-group">
-          <label for="pr2-eval-metodologia">Metodología (opcional)</label>
-          <textarea id="pr2-eval-metodologia" rows="2" placeholder="Ej: evaluación por objetivos y competencias, con autoevaluación previa y devolución del superior directo"></textarea>
+          <label>Metodología (tildá las que apliquen; opcional)</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0 10px">
+            ${METODOLOGIAS.map(m => `
+              <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;font-size:.88rem">
+                <input type="checkbox" class="pr2-metodo-check" data-item="${m.id}" style="width:auto"> ${esc(m.label)}
+              </label>`).join('')}
+          </div>
+          <label for="pr2-eval-metodologia-otros">Otros aspectos de la metodología (opcional)</label>
+          <textarea id="pr2-eval-metodologia-otros" rows="2" placeholder="Ej: ponderación específica por área, comité de calibración de resultados, etc."></textarea>
         </div>
       </div>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:20px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Código de Ética y Conducta</div>
       <div class="field-group" id="pr2-wrap-etica">
-        <label for="pr2-etica-adicional">Principios o prohibiciones específicas de la actividad (opcional)</label>
-        <textarea id="pr2-etica-adicional" rows="2" placeholder="Ej: prohibición de recibir dádivas de proveedores, protocolo de manejo de información confidencial de clientes"></textarea>
+        <label>Disposiciones adicionales, más allá de los principios y prohibiciones ya incluidos en el texto base (tildá las que apliquen; opcional)</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0 10px">
+          ${ETICA_ITEMS.map(e => `
+            <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;font-size:.88rem">
+              <input type="checkbox" class="pr2-etica-check" data-item="${e.id}" style="width:auto"> ${esc(e.label)}
+            </label>`).join('')}
+        </div>
+        <label for="pr2-etica-otros">Otras disposiciones específicas de la actividad (opcional)</label>
+        <textarea id="pr2-etica-otros" rows="2" placeholder="Ej: protocolo propio del sector, restricciones normativas específicas de la actividad"></textarea>
       </div>
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:20px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Canal de Denuncias</div>
@@ -158,6 +210,11 @@ export function initPoliticasRrhh(container) {
 
   function val(id) { const el = container.querySelector(`#${id}`); return el ? el.value.trim() : ''; }
   function esc(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function listaProsa(items) {
+    if (!items.length) return '';
+    if (items.length === 1) return items[0];
+    return `${items.slice(0, -1).join(', ')} y ${items[items.length - 1]}`;
+  }
 
   CAPITULOS.forEach(c => {
     capChecks[c.id].addEventListener('change', () => {
@@ -215,14 +272,18 @@ Toda solicitud de licencia deberá formalizarse con la mayor anticipación posib
       },
       evaluacion: () => {
         const periodicidad = container.querySelector('#pr2-eval-periodicidad').selectedOptions[0].textContent.toLowerCase();
-        const metodologia = val('pr2-eval-metodologia') || 'evaluación de objetivos y competencias, con instancia de devolución individual a cargo del superior directo';
-        return `La empresa implementa un proceso de evaluación de desempeño de periodicidad ${periodicidad}, con la siguiente metodología: ${metodologia}.
+        const metodosSel = METODOLOGIAS.filter(m => container.querySelector(`.pr2-metodo-check[data-item="${m.id}"]`).checked).map(m => m.texto);
+        const otrosMetodo = val('pr2-eval-metodologia-otros');
+        const metodologia = listaProsa(metodosSel) || 'evaluación de objetivos y competencias, con instancia de devolución individual a cargo del superior directo';
+        return `La empresa implementa un proceso de evaluación de desempeño de periodicidad ${periodicidad}, con la siguiente metodología: ${metodologia}.${otrosMetodo ? `\nAsimismo, se aplican los siguientes aspectos particulares: ${otrosMetodo}.` : ''}
 Los resultados de cada evaluación serán comunicados personalmente al trabajador evaluado, quien tendrá derecho a formular sus comentarios o descargo. Los resultados podrán ser considerados a los fines de capacitación, promoción o ajustes en las condiciones de trabajo, sin que ello implique por sí solo modificación alguna del contrato de trabajo sin el consentimiento del trabajador cuando la ley así lo exija.`;
       },
       etica: () => {
-        const adicional = val('pr2-etica-adicional');
+        const eticaSel = ETICA_ITEMS.filter(e => container.querySelector(`.pr2-etica-check[data-item="${e.id}"]`).checked).map(e => e.texto);
+        const otrosEtica = val('pr2-etica-otros');
+        const adicionalProsa = listaProsa(eticaSel);
         return `Todo el personal de la empresa, cualquiera sea su jerarquía, debe ajustar su conducta a los siguientes principios: legalidad, integridad, transparencia, respeto y trato digno hacia compañeros, clientes y proveedores, prevención de conflictos de interés, y confidencialidad de la información de la empresa y de terceros.
-Se encuentran expresamente prohibidas las siguientes conductas: el ofrecimiento, solicitud o aceptación de sobornos, dádivas o comisiones indebidas; el fraude o la falsificación de documentación o registros; el acoso laboral y el acoso sexual o cualquier forma de violencia en el ámbito laboral (en línea con la Ley 26.485 y el Convenio N° 190 de la OIT, ratificado por Ley 27.580); y el uso indebido de los bienes, información o recursos de la empresa en beneficio propio o de terceros.${adicional ? `\nAsimismo, y en atención a la actividad específica de la empresa: ${adicional}.` : ''}
+Se encuentran expresamente prohibidas las siguientes conductas: el ofrecimiento, solicitud o aceptación de sobornos, dádivas o comisiones indebidas; el fraude o la falsificación de documentación o registros; el acoso laboral y el acoso sexual o cualquier forma de violencia en el ámbito laboral (en línea con la Ley 26.485 y el Convenio N° 190 de la OIT, ratificado por Ley 27.580); y el uso indebido de los bienes, información o recursos de la empresa en beneficio propio o de terceros.${adicionalProsa ? `\nAsimismo, y en atención a la actividad específica de la empresa, resultan de aplicación las siguientes disposiciones: ${adicionalProsa}.` : ''}${otrosEtica ? `\nSe deja además constancia de lo siguiente: ${otrosEtica}.` : ''}
 Todo incumplimiento a este Código deberá denunciarse por el canal de denuncias previsto en el presente Reglamento, y podrá dar lugar a las sanciones disciplinarias que correspondan conforme la Ley de Contrato de Trabajo.`;
       },
       denuncias: () => {
@@ -272,6 +333,7 @@ Fecha de emisión: ${fmtFechaCorta(val('pr2-fecha'))}`;
     container.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => { el.value = ''; });
     container.querySelector('#pr2-eval-periodicidad').value = 'anual';
     container.querySelector('#pr2-denuncias-modalidad').value = 'email';
+    container.querySelectorAll('.pr2-metodo-check, .pr2-etica-check').forEach(el => { el.checked = false; });
     CAPITULOS.forEach(c => {
       capChecks[c.id].checked = true;
       wraps[c.id].style.opacity = '1';
