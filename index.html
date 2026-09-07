@@ -92,6 +92,9 @@
     <button class="nav-item" data-tool="diagnostico-pyme">
       <span class="nav-icon">🧭</span> Diagnóstico Integral PYME
     </button>
+    <button class="nav-item" data-tool="checklist-pyme">
+      <span class="nav-icon">✅</span> Checklist de Verificación PYME
+    </button>
 
     <div class="nav-label">Asistente IA</div>
     <button class="nav-item" data-tool="dalmacio" style="border-left:2px solid #c9a84c;">
@@ -136,6 +139,7 @@
     documentacion:    { label: 'Generador de Documentación Requerida', load: () => import('./tools/documentacion.js').then(m => m.initDocumentacion) },
     'convenio-honorarios': { label: 'Generador de Convenios de Honorarios', load: () => import('./tools/convenio-honorarios.js').then(m => m.initConvenioHonorarios) },
     'diagnostico-pyme': { label: 'Diagnóstico Integral PYME',          load: () => import('./tools/diagnostico-pyme.js').then(m => m.initDiagnosticoPyme) },
+    'checklist-pyme': { label: 'Checklist de Verificación Documental PYME', load: () => import('./tools/checklist-pyme.js').then(m => m.initChecklistPyme) },
     dalmacio:         { label: 'Dalmacio — Asistente Jurídico IA',   load: () => import('./tools/dalmacio.js').then(m => m.initDalmacio) },
   };
 
@@ -149,6 +153,7 @@
     presupuestos:'🧾', documentacion:'📑',
     'convenio-honorarios':'🤝',
     'diagnostico-pyme':'🧭',
+    'checklist-pyme':'✅',
     dalmacio:'🤖'
   };
 
@@ -157,7 +162,7 @@
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
     'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','demanda-art','minutas','escrito-sucesion','presupuestos','documentacion','convenio-honorarios'],
-    'Consultoría PYME':   ['diagnostico-pyme'],
+    'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme'],
     'Asistente IA':       ['dalmacio'],
   };
 

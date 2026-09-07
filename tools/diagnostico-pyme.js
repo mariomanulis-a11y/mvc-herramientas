@@ -353,10 +353,59 @@ export function initDiagnosticoPyme(container) {
         <div style="margin-top:14px;padding:10px 14px;background:${nGlobal.bg};border:1px solid ${nGlobal.borde};border-radius:6px;color:${nGlobal.color}">
           <strong>Score global: ${pctGlobal.toFixed(0)}% — Nivel ${nGlobal.nivel}</strong>
         </div>
+        <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:14px">
+          <button class="btn btn-ghost" id="dp-enviar-checklist" type="button">✅ Enviar a Checklist de Verificación</button>
+        </div>
+        <div id="dp-checklist-confirmacion" style="display:none;margin-top:8px"></div>
       </div>`;
 
     divPlanWrap.style.display = 'block';
     divPlanWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  // ── Enviar a Checklist de Verificación Documental PYME ──────────────────
+  // El botón se recrea en cada cálculo del diagnóstico, así que se delega el
+  // evento a nivel contenedor en lugar de re-adjuntar el listener cada vez.
+  // Solo se trasladan los datos de la empresa y el nivel de riesgo por área
+  // (a modo de prioridad de revisión) — el checklist es una verificación
+  // documental independiente y no debe precargarse con la autopercepción
+  // del cliente relevada en el diagnóstico (relación de género a especie).
+  container.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('#dp-enviar-checklist');
+    if (!btn || !ultimoDiagnostico) return;
+
+    const areas = {};
+    Object.keys(AREAS).forEach(areaKey => {
+      const a = ultimoDiagnostico.porArea[areaKey];
+      areas[areaKey] = { pct: a.pct, nivel: nivelDe(a.pct).nivel };
+    });
+
+    const payload = {
+      fecha: new Date().toLocaleDateString('es-AR'),
+      empresa: val('dp-empresa'),
+      cuit: val('dp-cuit'),
+      rubro: val('dp-rubro'),
+      areas,
+    };
+
+    const divConf = container.querySelector('#dp-checklist-confirmacion');
+    try {
+      localStorage.setItem('mvc_prefill_checklist_pyme', JSON.stringify(payload));
+    } catch (e) {
+      if (divConf) {
+        divConf.style.display = 'block';
+        divConf.innerHTML = `<div class="display-box" style="color:#c00">No se pudieron guardar los datos (${e.message}).</div>`;
+      }
+      return;
+    }
+    if (divConf) {
+      divConf.style.display = 'block';
+      divConf.innerHTML = `<div class="display-box" style="background:#e8f4ea;border-color:#7ab88a">
+        ✅ Datos enviados. Abrí el <strong>Checklist de Verificación Documental PYME</strong> y aceptá el banner para cargarlos.
+        <div style="margin-top:8px"><button class="btn btn-primary" id="dp-ir-a-checklist" type="button">Ir ahora</button></div>
+      </div>`;
+      container.querySelector('#dp-ir-a-checklist').addEventListener('click', () => { location.hash = 'checklist-pyme'; });
+    }
   });
 
   // ── Plan de acción: lista dinámica ───────────────────────────────────────
