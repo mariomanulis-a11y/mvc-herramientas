@@ -69,6 +69,19 @@ export function initPresupuestos(container) {
       enfoque: (sub) => 'Su objetivo es obtener la reparación integral del daño sufrido de la manera más eficiente posible, evitando que el paso del tiempo perjudique la prueba disponible o el cobro efectivo de la indemnización. Para lograrlo, nos encargamos de:',
       costoInaccion: (sub) => 'El paso del tiempo juega en contra del reclamante: la prueba testimonial se deteriora, la documental puede extraviarse o volverse inaccesible, y corren los plazos de prescripción de la acción. A la vez, el eventual monto de condena se incrementa por los intereses devengados desde la fecha del hecho o la mora hasta el efectivo pago. Iniciar el reclamo a tiempo preserva la prueba disponible y maximiza el valor efectivamente recuperable.',
     },
+    amparo_salud: {
+      label: 'Amparo de Salud con Medida Cautelar',
+      campos: ['actor_amparo', 'demandado_amparo', 'prestacion_reclamada', 'urgencia_medica'],
+      alcance: () => 'Interposición de la acción de amparo de salud con solicitud de medida cautelar de cobertura inmediata de la prestación requerida; seguimiento del trámite hasta la resolución de la cautelar y la sentencia definitiva de fondo.',
+      etapas: () => [
+        'Interposición del amparo y medida cautelar',
+        'Contestación de la demandada y producción de prueba',
+        'Sentencia definitiva y seguimiento del cumplimiento',
+      ],
+      baseDesc: 'Valor estimado de la prestación / tratamiento reclamado',
+      enfoque: () => 'Su objetivo es obtener la cobertura de la prestación de salud requerida en el menor tiempo posible, dada la urgencia que habitualmente reviste este tipo de reclamos. Para lograrlo, nos encargamos de:',
+      costoInaccion: () => 'La demora en judicializar un reclamo de cobertura de salud puede agravar el cuadro clínico del paciente y, en determinados casos, tornar irreversible el perjuicio, además de dificultar la reparación económica posterior. La vía del amparo con medida cautelar busca precisamente evitar esa demora, obteniendo una respuesta jurisdiccional en un plazo considerablemente menor al de un proceso ordinario.',
+    },
     asesoramiento_pyme: {
       label: 'Asesoramiento Integral PYME (Laboral, RRHH, Compliance y Control Interno)',
       campos: ['empresa_cliente', 'rubro_pyme', 'cant_empleados_pyme'],
@@ -108,6 +121,11 @@ export function initPresupuestos(container) {
 
     { id: 'rubro_pyme',            label: 'Rubro / actividad de la empresa',            tipo: 'text',   opcional: true, placeholder: 'Comercio, industria, servicios, etc.' },
     { id: 'cant_empleados_pyme',   label: 'Cantidad de empleados',                      tipo: 'entero', opcional: true },
+
+    { id: 'actor_amparo',          label: 'Actor / paciente',                           tipo: 'text', placeholder: 'Nombre y apellido' },
+    { id: 'demandado_amparo',      label: 'Demandado (obra social / prepaga / Estado)', tipo: 'text', opcional: true, placeholder: 'Ej: OSDE, IOMA, Provincia de Buenos Aires' },
+    { id: 'prestacion_reclamada',  label: 'Prestación / tratamiento reclamado',         tipo: 'text', opcional: true, placeholder: 'Medicación, cirugía, tratamiento, prótesis, etc.' },
+    { id: 'urgencia_medica',       label: '¿Reviste urgencia médica actual?',           tipo: 'checkbox' },
   ];
 
   const CAMPO_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
