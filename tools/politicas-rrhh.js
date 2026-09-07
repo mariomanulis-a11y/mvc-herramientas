@@ -187,6 +187,11 @@ export function initPoliticasRrhh(container) {
           <button class="btn btn-ghost"   id="pr2-word">📝 Exportar Word</button>
           <button class="btn btn-ghost"   id="pr2-reset-texto">Restablecer</button>
         </div>
+        <div id="pr2-eval-bridge" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border)">
+          <p style="font-size:.85rem;color:var(--color-muted);margin:0 0 8px">Se detectaron metodologías de evaluación de desempeño tildadas en este reglamento. Podés generar la ficha operativa correspondiente.</p>
+          <button class="btn btn-ghost" id="pr2-enviar-formularios" type="button">📈 Enviar a Formularios de Evaluación de Desempeño</button>
+          <div id="pr2-formularios-confirmacion" style="margin-top:8px"></div>
+        </div>
       </div>
 
       <p style="margin-top:24px;font-size:.78rem;color:var(--color-muted);border-top:1px solid var(--color-border);padding-top:12px">
@@ -327,6 +332,33 @@ Fecha de emisión: ${fmtFechaCorta(val('pr2-fecha'))}`;
     textarea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     textarea.dataset.empresa = empresa;
+    textarea.dataset.cuit = cuit;
+
+    // Puente hacia Formularios de Evaluación de Desempeño: solo si el
+    // capítulo de Evaluación está incluido y hay al menos una metodología
+    // (objetivos, competencias, autoeval o 360) tildada.
+    const bridge = container.querySelector('#pr2-eval-bridge');
+    const metodosParaFormulario = ['objetivos', 'competencias', 'autoeval', '360'];
+    const metodosDetectados = capChecks.evaluacion.checked
+      ? metodosParaFormulario.filter(id => container.querySelector(`.pr2-metodo-check[data-item="${id}"]`).checked)
+      : [];
+    container.querySelector('#pr2-formularios-confirmacion').innerHTML = '';
+    bridge.style.display = metodosDetectados.length ? 'block' : 'none';
+    bridge.dataset.metodos = JSON.stringify(metodosDetectados);
+  });
+
+  container.querySelector('#pr2-enviar-formularios').addEventListener('click', () => {
+    const bridge = container.querySelector('#pr2-eval-bridge');
+    let metodos = [];
+    try { metodos = JSON.parse(bridge.dataset.metodos || '[]'); } catch { metodos = []; }
+    const payload = { fecha: fmtFechaCorta(val('pr2-fecha')) || new Date().toLocaleDateString('es-AR'), empresa: textarea.dataset.empresa, cuit: textarea.dataset.cuit, tipos: metodos };
+    localStorage.setItem('mvc_prefill_formularios_evaluacion', JSON.stringify(payload));
+    container.querySelector('#pr2-formularios-confirmacion').innerHTML = `
+      <div class="display-box" style="padding:10px 14px">
+        ✅ Datos enviados a Formularios de Evaluación de Desempeño.
+        <button class="btn btn-ghost" id="pr2-ir-formularios" type="button" style="margin-left:8px">Ir ahora</button>
+      </div>`;
+    container.querySelector('#pr2-ir-formularios').addEventListener('click', () => { location.hash = 'formularios-evaluacion'; });
   });
 
   container.querySelector('#pr2-limpiar').addEventListener('click', () => {
@@ -343,6 +375,8 @@ Fecha de emisión: ${fmtFechaCorta(val('pr2-fecha'))}`;
     divRes.style.display = 'none';
     textarea.value = '';
     ultimoTextoGenerado = '';
+    container.querySelector('#pr2-eval-bridge').style.display = 'none';
+    container.querySelector('#pr2-formularios-confirmacion').innerHTML = '';
   });
 
   container.querySelector('#pr2-copiar').addEventListener('click', () => {

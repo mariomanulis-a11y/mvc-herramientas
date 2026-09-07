@@ -101,6 +101,9 @@
     <button class="nav-item" data-tool="politicas-rrhh">
       <span class="nav-icon">📘</span> Reglamento de Políticas RRHH
     </button>
+    <button class="nav-item" data-tool="formularios-evaluacion">
+      <span class="nav-icon">📈</span> Formularios de Evaluación de Desempeño
+    </button>
 
     <div class="nav-label">Asistente IA</div>
     <button class="nav-item" data-tool="dalmacio" style="border-left:2px solid #c9a84c;">
@@ -148,6 +151,7 @@
     'checklist-pyme': { label: 'Checklist de Verificación Documental PYME', load: () => import('./tools/checklist-pyme.js').then(m => m.initChecklistPyme) },
     'control-jornada': { label: 'Control de Jornada y Horario',          load: () => import('./tools/control-jornada.js').then(m => m.initControlJornada) },
     'politicas-rrhh': { label: 'Reglamento de Políticas RRHH',          load: () => import('./tools/politicas-rrhh.js').then(m => m.initPoliticasRrhh) },
+    'formularios-evaluacion': { label: 'Formularios de Evaluación de Desempeño', load: () => import('./tools/formularios-evaluacion.js').then(m => m.initFormulariosEvaluacion) },
     dalmacio:         { label: 'Dalmacio — Asistente Jurídico IA',   load: () => import('./tools/dalmacio.js').then(m => m.initDalmacio) },
   };
 
@@ -164,6 +168,7 @@
     'checklist-pyme':'✅',
     'control-jornada':'⏱️',
     'politicas-rrhh':'📘',
+    'formularios-evaluacion':'📈',
     dalmacio:'🤖'
   };
 
@@ -172,7 +177,7 @@
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
     'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','demanda-art','minutas','escrito-sucesion','presupuestos','documentacion','convenio-honorarios'],
-    'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme','control-jornada','politicas-rrhh'],
+    'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme','control-jornada','politicas-rrhh','formularios-evaluacion'],
     'Asistente IA':       ['dalmacio'],
   };
 

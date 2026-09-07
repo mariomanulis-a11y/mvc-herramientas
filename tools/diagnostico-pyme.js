@@ -357,10 +357,12 @@ export function initDiagnosticoPyme(container) {
           <button class="btn btn-ghost" id="dp-enviar-checklist" type="button">✅ Enviar a Checklist de Verificación</button>
           <button class="btn btn-ghost" id="dp-enviar-jornada" type="button">⏱️ Enviar a Control de Jornada</button>
           <button class="btn btn-ghost" id="dp-enviar-politicas" type="button">📘 Enviar a Reglamento de Políticas RRHH</button>
+          <button class="btn btn-ghost" id="dp-enviar-formularios" type="button">📈 Enviar a Formularios de Evaluación de Desempeño</button>
         </div>
         <div id="dp-checklist-confirmacion" style="display:none;margin-top:8px"></div>
         <div id="dp-jornada-confirmacion" style="display:none;margin-top:8px"></div>
         <div id="dp-politicas-confirmacion" style="display:none;margin-top:8px"></div>
+        <div id="dp-formularios-confirmacion" style="display:none;margin-top:8px"></div>
       </div>`;
 
     divPlanWrap.style.display = 'block';
@@ -474,6 +476,37 @@ export function initDiagnosticoPyme(container) {
         <div style="margin-top:8px"><button class="btn btn-primary" id="dp-ir-a-politicas" type="button">Ir ahora</button></div>
       </div>`;
       container.querySelector('#dp-ir-a-politicas').addEventListener('click', () => { location.hash = 'politicas-rrhh'; });
+    }
+  });
+
+  // ── Enviar a Formularios de Evaluación de Desempeño ──────────────────────
+  container.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('#dp-enviar-formularios');
+    if (!btn || !ultimoDiagnostico) return;
+
+    const payload = {
+      fecha: new Date().toLocaleDateString('es-AR'),
+      empresa: val('dp-empresa'),
+      cuit: val('dp-cuit'),
+    };
+
+    const divConf = container.querySelector('#dp-formularios-confirmacion');
+    try {
+      localStorage.setItem('mvc_prefill_formularios_evaluacion', JSON.stringify(payload));
+    } catch (e) {
+      if (divConf) {
+        divConf.style.display = 'block';
+        divConf.innerHTML = `<div class="display-box" style="color:#c00">No se pudieron guardar los datos (${e.message}).</div>`;
+      }
+      return;
+    }
+    if (divConf) {
+      divConf.style.display = 'block';
+      divConf.innerHTML = `<div class="display-box" style="background:#e8f4ea;border-color:#7ab88a">
+        ✅ Datos enviados. Abrí <strong>Formularios de Evaluación de Desempeño</strong> y aceptá el banner para cargarlos.
+        <div style="margin-top:8px"><button class="btn btn-primary" id="dp-ir-a-formularios" type="button">Ir ahora</button></div>
+      </div>`;
+      container.querySelector('#dp-ir-a-formularios').addEventListener('click', () => { location.hash = 'formularios-evaluacion'; });
     }
   });
 
