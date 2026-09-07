@@ -98,6 +98,9 @@
     <button class="nav-item" data-tool="control-jornada">
       <span class="nav-icon">⏱️</span> Control de Jornada y Horario
     </button>
+    <button class="nav-item" data-tool="politicas-rrhh">
+      <span class="nav-icon">📘</span> Reglamento de Políticas RRHH
+    </button>
 
     <div class="nav-label">Asistente IA</div>
     <button class="nav-item" data-tool="dalmacio" style="border-left:2px solid #c9a84c;">
@@ -144,6 +147,7 @@
     'diagnostico-pyme': { label: 'Diagnóstico Integral PYME',          load: () => import('./tools/diagnostico-pyme.js').then(m => m.initDiagnosticoPyme) },
     'checklist-pyme': { label: 'Checklist de Verificación Documental PYME', load: () => import('./tools/checklist-pyme.js').then(m => m.initChecklistPyme) },
     'control-jornada': { label: 'Control de Jornada y Horario',          load: () => import('./tools/control-jornada.js').then(m => m.initControlJornada) },
+    'politicas-rrhh': { label: 'Reglamento de Políticas RRHH',          load: () => import('./tools/politicas-rrhh.js').then(m => m.initPoliticasRrhh) },
     dalmacio:         { label: 'Dalmacio — Asistente Jurídico IA',   load: () => import('./tools/dalmacio.js').then(m => m.initDalmacio) },
   };
 
@@ -159,6 +163,7 @@
     'diagnostico-pyme':'🧭',
     'checklist-pyme':'✅',
     'control-jornada':'⏱️',
+    'politicas-rrhh':'📘',
     dalmacio:'🤖'
   };
 
@@ -167,7 +172,7 @@
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
     'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','demanda-art','minutas','escrito-sucesion','presupuestos','documentacion','convenio-honorarios'],
-    'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme','control-jornada'],
+    'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme','control-jornada','politicas-rrhh'],
     'Asistente IA':       ['dalmacio'],
   };
 
