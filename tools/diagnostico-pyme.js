@@ -353,10 +353,12 @@ export function initDiagnosticoPyme(container) {
         <div style="margin-top:14px;padding:10px 14px;background:${nGlobal.bg};border:1px solid ${nGlobal.borde};border-radius:6px;color:${nGlobal.color}">
           <strong>Score global: ${pctGlobal.toFixed(0)}% — Nivel ${nGlobal.nivel}</strong>
         </div>
-        <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:14px">
+        <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:14px;flex-wrap:wrap">
           <button class="btn btn-ghost" id="dp-enviar-checklist" type="button">✅ Enviar a Checklist de Verificación</button>
+          <button class="btn btn-ghost" id="dp-enviar-jornada" type="button">⏱️ Enviar a Control de Jornada</button>
         </div>
         <div id="dp-checklist-confirmacion" style="display:none;margin-top:8px"></div>
+        <div id="dp-jornada-confirmacion" style="display:none;margin-top:8px"></div>
       </div>`;
 
     divPlanWrap.style.display = 'block';
@@ -405,6 +407,40 @@ export function initDiagnosticoPyme(container) {
         <div style="margin-top:8px"><button class="btn btn-primary" id="dp-ir-a-checklist" type="button">Ir ahora</button></div>
       </div>`;
       container.querySelector('#dp-ir-a-checklist').addEventListener('click', () => { location.hash = 'checklist-pyme'; });
+    }
+  });
+
+  // ── Enviar a Control de Jornada y Horario ────────────────────────────────
+  // Traslada solo los datos de la empresa — el reglamento de jornada es un
+  // instrumento normativo a redactar con los datos operativos reales (horario,
+  // turnos, sistema de fichado) que el diagnóstico no releva en ese detalle.
+  container.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('#dp-enviar-jornada');
+    if (!btn || !ultimoDiagnostico) return;
+
+    const payload = {
+      fecha: new Date().toLocaleDateString('es-AR'),
+      empresa: val('dp-empresa'),
+      cuit: val('dp-cuit'),
+    };
+
+    const divConf = container.querySelector('#dp-jornada-confirmacion');
+    try {
+      localStorage.setItem('mvc_prefill_control_jornada', JSON.stringify(payload));
+    } catch (e) {
+      if (divConf) {
+        divConf.style.display = 'block';
+        divConf.innerHTML = `<div class="display-box" style="color:#c00">No se pudieron guardar los datos (${e.message}).</div>`;
+      }
+      return;
+    }
+    if (divConf) {
+      divConf.style.display = 'block';
+      divConf.innerHTML = `<div class="display-box" style="background:#e8f4ea;border-color:#7ab88a">
+        ✅ Datos enviados. Abrí <strong>Control de Jornada y Horario</strong> y aceptá el banner para cargarlos.
+        <div style="margin-top:8px"><button class="btn btn-primary" id="dp-ir-a-jornada" type="button">Ir ahora</button></div>
+      </div>`;
+      container.querySelector('#dp-ir-a-jornada').addEventListener('click', () => { location.hash = 'control-jornada'; });
     }
   });
 
