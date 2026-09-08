@@ -9,10 +9,10 @@ export function initDemandaDespido(container) {
 
   const EMAIL_ESTUDIO = 'mvcabogadospilar@gmail.com';
   const ABOGADOS = [
-    { id: 'manulis',    nombre: 'Mario Martín Manulis',       domicilioElectronico: '20271887931@notificaciones.scba.gov.ar', celular: '1153107794', matricula: 'T° 34 F° 69 CASI' },
-    { id: 'velazquez',  nombre: 'Soledad Celeste Velazquez',  domicilioElectronico: '27273872286@notificaciones.scba.gov.ar', celular: '1155781501', matricula: 'T° 36 F° 125 CASI' },
-    { id: 'curbelo',    nombre: 'Yanina Daniela Curbelo',     domicilioElectronico: '27268952867@notificaciones.scba.gov.ar', celular: '1149272774', matricula: 'T° 36 F° 90 CASI' },
-    { id: 'poggi',      nombre: 'Camila Susana Poggi',        domicilioElectronico: '27388231705@notificaciones.scba.gov.ar', celular: '1138224662', matricula: 'T° 55 F° 255 CASI' },
+    { id: 'manulis',    nombre: 'Mario Martín Manulis',       genero: 'M', domicilioElectronico: '20271887931@notificaciones.scba.gov.ar', celular: '1153107794', matricula: 'T° 34 F° 69 CASI' },
+    { id: 'velazquez',  nombre: 'Soledad Celeste Velazquez',  genero: 'F', domicilioElectronico: '27273872286@notificaciones.scba.gov.ar', celular: '1155781501', matricula: 'T° 36 F° 125 CASI' },
+    { id: 'curbelo',    nombre: 'Yanina Daniela Curbelo',     genero: 'F', domicilioElectronico: '27268952867@notificaciones.scba.gov.ar', celular: '1149272774', matricula: 'T° 36 F° 90 CASI' },
+    { id: 'poggi',      nombre: 'Camila Susana Poggi',        genero: 'F', domicilioElectronico: '27388231705@notificaciones.scba.gov.ar', celular: '1138224662', matricula: 'T° 55 F° 255 CASI' },
   ];
   const ABOGADOS_BY_ID = Object.fromEntries(ABOGADOS.map(a => [a.id, a]));
   const TODOS_ABOGADOS_TEXTO = 'los Dres./Dras. ' + ABOGADOS.map(a => `${a.nombre} (${a.matricula})`).join(' y/o ');
@@ -583,7 +583,7 @@ e) Practique liquidación de los rubros reclamados en la presente demanda, confo
     const caracterLetradoValor = val('dd-caracter-letrado') || 'patrocinante';
     const caracterLetradoTexto = caracterLetradoValor === 'apoderado' ? 'apoderado/a' : 'patrocinante';
     const d = {
-      abogado: `Dr./Dra. ${abogadoSel.nombre}, ${matricula}`,
+      abogado: `${abogadoSel.nombre}, ${abogadoSel.genero === 'M' ? 'abogado' : 'abogada'} (${matricula})`,
       caracter_letrado: caracterLetradoTexto,
       juzgado: val('dd-juzgado'),
       domicilio_procesal: val('dd-domicilio_procesal') || '[DOMICILIO PROCESAL A CONSTITUIR]',
