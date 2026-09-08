@@ -55,7 +55,7 @@ export function exportarPDF(titulo, htmlBody, opts = {}) {
   <div class="mvc-header">
     <div>
       <div class="mvc-logo">MVC <span>ABOGADOS</span></div>
-      <div class="mvc-sub">Soluciones jurídicas para tu tranquilidad</div>
+      <div class="mvc-sub">Soluciones Jurídicas</div>
     </div>
     <div class="mvc-contact">
       WhatsApp: <a href="${WA_URL_1}">${WA_NUMERO_1}</a> / <a href="${WA_URL_2}">${WA_NUMERO_2}</a><br>
