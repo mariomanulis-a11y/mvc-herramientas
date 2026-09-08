@@ -1,7 +1,7 @@
 // Generador de Carta Poder Laboral — Tribunales del Trabajo de la Provincia de Buenos Aires
 // Base normativa: Art. 28, Ley 15.057 (Nuevo Procedimiento Laboral - Pcia. de Buenos Aires)
 // Modelo alineado al formato utilizado actualmente por el Estudio MVC Abogados.
-import { exportarPDF } from './exportar.js';
+import { exportarPDF, exportarWord } from './exportar.js';
 
 export function initCartaPoderLaboral(container) {
 
@@ -160,6 +160,7 @@ export function initCartaPoderLaboral(container) {
         <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">
           <button class="btn btn-success" id="cp-copiar">📋 Copiar texto</button>
           <button class="btn btn-ghost"   id="cp-pdf">📄 Exportar PDF</button>
+          <button class="btn btn-ghost"   id="cp-word">📝 Exportar Word</button>
           <button class="btn btn-ghost"   id="cp-reset-texto">Restablecer</button>
         </div>
       </div>
@@ -341,5 +342,13 @@ En la Ciudad de ${ciudadActo}, a los ${fecha.dia} días del mes de ${fecha.mes} 
     if (!texto) return;
     const html = `<div class="info-box" style="font-size:13px;line-height:1.9;white-space:pre-wrap">${texto.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
     exportarPDF('Carta Poder Laboral — Art. 28 Ley 15.057', html);
+  });
+
+  container.querySelector('#cp-word').addEventListener('click', () => {
+    const texto = textarea.value;
+    if (!texto) return;
+    const clienteNombre = container.querySelector('#cp-nombre').value.trim() || 'cliente';
+    const parrafos = texto.split('\n').map(l => `<p>${l.replace(/</g, '&lt;').replace(/>/g, '&gt;') || '&nbsp;'}</p>`).join('\n');
+    exportarWord(`Carta Poder Laboral - ${clienteNombre}`, parrafos);
   });
 }
