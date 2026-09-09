@@ -434,31 +434,31 @@ export function initDemandaConsumidor(container) {
   const wrapDemandadosExtra = container.querySelector('#dcons-demandados-extra-wrapper');
   let actoresExtraCount = 0, demandadosExtraCount = 0;
 
-  function agregarActorExtra() {
+  function agregarActorExtra(datos = {}) {
     actoresExtraCount++;
     const id = actoresExtraCount;
     const div = document.createElement('div');
     div.className = 'form-row';
     div.id = `dcons-actor-extra-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dcons-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dcons-actor-extra-dni-${id}" placeholder="DNI"></div>
-      <div class="field-group" style="flex:2"><input type="text" id="dcons-actor-extra-domicilio-${id}" placeholder="Domicilio real"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dcons-actor-extra-dni-${id}" placeholder="DNI" value="${(datos.dni || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-actor-extra-domicilio-${id}" placeholder="Domicilio real" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-actor="${id}">✕</button></div>`;
     wrapActoresExtra.appendChild(div);
     div.querySelector('[data-remove-actor]').addEventListener('click', () => div.remove());
   }
 
-  function agregarDemandadoExtra() {
+  function agregarDemandadoExtra(datos = {}) {
     demandadosExtraCount++;
     const id = demandadosExtraCount;
     const div = document.createElement('div');
     div.className = 'form-row';
     div.id = `dcons-demandado-extra-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dcons-demandado-extra-nombre-${id}" placeholder="Razón social / nombre del/de la codemandado/a"></div>
-      <div class="field-group" style="flex:2"><input type="text" id="dcons-demandado-extra-domicilio-${id}" placeholder="Domicilio"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dcons-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-demandado-extra-nombre-${id}" placeholder="Razón social / nombre del/de la codemandado/a" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-demandado-extra-domicilio-${id}" placeholder="Domicilio" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dcons-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)" value="${(datos.cuit || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-demandado="${id}">✕</button></div>`;
     wrapDemandadosExtra.appendChild(div);
     div.querySelector('[data-remove-demandado]').addEventListener('click', () => div.remove());
@@ -527,7 +527,7 @@ export function initDemandaConsumidor(container) {
     btnAddTestigo.textContent = testigosActivos >= MAX_TESTIGOS ? 'Máximo de 5 testigos alcanzado' : '+ Agregar testigo (máx. 5)';
   }
 
-  function agregarTestigo() {
+  function agregarTestigo(datos = {}) {
     if (testigosActivos >= MAX_TESTIGOS) return;
     testigosCount++; testigosActivos++;
     const id = testigosCount;
@@ -535,9 +535,9 @@ export function initDemandaConsumidor(container) {
     div.className = 'form-row';
     div.id = `dcons-testigo-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dcons-testigo-nombre-${id}" placeholder="Nombre y apellido"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dcons-testigo-dni-${id}" placeholder="DNI"></div>
-      <div class="field-group" style="flex:3"><input type="text" id="dcons-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dcons-testigo-nombre-${id}" placeholder="Nombre y apellido" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dcons-testigo-dni-${id}" placeholder="DNI" value="${(datos.dni || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:3"><input type="text" id="dcons-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-testigo="${id}">✕</button></div>`;
     wrapTestigos.appendChild(div);
     div.querySelector('[data-remove-testigo]').addEventListener('click', () => { div.remove(); testigosActivos--; actualizarBotonTestigo(); });
@@ -968,6 +968,45 @@ Recordatorios previos a la presentación (no forman parte del escrito):
         if (el && valor) el.value = valor;
       });
       actualizarTotal();
+      if (Array.isArray(payload.coactores)) payload.coactores.forEach(c => agregarActorExtra(c));
+      if (Array.isArray(payload.codemandados)) payload.codemandados.forEach(dem => agregarDemandadoExtra(dem));
+      if (Array.isArray(payload.testigos) && payload.testigos.length) {
+        container.querySelector('#dcons-prueba-testifical').checked = true;
+        container.querySelector('#dcons-wrap-testifical').style.display = 'block';
+        payload.testigos.forEach(t => agregarTestigo(t));
+      }
+      if (payload.documentacion && Array.isArray(payload.documentacion.items)) {
+        const marcarDocumental = (id, detalle) => {
+          const chk = container.querySelector(`[data-documental="${id}"]`);
+          if (!chk) return;
+          if (!chk.checked) { chk.checked = true; chk.dispatchEvent(new Event('change')); }
+          if (detalle) {
+            const input = container.querySelector(`[data-documental-dato="${id}"]`);
+            if (input) input.value = input.value ? `${input.value}; ${detalle}` : detalle;
+          }
+        };
+        const otroDetalles = [];
+        payload.documentacion.items.forEach(item => {
+          switch (item.id) {
+            case 'contrato':
+              marcarDocumental('contrato_comprobante', item.detalle);
+              break;
+            case 'telegramas':
+              marcarDocumental('telegramas', item.detalle);
+              break;
+            case 'historia_clinica':
+              otroDetalles.push(`Historia clínica / informes médicos${item.detalle ? `: ${item.detalle}` : ''}`);
+              break;
+            case 'pericias':
+              otroDetalles.push(`Pericias / informes técnicos${item.detalle ? `: ${item.detalle}` : ''}`);
+              break;
+            case 'otro':
+              otroDetalles.push(item.detalle || 'Otro documento (ver minuta)');
+              break;
+          }
+        });
+        if (otroDetalles.length) marcarDocumental('otro', otroDetalles.join(' / '));
+      }
       localStorage.removeItem('mvc_prefill_consumidor');
       banner.remove();
     });

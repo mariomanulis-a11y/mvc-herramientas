@@ -171,6 +171,11 @@ export function initDemandaArt(container) {
         <div>
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del/de la trabajador/a</div>
           <div id="dart-grupo-actor"></div>
+          <p style="font-weight:700;margin:10px 0 6px;font-size:.85rem">Coactores/as (opcional)</p>
+          <div id="dart-actores-extra-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+            <button class="btn btn-ghost" id="dart-add-actor" type="button">+ Agregar coactor/a</button>
+          </div>
         </div>
         <div>
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos de la/s demandada/s</div>
@@ -179,6 +184,11 @@ export function initDemandaArt(container) {
             <input type="checkbox" id="dart-empleador_asegurado" style="width:auto" checked>
             El empleador tenía contratado seguro de riesgos del trabajo al momento del hecho
           </label>
+          <p style="font-weight:700;margin:10px 0 6px;font-size:.85rem">Codemandados/as adicionales (opcional)</p>
+          <div id="dart-demandados-extra-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+            <button class="btn btn-ghost" id="dart-add-demandado" type="button">+ Agregar codemandado/a</button>
+          </div>
         </div>
         <div style="grid-column:1/-1">
           <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Datos del hecho</div>
@@ -310,6 +320,66 @@ export function initDemandaArt(container) {
     });
   });
 
+  // ── Coactores/codemandados dinámicos ────────────────────────────────────
+  const wrapActoresExtra = container.querySelector('#dart-actores-extra-wrapper');
+  const wrapDemandadosExtra = container.querySelector('#dart-demandados-extra-wrapper');
+  let actoresExtraCount = 0, demandadosExtraCount = 0;
+
+  function agregarActorExtra(datos = {}) {
+    actoresExtraCount++;
+    const id = actoresExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dart-actor-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dart-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dart-actor-extra-dni-${id}" placeholder="DNI" value="${(datos.dni || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dart-actor-extra-domicilio-${id}" placeholder="Domicilio real" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-actor="${id}">✕</button></div>`;
+    wrapActoresExtra.appendChild(div);
+    div.querySelector('[data-remove-actor]').addEventListener('click', () => div.remove());
+  }
+
+  function agregarDemandadoExtra(datos = {}) {
+    demandadosExtraCount++;
+    const id = demandadosExtraCount;
+    const div = document.createElement('div');
+    div.className = 'form-row';
+    div.id = `dart-demandado-extra-row-${id}`;
+    div.innerHTML = `
+      <div class="field-group" style="flex:2"><input type="text" id="dart-demandado-extra-nombre-${id}" placeholder="Razón social / nombre del/de la codemandado/a" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dart-demandado-extra-domicilio-${id}" placeholder="Domicilio" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dart-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)" value="${(datos.cuit || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-demandado="${id}">✕</button></div>`;
+    wrapDemandadosExtra.appendChild(div);
+    div.querySelector('[data-remove-demandado]').addEventListener('click', () => div.remove());
+  }
+
+  container.querySelector('#dart-add-actor').addEventListener('click', () => agregarActorExtra());
+  container.querySelector('#dart-add-demandado').addEventListener('click', () => agregarDemandadoExtra());
+
+  function leerActoresExtra() {
+    return Array.from(wrapActoresExtra.querySelectorAll('[id^="dart-actor-extra-row-"]')).map(row => {
+      const id = row.id.replace('dart-actor-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#dart-actor-extra-nombre-${id}`)?.value.trim() || '',
+        dni: container.querySelector(`#dart-actor-extra-dni-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dart-actor-extra-domicilio-${id}`)?.value.trim() || '',
+      };
+    }).filter(a => a.nombre);
+  }
+
+  function leerDemandadosExtra() {
+    return Array.from(wrapDemandadosExtra.querySelectorAll('[id^="dart-demandado-extra-row-"]')).map(row => {
+      const id = row.id.replace('dart-demandado-extra-row-', '');
+      return {
+        nombre: container.querySelector(`#dart-demandado-extra-nombre-${id}`)?.value.trim() || '',
+        domicilio: container.querySelector(`#dart-demandado-extra-domicilio-${id}`)?.value.trim() || '',
+        cuit: container.querySelector(`#dart-demandado-extra-cuit-${id}`)?.value.trim() || '',
+      };
+    }).filter(x => x.nombre);
+  }
+
   // ── Prueba testifical: testigos dinámicos (máx. 5) ────────────────────
   const wrapTestigos = container.querySelector('#dart-testigos-wrapper');
   const btnAddTestigo = container.querySelector('#dart-add-testigo');
@@ -321,7 +391,7 @@ export function initDemandaArt(container) {
     btnAddTestigo.textContent = testigosActivos >= MAX_TESTIGOS ? 'Máximo de 5 testigos alcanzado' : '+ Agregar testigo (máx. 5)';
   }
 
-  function agregarTestigo() {
+  function agregarTestigo(datos = {}) {
     if (testigosActivos >= MAX_TESTIGOS) return;
     testigosCount++; testigosActivos++;
     const id = testigosCount;
@@ -329,9 +399,9 @@ export function initDemandaArt(container) {
     div.className = 'form-row';
     div.id = `dart-testigo-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dart-testigo-nombre-${id}" placeholder="Nombre y apellido"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dart-testigo-dni-${id}" placeholder="DNI"></div>
-      <div class="field-group" style="flex:3"><input type="text" id="dart-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dart-testigo-nombre-${id}" placeholder="Nombre y apellido" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dart-testigo-dni-${id}" placeholder="DNI" value="${(datos.dni || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:3"><input type="text" id="dart-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-testigo="${id}">✕</button></div>`;
     wrapTestigos.appendChild(div);
     div.querySelector('[data-remove-testigo]').addEventListener('click', () => { div.remove(); testigosActivos--; actualizarBotonTestigo(); });
@@ -458,11 +528,16 @@ c) Si la incapacidad determinada por la Comisión Médica jurisdiccional se ajus
     const empleadorAsegurado = container.querySelector('#dart-empleador_asegurado').checked;
     const opcionLey26773 = val('dart-opcion-ley26773') || container.querySelector('#dart-opcion-ley26773').value;
 
+    const actoresExtra = leerActoresExtra();
+    const demandadosExtra = leerDemandadosExtra();
+    const coactoresTexto = joinConY(actoresExtra.map(a => `${a.nombre}, DNI ${a.dni || '[DNI]'}${a.domicilio ? `, con domicilio real en ${a.domicilio}` : ''}`));
+
     const demandadosTexto = [];
     if (d.art_nombre) demandadosTexto.push(`${d.art_nombre}, con domicilio en ${d.dom_art || '[DOMICILIO ART]'}`);
     if (d.empleador_nombre) demandadosTexto.push(`${d.empleador_nombre}, con domicilio en ${d.dom_empleador || '[DOMICILIO EMPLEADOR]'}`);
+    demandadosExtra.forEach(x => demandadosTexto.push(`${x.nombre}, con domicilio en ${x.domicilio || '[DOMICILIO]'}${x.cuit ? `, CUIT ${x.cuit}` : ''}`));
     const demandadosTextoObjeto = joinConY(demandadosTexto);
-    const demandadosNombres = [d.art_nombre, d.empleador_nombre].filter(Boolean);
+    const demandadosNombres = [d.art_nombre, d.empleador_nombre, ...demandadosExtra.map(x => x.nombre)].filter(Boolean);
     const demandadosTextoPetitorio = joinConY(demandadosNombres);
 
     const totalTexto = d.monto_reclamado ? fmtMoneda(parseFloat(d.monto_reclamado) || 0) : '';
@@ -529,7 +604,7 @@ c) Si la incapacidad determinada por la Comisión Médica jurisdiccional se ajus
     const texto =
 `SEÑOR JUEZ${juzgado ? ` — ${juzgado}` : ''}:
 
-${abogadoTexto}, en mi carácter de ${caracterLetradoTexto} de ${d.nombre}, DNI ${d.dni}, con domicilio real en ${d.domicilio}, constituyendo domicilio procesal en ${domicilioProcesal} y domicilio electrónico en ${emailNotif} (art. 40, CPCC de la Provincia de Buenos Aires), a V.S. respetuosamente me presento y digo:
+${abogadoTexto}, en mi carácter de ${caracterLetradoTexto} de ${d.nombre}, DNI ${d.dni}, con domicilio real en ${d.domicilio}${coactoresTexto ? `, y de ${coactoresTexto}` : ''}, constituyendo domicilio procesal en ${domicilioProcesal} y domicilio electrónico en ${emailNotif} (art. 40, CPCC de la Provincia de Buenos Aires), a V.S. respetuosamente me presento y digo:
 
 I. OBJETO
 Que vengo por el presente a promover la presente acción contra ${demandadosTextoObjeto}, ${materia.encuadre}${totalTexto ? `, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}) y/o lo que en más o en menos resulte de la prueba a producirse` : ''}, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
@@ -560,7 +635,8 @@ SERÁ JUSTICIA.
 ──────────────────────────────────────────────
 Recordatorios previos a la presentación (no forman parte del escrito):
 - Verificar el plazo de apelación aplicable al dictamen de Comisión Médica (5 o 15 días hábiles, según Res. SRT 298/17 o 179/15 vigente a la fecha de notificación).
-- Verificar la instancia de la Comisión Médica Central antes de acceder a la vía judicial, salvo excepción aplicable.${advertenciaAsegurado}${advertenciaOpcion}`;
+- Verificar la instancia de la Comisión Médica Central antes de acceder a la vía judicial, salvo excepción aplicable.${advertenciaAsegurado}${advertenciaOpcion}${(actoresExtra.length || demandadosExtra.length) ? `
+- LITISCONSORCIO: se cargaron ${actoresExtra.length} coactor/es y ${demandadosExtra.length} codemandado/s adicional/es. El relato de HECHOS y EL DERECHO fue redactado sobre los datos del/de la trabajador/a y de la/s demandada/s principal/es (ART/empleador) — revisar y adaptar manualmente esos puntos si los coactores/codemandados tuvieran datos o circunstancias propias.` : ''}`;
 
     ultimoTextoGenerado = texto;
     textarea.value = texto;
@@ -581,6 +657,10 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     container.querySelectorAll('.dart-documental-check, .dart-informativa-check').forEach(c => c.checked = false);
     container.querySelectorAll('.dart-documental-dato, .dart-informativa-dato').forEach(el => { el.value = ''; el.disabled = true; el.style.display = 'none'; });
     container.querySelector('#dart-pericial_medica_puntos').value = '';
+    wrapActoresExtra.innerHTML = '';
+    wrapDemandadosExtra.innerHTML = '';
+    actoresExtraCount = 0;
+    demandadosExtraCount = 0;
     wrapTestigos.innerHTML = '';
     testigosCount = 0; testigosActivos = 0;
     actualizarBotonTestigo();
@@ -653,6 +733,46 @@ Recordatorios previos a la presentación (no forman parte del escrito):
       });
       if (payload.empleadorAsegurado !== undefined) container.querySelector('#dart-empleador_asegurado').checked = !!payload.empleadorAsegurado;
       if (payload.opcionLey26773) container.querySelector('#dart-opcion-ley26773').value = payload.opcionLey26773;
+      if (Array.isArray(payload.coactores)) payload.coactores.forEach(c => agregarActorExtra(c));
+      if (Array.isArray(payload.codemandados)) payload.codemandados.forEach(dem => agregarDemandadoExtra(dem));
+      if (Array.isArray(payload.testigos) && payload.testigos.length) {
+        container.querySelector('#dart-prueba-testifical').checked = true;
+        container.querySelector('#dart-wrap-testifical').style.display = 'block';
+        payload.testigos.forEach(t => agregarTestigo(t));
+      }
+      if (payload.documentacion && Array.isArray(payload.documentacion.items)) {
+        const marcarDocumental = (id, detalle) => {
+          const chk = container.querySelector(`[data-documental="${id}"]`);
+          if (!chk) return;
+          if (!chk.checked) { chk.checked = true; chk.dispatchEvent(new Event('change')); }
+          if (detalle) {
+            const input = container.querySelector(`[data-documental-dato="${id}"]`);
+            if (input) input.value = input.value ? `${input.value}; ${detalle}` : detalle;
+          }
+        };
+        const otroDetalles = [];
+        payload.documentacion.items.forEach(item => {
+          switch (item.id) {
+            case 'historia_clinica':
+              marcarDocumental('historia_clinica', item.detalle);
+              break;
+            case 'contrato':
+              marcarDocumental('recibos_sueldo', '');
+              if (item.detalle) otroDetalles.push(`Contrato / comprobante / recibo de sueldo: ${item.detalle}`);
+              break;
+            case 'telegramas':
+              otroDetalles.push(`Telegramas / cartas documento${item.detalle ? `: ${item.detalle}` : ''}`);
+              break;
+            case 'pericias':
+              otroDetalles.push(`Pericias / informes técnicos${item.detalle ? `: ${item.detalle}` : ''}`);
+              break;
+            case 'otro':
+              otroDetalles.push(item.detalle || 'Otro documento (ver minuta)');
+              break;
+          }
+        });
+        if (otroDetalles.length) marcarDocumental('otro', otroDetalles.join(' / '));
+      }
       localStorage.removeItem('mvc_prefill_art');
       banner.remove();
     });

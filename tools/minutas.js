@@ -96,6 +96,8 @@ export function initMinutas(container) {
   const wrapCronologia = () => container.querySelector('#mn-cronologia-wrapper');
   const wrapTestigos   = () => container.querySelector('#mn-testigos-wrapper');
   const wrapGestiones  = () => container.querySelector('#mn-gestiones-wrapper');
+  const wrapCoactores    = () => container.querySelector('#mn-coactores-wrapper');
+  const wrapCodemandados = () => container.querySelector('#mn-codemandados-wrapper');
   let cronCount = 0, cronActivos = 0, testCount = 0, testActivos = 0, gesCount = 0, gesActivos = 0;
   const MAX_CRON = 15, MAX_TEST = 5, MAX_GES = 8;
 
@@ -137,12 +139,28 @@ export function initMinutas(container) {
         <div class="field-group"><label for="mn-cliente_profesion">Profesión</label><input type="text" id="mn-cliente_profesion"></div>
       </div>
 
+      <div id="mn-bloque-coactores" style="margin-top:10px">
+        <p style="font-weight:700;margin:0 0 6px">Coactores/as (opcional)</p>
+        <div id="mn-coactores-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+          <button class="btn btn-ghost" id="mn-add-coactor" type="button">+ Agregar coactor/a (máx. 10)</button>
+        </div>
+      </div>
+
       <div id="mn-bloque-contraparte">
         <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Contraparte</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
           <div class="field-group"><label for="mn-contraparte_nombre">Nombre / Razón social</label><input type="text" id="mn-contraparte_nombre"></div>
           <div class="field-group"><label for="mn-contraparte_cuit">CUIT (opcional)</label><input type="text" id="mn-contraparte_cuit"></div>
           <div class="field-group" style="grid-column:1/-1"><label for="mn-contraparte_domicilio">Domicilio</label><input type="text" id="mn-contraparte_domicilio"></div>
+        </div>
+
+        <div style="margin-top:10px">
+          <p style="font-weight:700;margin:0 0 6px">Codemandados/as (opcional)</p>
+          <div id="mn-codemandados-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+            <button class="btn btn-ghost" id="mn-add-codemandado" type="button">+ Agregar codemandado/a (máx. 10)</button>
+          </div>
         </div>
       </div>
 
@@ -443,6 +461,7 @@ export function initMinutas(container) {
     sucesiones: container.querySelector('#mn-bloque-sucesiones'),
   };
   const bloqueContraparte = container.querySelector('#mn-bloque-contraparte');
+  const bloqueCoactores = container.querySelector('#mn-bloque-coactores');
   const divRes = container.querySelector('#mn-resultado');
   const textarea = container.querySelector('#mn-texto');
   const divEnviarConf = container.querySelector('#mn-enviar-confirmacion');
@@ -458,6 +477,7 @@ export function initMinutas(container) {
     ramaActual = selRama.value;
     Object.entries(bloques).forEach(([k, el]) => { el.style.display = k === ramaActual ? 'block' : 'none'; });
     bloqueContraparte.style.display = ramaActual === 'sucesiones' ? 'none' : 'block';
+    bloqueCoactores.style.display = ramaActual === 'sucesiones' ? 'none' : 'block';
   }
   selRama.addEventListener('change', actualizarBloqueRama);
   actualizarBloqueRama();
@@ -530,12 +550,33 @@ export function initMinutas(container) {
 
   const testContador = { count: 0, activos: 0 };
   const TEST_CAMPOS = [
-    { id: 'nombre', tipo: 'text', placeholder: 'Nombre y apellido', flex: 2 },
-    { id: 'contacto', tipo: 'text', placeholder: 'Teléfono / email', flex: 2 },
-    { id: 'declarar', tipo: 'text', placeholder: 'Qué puede declarar', flex: 3 },
+    { id: 'nombre', tipo: 'text', placeholder: 'Nombre y apellidos completos', flex: 2 },
+    { id: 'dni', tipo: 'text', placeholder: 'DNI', flex: 1 },
+    { id: 'domicilio', tipo: 'text', placeholder: 'Domicilio', flex: 2 },
+    { id: 'contacto', tipo: 'text', placeholder: 'Teléfono / email', flex: 1 },
+    { id: 'declarar', tipo: 'text', placeholder: 'Qué puede declarar', flex: 2 },
   ];
   container.querySelector('#mn-add-testigo').addEventListener('click', () =>
     crearFilaDinamica({ wrapper: wrapTestigos(), prefix: 'mn-test', campos: TEST_CAMPOS, max: MAX_TEST, contadorRef: testContador }));
+
+  const MAX_COACTORES = 10, MAX_CODEMANDADOS = 10;
+  const coactoresContador = { count: 0, activos: 0 };
+  const COACTOR_CAMPOS = [
+    { id: 'nombre', tipo: 'text', placeholder: 'Nombre completo del/de la coactor/a', flex: 2 },
+    { id: 'dni', tipo: 'text', placeholder: 'DNI', flex: 1 },
+    { id: 'domicilio', tipo: 'text', placeholder: 'Domicilio real', flex: 2 },
+  ];
+  container.querySelector('#mn-add-coactor').addEventListener('click', () =>
+    crearFilaDinamica({ wrapper: wrapCoactores(), prefix: 'mn-coactor', campos: COACTOR_CAMPOS, max: MAX_COACTORES, contadorRef: coactoresContador }));
+
+  const codemandadosContador = { count: 0, activos: 0 };
+  const CODEMANDADO_CAMPOS = [
+    { id: 'nombre', tipo: 'text', placeholder: 'Nombre / razón social del/de la codemandado/a', flex: 2 },
+    { id: 'domicilio', tipo: 'text', placeholder: 'Domicilio', flex: 2 },
+    { id: 'cuit', tipo: 'text', placeholder: 'CUIT (opcional)', flex: 1 },
+  ];
+  container.querySelector('#mn-add-codemandado').addEventListener('click', () =>
+    crearFilaDinamica({ wrapper: wrapCodemandados(), prefix: 'mn-codem', campos: CODEMANDADO_CAMPOS, max: MAX_CODEMANDADOS, contadorRef: codemandadosContador }));
 
   const gesContador = { count: 0, activos: 0 };
   const GES_CAMPOS = [
@@ -712,8 +753,10 @@ Administrador/a provisional propuesto/a: ${chkSucAdministrador.checked ? (val('m
 
   container.querySelector('#mn-generar').addEventListener('click', () => {
     const cronologia = leerLista(wrapCronologia(), 'mn-cron', ['fecha', 'detalle']);
-    const testigos = leerLista(wrapTestigos(), 'mn-test', ['nombre', 'contacto', 'declarar']);
+    const testigos = leerLista(wrapTestigos(), 'mn-test', ['nombre', 'dni', 'domicilio', 'contacto', 'declarar']);
     const gestiones = leerLista(wrapGestiones(), 'mn-ges', ['fecha', 'medio', 'resultado']);
+    const coactores = leerLista(wrapCoactores(), 'mn-coactor', ['nombre', 'dni', 'domicilio']);
+    const codemandados = leerLista(wrapCodemandados(), 'mn-codem', ['nombre', 'domicilio', 'cuit']);
 
     const docAportada = DOC_ITEMS.filter(p => container.querySelector(`[data-doc="${p.id}"]`).checked)
       .map(p => `- ${p.label}${(() => { const d = container.querySelector(`[data-doc-dato="${p.id}"]`)?.value.trim(); return d ? `: ${d}` : ''; })()}`)
@@ -724,8 +767,16 @@ Administrador/a provisional propuesto/a: ${chkSucAdministrador.checked ? (val('m
       : '- (sin hechos cargados)';
 
     const testigosTexto = testigos.length
-      ? testigos.map(t => `- ${t.nombre || '[NOMBRE]'} — Contacto: ${t.contacto || '-'} — Puede declarar: ${t.declarar || '-'}`).join('\n')
+      ? testigos.map(t => `- ${t.nombre || '[NOMBRE]'} — DNI: ${t.dni || '-'} — Domicilio: ${t.domicilio || '-'} — Contacto: ${t.contacto || '-'} — Puede declarar: ${t.declarar || '-'}`).join('\n')
       : '- (sin testigos cargados)';
+
+    const coactoresTexto = coactores.length
+      ? coactores.map(c => `- ${c.nombre || '[NOMBRE]'} — DNI: ${c.dni || '-'} — Domicilio: ${c.domicilio || '-'}`).join('\n')
+      : '- (sin coactores/as cargados)';
+
+    const codemandadosTexto = codemandados.length
+      ? codemandados.map(c => `- ${c.nombre || '[NOMBRE]'} — Domicilio: ${c.domicilio || '-'} — CUIT: ${c.cuit || '-'}`).join('\n')
+      : '- (sin codemandados/as cargados)';
 
     const gestionesTexto = gestiones.length
       ? gestiones.map(g => `- ${fmtFechaISO(g.fecha) || '[FECHA]'} — ${g.medio || '-'} — Resultado: ${g.resultado || '-'}`).join('\n')
@@ -753,10 +804,16 @@ Estado civil: ${val('mn-cliente_estado_civil') || '-'}
 Nacionalidad: ${val('mn-cliente_nacionalidad') || '-'}
 Profesión: ${val('mn-cliente_profesion') || '-'}
 
+COACTORES/AS
+${coactoresTexto}
+
 CONTRAPARTE
 Nombre / Razón social: ${val('mn-contraparte_nombre') || '-'}
 CUIT: ${val('mn-contraparte_cuit') || '-'}
 Domicilio: ${val('mn-contraparte_domicilio') || '-'}
+
+CODEMANDADOS/AS
+${codemandadosTexto}
 
 ${bloqueRamaTexto()}
 
@@ -796,6 +853,8 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     wrapCronologia().innerHTML = ''; cronContador.count = 0; cronContador.activos = 0;
     wrapTestigos().innerHTML = ''; testContador.count = 0; testContador.activos = 0;
     wrapGestiones().innerHTML = ''; gesContador.count = 0; gesContador.activos = 0;
+    wrapCoactores().innerHTML = ''; coactoresContador.count = 0; coactoresContador.activos = 0;
+    wrapCodemandados().innerHTML = ''; codemandadosContador.count = 0; codemandadosContador.activos = 0;
     wrapSucHerederos().innerHTML = ''; sucHerederosContador.count = 0; sucHerederosContador.activos = 0;
     container.querySelector('#mn-d_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-c_plazo_resultado').innerHTML = '';
@@ -843,9 +902,25 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
       },
     };
 
+    // ── Coactores/codemandados/testigos/documentación: comunes a Despido,
+    // Consumidor, Amparo de Salud y ART (Sucesiones usa su propio esquema
+    // de herederos y no envía estos campos) ──────────────────────────────
+    const extrasPartes = {
+      coactores: leerLista(wrapCoactores(), 'mn-coactor', ['nombre', 'dni', 'domicilio']),
+      codemandados: leerLista(wrapCodemandados(), 'mn-codem', ['nombre', 'domicilio', 'cuit']),
+      testigos: leerLista(wrapTestigos(), 'mn-test', ['nombre', 'dni', 'domicilio', 'contacto', 'declarar']),
+      documentacion: {
+        items: DOC_ITEMS.filter(p => container.querySelector(`[data-doc="${p.id}"]`).checked).map(p => ({
+          id: p.id,
+          detalle: container.querySelector(`[data-doc-dato="${p.id}"]`)?.value.trim() || '',
+        })),
+      },
+    };
+
     if (ramaActual === 'despido') {
       return {
         ...base,
+        ...extrasPartes,
         campos: {
           actor_nombre: val('mn-cliente_nombre'),
           actor_dni: val('mn-cliente_dni'),
@@ -877,6 +952,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     if (ramaActual === 'consumidor') {
       return {
         ...base,
+        ...extrasPartes,
         materia: selCMateria.value,
         tipo: selCTipo.value,
         campos: {
@@ -897,6 +973,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     if (ramaActual === 'amparo') {
       return {
         ...base,
+        ...extrasPartes,
         materia: container.querySelector('#mn-a_tipo_demandado').value,
         campos: {
           nombre: val('mn-cliente_nombre'),
@@ -923,6 +1000,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
       const descripcion = val('mn-art_descripcion');
       return {
         ...base,
+        ...extrasPartes,
         materia: 'riesgos_trabajo',
         tipo: val('mn-art_tipo_sugerido') || container.querySelector('#mn-art_tipo_sugerido').value,
         empleadorAsegurado: container.querySelector('#mn-art_empleador_asegurado').value === 'si',

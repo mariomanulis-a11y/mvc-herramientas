@@ -90,10 +90,10 @@ export function initDemandaDespido(container) {
     { id: 'sac_proporcional',    label: 'SAC proporcional' },
     { id: 'vacaciones',          label: 'Vacaciones no gozadas' },
     { id: 'salarios_adeudados',  label: 'Salarios adeudados' },
-    { id: 'ley25323_art1',       label: 'Daño y perjuicio por registración deficiente/omitida (quantum ex art. 1, Ley 25.323 — derogado)' },
-    { id: 'ley25323_art2',       label: 'Daño y perjuicio por falta de pago en término (quantum ex art. 2, Ley 25.323 — derogado)' },
-    { id: 'art80_lct',           label: 'Daño y perjuicio por falta de entrega de certificados (quantum ex art. 45, Ley 25.345 — derogado)' },
-    { id: 'ley24013',            label: 'Daño y perjuicio por no registración/subregistro (quantum ex arts. 8, 9, 10 y/o 15, Ley 24.013 — derogados)' },
+    { id: 'ley25323_art1',       label: 'Daño y perjuicio por registración deficiente/omitida (cuantificación equitativa — derecho común)' },
+    { id: 'ley25323_art2',       label: 'Daño y perjuicio por falta de pago en término (cuantificación equitativa — derecho común)' },
+    { id: 'art80_lct',           label: 'Daño y perjuicio por falta de entrega de certificados (cuantificación equitativa — derecho común)' },
+    { id: 'ley24013',            label: 'Daño y perjuicio por no registración/subregistro (cuantificación equitativa — derecho común)' },
     { id: 'indemnizacion_especial_estabilidad', label: 'Indemnización especial por estabilidad (art. 182 LCT / Ley 23.551, según corresponda)' },
     { id: 'dano_moral',          label: 'Daño moral (opcional)' },
     { id: 'otro',                label: 'Otro concepto (detallar)' },
@@ -371,31 +371,31 @@ export function initDemandaDespido(container) {
   const wrapDemandadosExtra = container.querySelector('#dd-demandados-extra-wrapper');
   let actoresExtraCount = 0, demandadosExtraCount = 0;
 
-  function agregarActorExtra() {
+  function agregarActorExtra(datos = {}) {
     actoresExtraCount++;
     const id = actoresExtraCount;
     const div = document.createElement('div');
     div.className = 'form-row';
     div.id = `dd-actor-extra-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dd-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dd-actor-extra-dni-${id}" placeholder="DNI"></div>
-      <div class="field-group" style="flex:2"><input type="text" id="dd-actor-extra-domicilio-${id}" placeholder="Domicilio real"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-actor-extra-nombre-${id}" placeholder="Nombre completo del/de la coactor/a" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dd-actor-extra-dni-${id}" placeholder="DNI" value="${(datos.dni || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-actor-extra-domicilio-${id}" placeholder="Domicilio real" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-actor="${id}">✕</button></div>`;
     wrapActoresExtra.appendChild(div);
     div.querySelector('[data-remove-actor]').addEventListener('click', () => div.remove());
   }
 
-  function agregarDemandadoExtra() {
+  function agregarDemandadoExtra(datos = {}) {
     demandadosExtraCount++;
     const id = demandadosExtraCount;
     const div = document.createElement('div');
     div.className = 'form-row';
     div.id = `dd-demandado-extra-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dd-demandado-extra-nombre-${id}" placeholder="Nombre / razón social del/de la codemandado/a"></div>
-      <div class="field-group" style="flex:2"><input type="text" id="dd-demandado-extra-domicilio-${id}" placeholder="Domicilio"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dd-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-demandado-extra-nombre-${id}" placeholder="Nombre / razón social del/de la codemandado/a" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-demandado-extra-domicilio-${id}" placeholder="Domicilio" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dd-demandado-extra-cuit-${id}" placeholder="CUIT (opcional)" value="${(datos.cuit || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-demandado="${id}">✕</button></div>`;
     wrapDemandadosExtra.appendChild(div);
     div.querySelector('[data-remove-demandado]').addEventListener('click', () => div.remove());
@@ -463,7 +463,7 @@ export function initDemandaDespido(container) {
     btnAddTestigo.textContent = testigosActivos >= MAX_TESTIGOS ? 'Máximo de 5 testigos alcanzado' : '+ Agregar testigo (máx. 5)';
   }
 
-  function agregarTestigo() {
+  function agregarTestigo(datos = {}) {
     if (testigosActivos >= MAX_TESTIGOS) return;
     testigosCount++; testigosActivos++;
     const id = testigosCount;
@@ -471,9 +471,9 @@ export function initDemandaDespido(container) {
     div.className = 'form-row';
     div.id = `dd-testigo-row-${id}`;
     div.innerHTML = `
-      <div class="field-group" style="flex:2"><input type="text" id="dd-testigo-nombre-${id}" placeholder="Nombre y apellido"></div>
-      <div class="field-group" style="flex:1"><input type="text" id="dd-testigo-dni-${id}" placeholder="DNI"></div>
-      <div class="field-group" style="flex:3"><input type="text" id="dd-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia"></div>
+      <div class="field-group" style="flex:2"><input type="text" id="dd-testigo-nombre-${id}" placeholder="Nombre y apellido" value="${(datos.nombre || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:1"><input type="text" id="dd-testigo-dni-${id}" placeholder="DNI" value="${(datos.dni || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field-group" style="flex:3"><input type="text" id="dd-testigo-domicilio-${id}" placeholder="Domicilio: calle N°, localidad, partido, provincia" value="${(datos.domicilio || '').replace(/"/g, '&quot;')}"></div>
       <div class="field-group" style="flex:0;align-self:flex-end"><button class="btn btn-ghost" type="button" data-remove-testigo="${id}">✕</button></div>`;
     wrapTestigos.appendChild(div);
     div.querySelector('[data-remove-testigo]').addEventListener('click', () => { div.remove(); testigosActivos--; actualizarBotonTestigo(); });
@@ -668,15 +668,15 @@ e) Practique liquidación de los rubros reclamados en la presente demanda, confo
           return `Salarios adeudados: se reclama el pago de las remuneraciones devengadas y no abonadas por la demandada, correspondientes a los períodos que se acreditarán en la etapa probatoria, por la suma de $ ${m}.`;
         case 'ley25323_art1': {
           const tipoRegistro = d.registrado === 'no_registrada' ? 'no registrada ("en negro")' : d.registrado === 'deficiente' ? 'registrada en forma deficiente (fecha de ingreso y/o remuneración consignadas por debajo de la real)' : 'irregularmente registrada';
-          return `Daño y perjuicio por registración deficiente u omitida: la relación laboral fue ${tipoRegistro}, incumplimiento que — conforme los fundamentos desarrollados en el punto III — configura una fuente autónoma de responsabilidad civil que afecta además los aportes previsionales de la parte actora en perjuicio de su futura jubilación. A fin de cuantificar este daño, se solicita se lo gradúe en el equivalente al doble de las indemnizaciones de los arts. 232, 233 y 245 de la LCT (pauta objetiva ex art. 1, Ley 25.323, hoy derogado) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
+          return `Daño y perjuicio por registración deficiente u omitida: la relación laboral fue ${tipoRegistro}, incumplimiento que — conforme los fundamentos desarrollados en el punto III — configura una fuente autónoma de responsabilidad civil que afecta además los aportes previsionales de la parte actora en perjuicio de su futura jubilación. A fin de cuantificar este daño, se solicita se lo gradúe, como pauta objetiva y razonable de cuantificación, en el equivalente al doble de las indemnizaciones de los arts. 232, 233 y 245 de la LCT, y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
         }
         case 'ley25323_art2':
-          return `Daño y perjuicio por falta de pago en término de las indemnizaciones: la demora imputable a la demandada en el pago de las indemnizaciones derivadas de la ruptura del vínculo excede el simple retraso compensable con el interés moratorio, en tanto dichas acreencias revisten carácter alimentario (arts. 103, 116 y ccdtes., LCT) y su percepción oportuna resulta indispensable para que la parte actora pueda afrontar sus necesidades básicas hasta su reinserción laboral (art. 19, CN; arts. 1708 y ss., CCCN; cfr. Ossola, Responsabilidad civil, 2ª ed., Abeledo-Perrot, 2024, p. 367). A fin de cuantificar este daño, se solicita se lo gradúe en el cincuenta por ciento (50%) de las indemnizaciones de los arts. 232, 233 y 245 de la LCT (pauta objetiva ex art. 2, Ley 25.323, hoy derogado) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
+          return `Daño y perjuicio por falta de pago en término de las indemnizaciones: la demora imputable a la demandada en el pago de las indemnizaciones derivadas de la ruptura del vínculo excede el simple retraso compensable con el interés moratorio, en tanto dichas acreencias revisten carácter alimentario (arts. 103, 116 y ccdtes., LCT) y su percepción oportuna resulta indispensable para que la parte actora pueda afrontar sus necesidades básicas hasta su reinserción laboral (art. 19, CN; arts. 1708 y ss., CCCN; cfr. Ossola, Responsabilidad civil, 2ª ed., Abeledo-Perrot, 2024, p. 367). A fin de cuantificar este daño, se solicita se lo gradúe, como pauta objetiva y razonable de cuantificación, en el cincuenta por ciento (50%) de las indemnizaciones de los arts. 232, 233 y 245 de la LCT, y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
         case 'art80_lct':
-          return `Daño y perjuicio por falta de entrega de certificados de trabajo: el incumplimiento de la demandada a su obligación de entregar el certificado de trabajo con los datos reales de la relación laboral (art. 80, LCT; art. 1° de la Ley 24.576) le genera a la parte actora la imposibilidad de acreditar su calificación profesional y experiencia frente a futuros empleadores, configurando un daño cierto y una pérdida de chance que no requieren prueba específica por hallarse la confección y entrega del certificado en cabeza exclusiva de la patronal (arts. 1737, 1738 y 1739, CCCN; SCBA, causa L. 105.726, "Mac Garrell, Esteban c/ Atento Holding Telecomunicaciones y ots. s/ Despido"; CNAT, Sala VI, Expte. N° 10785/00, "Sequeira, Pedro c/ Fomec S.A. s/ despido"). A fin de cuantificar este daño, se solicita se lo gradúe en el equivalente a tres (3) remuneraciones percibidas por la parte actora (pauta objetiva ex art. 45, Ley 25.345, hoy derogado) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
+          return `Daño y perjuicio por falta de entrega de certificados de trabajo: el incumplimiento de la demandada a su obligación de entregar el certificado de trabajo con los datos reales de la relación laboral (art. 80, LCT; art. 1° de la Ley 24.576) le genera a la parte actora la imposibilidad de acreditar su calificación profesional y experiencia frente a futuros empleadores, configurando un daño cierto y una pérdida de chance que no requieren prueba específica por hallarse la confección y entrega del certificado en cabeza exclusiva de la patronal (arts. 1737, 1738 y 1739, CCCN; SCBA, causa L. 105.726, "Mac Garrell, Esteban c/ Atento Holding Telecomunicaciones y ots. s/ Despido"; CNAT, Sala VI, Expte. N° 10785/00, "Sequeira, Pedro c/ Fomec S.A. s/ despido"). A fin de cuantificar este daño, se solicita se lo gradúe, como pauta objetiva y razonable de cuantificación, en el equivalente a tres (3) remuneraciones percibidas por la parte actora, y/o lo que V.E. considere una justa recomposición del perjuicio sufrido, reclamándose por este concepto la suma de $ ${m}.`;
         case 'ley24013': {
           const tipoRegistro2 = d.registrado === 'no_registrada' ? 'no registrada' : d.registrado === 'deficiente' ? 'registrada en forma deficiente' : 'irregularmente registrada';
-          return `Daño y perjuicio por no registración o registración deficiente (Ley 24.013): sin perjuicio del rubro anterior, y en tanto la relación fue ${tipoRegistro2}, se reclama asimismo — con idéntico fundamento de derecho común expuesto en el punto III — la suma de $ ${m}, tomando como pauta objetiva de cuantificación las multas que preveían los arts. 8, 9, 10 y/o 15 de la Ley 24.013 (hoy derogados) y/o lo que V.E. considere una justa recomposición del perjuicio sufrido.`;
+          return `Daño y perjuicio por no registración o registración deficiente: sin perjuicio del rubro anterior, y en tanto la relación fue ${tipoRegistro2}, se reclama asimismo — con idéntico fundamento de derecho común expuesto en el punto III — la suma de $ ${m} en concepto de daño derivado del deficiente registro de la relación laboral, tomando como pauta objetiva y razonable de cuantificación la que en definitiva V.E. estime una justa recomposición del perjuicio sufrido.`;
         }
         case 'indemnizacion_especial_estabilidad': {
           const fundamento = tipoEstabilidadSel === 'sindical'
@@ -713,6 +713,20 @@ e) Practique liquidación de los rubros reclamados en la presente demanda, confo
 
     const rubroActivo = (id) => container.querySelector(`[data-rubro="${id}"]`).checked;
 
+    // ── Materia del reclamo (causal + rubros activos) para el Objeto ────────
+    const causalLabelObj = (CAUSALES.find(c => c.value === causal) || {}).label || 'despido';
+    const materiaItems = [causalLabelObj];
+    RUBROS.forEach(r => {
+      if (!rubroActivo(r.id)) return;
+      if (r.id === 'otro') {
+        const detalleOtro = val('dd-otro_detalle');
+        materiaItems.push(detalleOtro || 'otro concepto reclamado');
+      } else {
+        materiaItems.push(r.label);
+      }
+    });
+    const materiaTexto = materiaItems.join(', ');
+
     const actoresExtra = leerActoresExtra();
     const demandadosExtra = leerDemandadosExtra();
     const coactoresTexto = joinConY(actoresExtra.map(a => `${a.nombre}, DNI ${a.dni || '[DNI]'}${a.domicilio ? `, con domicilio real en ${a.domicilio}` : ''}`));
@@ -726,8 +740,8 @@ e) Practique liquidación de los rubros reclamados en la presente demanda, confo
     // ── Hechos según causal ──────────────────────────────────────────────
     const registradoTexto = {
       registrada: 'encontrándose la relación debidamente registrada',
-      no_registrada: 'sin encontrarse la relación laboral registrada, conforme lo dispuesto por la Ley 24.013',
-      deficiente: 'encontrándose la relación registrada en forma deficiente (fecha de ingreso y/o remuneración consignadas por debajo de la real), conforme lo dispuesto por la Ley 24.013',
+      no_registrada: 'sin encontrarse la relación laboral registrada',
+      deficiente: 'encontrándose la relación registrada en forma deficiente (fecha de ingreso y/o remuneración consignadas por debajo de la real)',
     }[d.registrado] || 'conforme surge de la documentación que se acompaña';
 
     let hechosCausal = '';
@@ -752,7 +766,7 @@ e) Practique liquidación de los rubros reclamados en la presente demanda, confo
     }
     const reclamaDanioDerogado = rubroActivo('ley25323_art1') || rubroActivo('ley25323_art2') || rubroActivo('art80_lct') || rubroActivo('ley24013');
     if (reclamaDanioDerogado) {
-      derecho += `. En cuanto a los daños y perjuicios reclamados por registración deficiente u omitida, mora en el pago y/o falta de entrega de certificados de trabajo, cabe destacar que la indemnización tarifada del art. 245 de la LCT no repara cabal y completamente todos los daños padecidos por la parte actora, en particular aquellos cuyo origen es el incumplimiento de las obligaciones registrales y documentales que la legislación laboral pone en cabeza del empleador (arts. 7, 8, 9, 10, 52 y ccdtes., LCT; arts. 7 y 12, Ley 24.013). La eliminación de las denominadas "multas" laborales de los arts. 8, 9, 10 y 15 de la Ley 24.013, del art. 45 de la Ley 25.345 y de los arts. 1 y 2 de la Ley 25.323 (arts. 99, 100 y 55, Ley 27.742/DNU 70/2023) no elimina la obligación de reparar el daño causado, que subsiste con fundamento en el derecho común, quedando habilitada su reclamación con sustento en los arts. 1716, 1717, 1722, 1737, 1738, 1739, 1740 y 1741 del Código Civil y Comercial de la Nación (cfr. Ackerman, "Algunas posibles consecuencias de la eliminación o cambio de destino de las mal llamadas multas de las Leyes 24.013 y 25.323 y del artículo 80 de la Ley de Contrato de Trabajo", Revista de Derecho Laboral. Actualidad, n° 2018-I, Rubinzal-Culzoni, p. 119, esp. p. 122). Las fórmulas que preveían dichas normas hoy derogadas se invocan, en cada caso, como pauta objetiva y razonable de cuantificación del daño, sin perjuicio de que V.E. fije el monto que considere una justa recomposición del perjuicio sufrido`;
+      derecho += `. En cuanto a los daños y perjuicios reclamados por registración deficiente u omitida, mora en el pago y/o falta de entrega de certificados de trabajo, cabe destacar que la indemnización tarifada del art. 245 de la LCT no repara cabal y completamente todos los daños padecidos por la parte actora, en particular aquellos cuyo origen es el incumplimiento de las obligaciones registrales y documentales que la legislación laboral pone en cabeza del empleador (arts. 7, 8, 9, 10, 52 y ccdtes., LCT). La eliminación de las denominadas "multas" que preveía la legislación laboral en la materia, hoy derogadas (arts. 99, 100 y 55, Ley 27.742/DNU 70/2023), no elimina la obligación de reparar el daño causado, que subsiste con fundamento en el derecho común, quedando habilitada su reclamación con sustento en los arts. 1716, 1717, 1722, 1737, 1738, 1739, 1740 y 1741 del Código Civil y Comercial de la Nación (cfr. Ackerman, Revista de Derecho Laboral. Actualidad, n° 2018-I, Rubinzal-Culzoni, p. 119, esp. p. 122, sobre las consecuencias de la eliminación o cambio de destino de las entonces vigentes multas laborales). Las fórmulas que preveían dichas normas hoy derogadas se invocan, en cada caso, como pauta objetiva y razonable de cuantificación del daño, sin perjuicio de que V.E. fije el monto que considere una justa recomposición del perjuicio sufrido`;
     }
     derecho += `. En cuanto a los requisitos formales de la presente, se estará a lo dispuesto por el art. 31 de la Ley 15.057 de Procedimiento Laboral de la Provincia de Buenos Aires, siendo de aplicación supletoria el Código Procesal Civil y Comercial de la Provincia de Buenos Aires conforme lo dispone el art. 89 de la citada ley.`;
 
@@ -842,7 +856,7 @@ e) Practique liquidación de los rubros reclamados en la presente demanda, confo
 ${d.abogado}, en mi carácter de ${d.caracter_letrado} de ${d.actor_nombre}, DNI ${d.actor_dni}, con domicilio real en ${d.actor_domicilio_real}${coactoresTexto ? `, y de ${coactoresTexto}` : ''}, constituyendo domicilio procesal en ${d.domicilio_procesal} y domicilio electrónico en ${d.email_notificaciones} (art. 40, CPCC de la Provincia de Buenos Aires, de aplicación supletoria conforme art. 89, Ley 15.057), a V.E. respetuosamente me presento y digo:
 
 I. OBJETO
-Que vengo por el presente a promover demanda laboral contra ${demandadosTextoObjeto}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}), o lo que en más o en menos resulte de la prueba a producirse en autos, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
+Que vengo por el presente a promover demanda laboral contra ${demandadosTextoObjeto}, en concepto de ${materiaTexto}, por cobro de la suma de $ ${totalTexto} (PESOS ${totalTexto}), o lo que en más o en menos resulte de la prueba a producirse en autos, con más sus intereses y costas, en virtud de los hechos y el derecho que a continuación se exponen.
 
 II. HECHOS
 Que ${d.actor_nombre}, DNI ${d.actor_dni}, de ${d.actor_edad || '[EDAD]'} años de edad, de nacionalidad ${d.actor_nacionalidad}, de estado civil ${d.actor_estado_civil || '[ESTADO CIVIL]'}, de profesión/oficio ${d.actor_profesion || '[PROFESIÓN U OFICIO]'}, ingresó a trabajar en relación de dependencia para la demandada con fecha ${d.fecha_ingreso}, desempeñando tareas de ${d.categoria_tareas}, cumpliendo una jornada de ${d.jornada}, percibiendo una remuneración mensual, normal y habitual de $ ${d.remuneracion_mensual ? fmtMoneda(parseFloat(d.remuneracion_mensual)) : '[MONTO]'}, ${registradoTexto}.
@@ -981,6 +995,46 @@ Recordatorios previos a la presentación (no forman parte del escrito):
       if (payload.selects) {
         if (payload.selects.registrado) container.querySelector('#dd-registrado').value = payload.selects.registrado;
         if (payload.selects.causal) { selCausal.value = payload.selects.causal; actualizarBloqueCausal(); }
+      }
+      if (Array.isArray(payload.coactores)) payload.coactores.forEach(c => agregarActorExtra(c));
+      if (Array.isArray(payload.codemandados)) payload.codemandados.forEach(dem => agregarDemandadoExtra(dem));
+      if (Array.isArray(payload.testigos) && payload.testigos.length) {
+        container.querySelector('#dd-prueba-testifical').checked = true;
+        container.querySelector('#dd-wrap-testifical').style.display = 'block';
+        payload.testigos.forEach(t => agregarTestigo(t));
+      }
+      if (payload.documentacion && Array.isArray(payload.documentacion.items)) {
+        const marcarDocumental = (id, detalle) => {
+          const chk = container.querySelector(`[data-documental="${id}"]`);
+          if (!chk) return;
+          if (!chk.checked) { chk.checked = true; chk.dispatchEvent(new Event('change')); }
+          if (detalle) {
+            const input = container.querySelector(`[data-documental-dato="${id}"]`);
+            if (input) input.value = input.value ? `${input.value}; ${detalle}` : detalle;
+          }
+        };
+        const otroDetalles = [];
+        payload.documentacion.items.forEach(item => {
+          switch (item.id) {
+            case 'contrato':
+              marcarDocumental('recibos', item.detalle);
+              marcarDocumental('contrato', '');
+              break;
+            case 'telegramas':
+              marcarDocumental('telegramas', item.detalle);
+              break;
+            case 'historia_clinica':
+              otroDetalles.push(`Historia clínica / informes médicos${item.detalle ? `: ${item.detalle}` : ''}`);
+              break;
+            case 'pericias':
+              otroDetalles.push(`Pericias / informes técnicos${item.detalle ? `: ${item.detalle}` : ''}`);
+              break;
+            case 'otro':
+              otroDetalles.push(item.detalle || 'Otro documento (ver minuta)');
+              break;
+          }
+        });
+        if (otroDetalles.length) marcarDocumental('otro', otroDetalles.join(' / '));
       }
       localStorage.removeItem('mvc_prefill_despido');
       banner.remove();
