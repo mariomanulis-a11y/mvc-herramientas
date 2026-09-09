@@ -30,6 +30,7 @@ export function initPresupuestos(container) {
       baseDesc: 'Monto del acervo hereditario / valor de los bienes a adjudicar',
       enfoque: (sub) => 'Su objetivo es asegurar la transmisión ordenada del patrimonio del causante a los herederos, evitando conflictos entre las partes y protegiendo el valor de los bienes hasta su adjudicación definitiva. Para lograrlo, nos encargamos de:',
       costoInaccion: (sub) => 'Mientras no se inicie y concluya el proceso sucesorio, los bienes registrables del causante permanecen inmovilizados: no pueden venderse, no pueden ofrecerse en garantía ni ser objeto de créditos hipotecarios, y su administración (cobro de alquileres, pago de expensas e impuestos) queda en una situación de hecho que expone a los herederos a reclamos de terceros. Cuanto más se demore el inicio del trámite, mayor es el riesgo de acumulación de deudas impagas sobre los bienes del acervo (impuestos, expensas, servicios) y de aparición de nuevos reclamantes o controversias entre herederos.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'itgb', 'sellados', 'edictos', 'inscripcion_registral', 'certificados_dominio', 'peritos'],
     },
     divorcio: {
       label: 'Divorcio (PBA)',
@@ -54,6 +55,7 @@ export function initPresupuestos(container) {
       costoInaccion: (sub) => sub === 'presentacion_unilateral'
         ? 'La falta de una presentación técnica adecuada expone a demoras evitables en el traslado y en la fijación de la audiencia prevista en el art. 438 del CCCN, y puede derivar en una propuesta de convenio regulador que no contemple adecuadamente todos los aspectos exigidos por el art. 439 del CCCN (vivienda, bienes, compensación económica, cuidado personal, régimen de comunicación y alimentos), generando revisiones y controversias posteriores.'
         : 'La falta de un convenio regulador completo y técnicamente preciso (art. 439, CCCN) puede dar lugar a controversias futuras entre los cónyuges sobre la vivienda, los bienes gananciales, el cuidado personal de los hijos/as o la cuota alimentaria, que podrían haberse evitado con una redacción clara desde el inicio.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'certificados_dominio', 'inscripcion_registral', 'peritos'],
     },
     laboral_demandada: {
       label: 'Laboral — Representación de la parte demandada (empleadora)',
@@ -76,6 +78,7 @@ export function initPresupuestos(container) {
       baseDesc: 'Monto reclamado / monto de sentencia o acuerdo',
       enfoque: (sub) => 'Su objetivo como empleador es resolver el conflicto laboral planteado minimizando la exposición económica y reputacional de la empresa, evitando que el paso del tiempo agrave la contingencia. Para lograrlo, nos encargamos de:',
       costoInaccion: (sub) => 'La falta de una defensa técnica oportuna expone a la empresa a que el reclamo prospere en su totalidad, monto que se incrementa además por los intereses devengados desde la mora hasta el efectivo pago (conforme la tasa que fije la Suprema Corte de la Provincia de Buenos Aires o el fuero interviniente) y, eventualmente, por sanciones conminatorias o multas procesales derivadas de incomparecencias o incumplimientos. Una defensa técnica adecuada, en cambio, permite explorar salidas conciliatorias tempranas y acotar la contingencia.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'peritos'],
     },
     danios: {
       label: 'Daños y Perjuicios',
@@ -92,6 +95,7 @@ export function initPresupuestos(container) {
       baseDesc: 'Monto estimado de la demanda / monto de sentencia o acuerdo',
       enfoque: (sub) => 'Su objetivo es obtener la reparación integral del daño sufrido de la manera más eficiente posible, evitando que el paso del tiempo perjudique la prueba disponible o el cobro efectivo de la indemnización. Para lograrlo, nos encargamos de:',
       costoInaccion: (sub) => 'El paso del tiempo juega en contra del reclamante: la prueba testimonial se deteriora, la documental puede extraviarse o volverse inaccesible, y corren los plazos de prescripción de la acción. A la vez, el eventual monto de condena se incrementa por los intereses devengados desde la fecha del hecho o la mora hasta el efectivo pago. Iniciar el reclamo a tiempo preserva la prueba disponible y maximiza el valor efectivamente recuperable.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'mediacion', 'peritos'],
     },
     amparo_salud: {
       label: 'Amparo de Salud con Medida Cautelar',
@@ -105,6 +109,7 @@ export function initPresupuestos(container) {
       baseDesc: 'Valor estimado de la prestación / tratamiento reclamado',
       enfoque: () => 'Su objetivo es obtener la cobertura de la prestación de salud requerida en el menor tiempo posible, dada la urgencia que habitualmente reviste este tipo de reclamos. Para lograrlo, nos encargamos de:',
       costoInaccion: () => 'La demora en judicializar un reclamo de cobertura de salud puede agravar el cuadro clínico del paciente y, en determinados casos, tornar irreversible el perjuicio, además de dificultar la reparación económica posterior. La vía del amparo con medida cautelar busca precisamente evitar esa demora, obteniendo una respuesta jurisdiccional en un plazo considerablemente menor al de un proceso ordinario.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'peritos'],
     },
     asesoramiento_pyme: {
       label: 'Asesoramiento Integral PYME (Laboral, RRHH, Compliance y Control Interno)',
@@ -118,6 +123,7 @@ export function initPresupuestos(container) {
       baseDesc: 'Honorario mensual / abono por servicio de asesoramiento integral',
       enfoque: () => 'Su objetivo es contar con una gestión laboral, de recursos humanos y de control interno ordenada, que reduzca la exposición a contingencias (laborales, administrativas y reputacionales) y sostenga el cumplimiento normativo en el tiempo. Para lograrlo, nos encargamos de:',
       costoInaccion: () => 'La ausencia de un control preventivo en materia laboral, de recursos humanos y de compliance expone a la empresa a contingencias que se acumulan silenciosamente: relaciones laborales mal instrumentadas o no registradas, incumplimientos a normativa de higiene y seguridad, ausencia de canales de denuncia y códigos de ética exigibles en determinados regímenes, y debilidades de control interno que facilitan errores o irregularidades no detectadas a tiempo. Estas contingencias, cuando se detectan tardíamente (por ejemplo, ante una inspección, un reclamo laboral o una denuncia), resultan considerablemente más costosas de resolver que si se hubieran prevenido mediante un diagnóstico y un plan de acción oportunos.',
+      gastos: ['terceros_pyme'],
     },
   };
 
@@ -160,6 +166,24 @@ export function initPresupuestos(container) {
   ];
 
   const CAMPO_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
+
+  // ── Gastos y aranceles habituales por rama (selector, siempre opcional) ─────
+  // Lista orientativa según el tipo de proceso — no taxativa: el usuario puede
+  // tildar los que correspondan y además agregar otros gastos no listados.
+  const GASTOS_CONFIG = [
+    { id: 'tasa_justicia',        label: 'Tasa de Justicia',                                    nota: 'Código Fiscal (Ley 10.397), actualizada anualmente por la Ley Impositiva provincial.' },
+    { id: 'sobretasa_justicia',   label: 'Sobretasa de Justicia',                                nota: 'Aporte a la Caja de Previsión Social para Abogados de la Provincia de Buenos Aires, calculado sobre la Tasa de Justicia.' },
+    { id: 'bono_ley_8480',        label: 'Bono de Derecho Fijo (Ley 8480)',                       nota: 'Aporte al Colegio de Abogados departamental, salvo exención aplicable.' },
+    { id: 'itgb',                 label: 'ITGB — Impuesto a la Transmisión Gratuita de Bienes',   nota: 'Código Fiscal (Ley 10.397), aplicable si el acervo supera el mínimo no imponible vigente.' },
+    { id: 'sellados',             label: 'Sellados de actuación',                                 nota: 'Actuaciones notariales, administrativas o registrales que requieran sellado.' },
+    { id: 'edictos',              label: 'Publicación de edictos',                                nota: 'Diario Judicial / Boletín Oficial, según corresponda.' },
+    { id: 'inscripcion_registral', label: 'Inscripción registral',                                nota: 'Registro de la Propiedad Inmueble / Automotor, según los bienes involucrados.' },
+    { id: 'certificados_dominio', label: 'Certificados de dominio e inhibiciones',                nota: 'Solicitados ante el Registro de la Propiedad.' },
+    { id: 'peritos',              label: 'Honorarios de peritos',                                 nota: 'Prueba pericial ofrecida (contable, médica, técnica, etc.), a cargo de la parte que la propone salvo distribución de costas.' },
+    { id: 'mediacion',            label: 'Mediación prejudicial obligatoria',                     nota: 'Honorarios del mediador interviniente (Ley 13.951 / Ley 26.589, según fuero).' },
+    { id: 'terceros_pyme',        label: 'Honorarios de terceros / proveedores externos',         nota: 'Auditorías, certificaciones u otros servicios contratados a terceros, si corresponde.' },
+  ];
+  const GASTOS_BY_ID = Object.fromEntries(GASTOS_CONFIG.map(g => [g.id, g]));
 
   // ── Equipo (para el apartado opcional "Profesionales intervinientes") ──────
   // Bios sintéticas, enfocadas en el ejercicio privado (se omite lo estatal/auditoría
@@ -342,8 +366,11 @@ export function initPresupuestos(container) {
           <input type="number" id="pr-validez" min="1" step="1" value="30">
         </div>
         <div class="field-group" style="grid-column:1/-1">
-          <label for="pr-gastos">Gastos y aranceles estimados (opcional)</label>
-          <textarea id="pr-gastos" rows="2" placeholder="Tasa de justicia, sellado, publicación de edictos, peritos, etc. No incluidos en el honorario."></textarea>
+          <label>Gastos y aranceles estimados (opcional)</label>
+          <p style="font-size:.78rem;color:var(--color-muted);margin:0 0 6px">Tildá los que correspondan a este proceso e indicá si están o no incluidos en el presupuesto. El listado es orientativo — podés agregar cualquier otro gasto no listado.</p>
+          <div id="pr-gastos-selector" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div id="pr-gastos-custom" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+          <button type="button" class="btn btn-ghost" id="pr-gasto-agregar" style="margin-top:8px;align-self:flex-start">+ Agregar otro gasto</button>
         </div>
       </div>
 
@@ -421,8 +448,12 @@ export function initPresupuestos(container) {
   const btnLimp         = container.querySelector('#pr-limpiar');
   const btnCop          = container.querySelector('#pr-copiar');
   const btnReset        = container.querySelector('#pr-reset-texto');
+  const divGastosSelector = container.querySelector('#pr-gastos-selector');
+  const divGastosCustom   = container.querySelector('#pr-gastos-custom');
+  const btnGastoAgregar   = container.querySelector('#pr-gasto-agregar');
 
   let ultimoTextoGenerado = '';
+  let gastoCustomSeq = 0;
   let ultimoResultadoHonorarios = null;
   let alcanceTocadoManualmente = false;
   let enfoqueTocadoManualmente = false;
@@ -431,6 +462,84 @@ export function initPresupuestos(container) {
   taAlcance.addEventListener('input', () => { alcanceTocadoManualmente = true; });
   taEnfoque.addEventListener('input', () => { enfoqueTocadoManualmente = true; });
   taCostoInaccion.addEventListener('input', () => { costoInaccionTocadoManualmente = true; });
+
+  // ── Gastos y aranceles: selector orientativo por rama + agregado libre ─────
+  // Nunca es un listado cerrado: además de tildar los ítems sugeridos según el
+  // proceso, el usuario puede sumar cualquier otro gasto no listado. Todo el
+  // apartado es opcional — no incide si queda vacío.
+  function renderGastosSelector() {
+    const ramaKey = selRama.value;
+    const rama = RAMAS[ramaKey];
+    const ids = rama.gastos || [];
+    if (!ids.length) {
+      divGastosSelector.innerHTML = '';
+      return;
+    }
+    divGastosSelector.innerHTML = ids.map(id => {
+      const g = GASTOS_BY_ID[id];
+      if (!g) return '';
+      return `
+        <div class="check-row pr-gasto-row" data-id="${g.id}" style="align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="checkbox" class="pr-gasto-check" id="pr-gasto-${g.id}" data-id="${g.id}">
+          <label for="pr-gasto-${g.id}" style="flex:1;min-width:180px" title="${g.nota ? g.nota.replace(/"/g, '&quot;') : ''}">${g.label}</label>
+          <select class="pr-gasto-incluido" data-id="${g.id}" style="display:none">
+            <option value="no">No incluido en el presupuesto</option>
+            <option value="si">Incluido en el presupuesto</option>
+          </select>
+        </div>`;
+    }).join('');
+
+    divGastosSelector.querySelectorAll('.pr-gasto-check').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const sel = divGastosSelector.querySelector(`.pr-gasto-incluido[data-id="${chk.dataset.id}"]`);
+        if (sel) sel.style.display = chk.checked ? '' : 'none';
+      });
+    });
+  }
+
+  function agregarGastoCustom() {
+    const id = ++gastoCustomSeq;
+    const row = document.createElement('div');
+    row.className = 'check-row pr-gasto-custom-row';
+    row.dataset.customId = String(id);
+    row.style.cssText = 'align-items:center;gap:8px;flex-wrap:wrap';
+    row.innerHTML = `
+      <input type="text" class="pr-gasto-custom-label" data-id="${id}" placeholder="Nombre del gasto (Ej: honorarios de mediador)" style="flex:1;min-width:180px">
+      <select class="pr-gasto-custom-incluido" data-id="${id}">
+        <option value="no">No incluido en el presupuesto</option>
+        <option value="si">Incluido en el presupuesto</option>
+      </select>
+      <button type="button" class="btn btn-ghost pr-gasto-custom-quitar" data-id="${id}" title="Quitar">✕</button>`;
+    divGastosCustom.appendChild(row);
+    row.querySelector('.pr-gasto-custom-quitar').addEventListener('click', () => row.remove());
+  }
+
+  btnGastoAgregar.addEventListener('click', agregarGastoCustom);
+
+  // Devuelve los gastos tildados/agregados: {label, incluido, nota}[].
+  function leerGastosSeleccionados() {
+    const seleccionados = [];
+    divGastosSelector.querySelectorAll('.pr-gasto-check:checked').forEach(chk => {
+      const g = GASTOS_BY_ID[chk.dataset.id];
+      if (!g) return;
+      const sel = divGastosSelector.querySelector(`.pr-gasto-incluido[data-id="${chk.dataset.id}"]`);
+      seleccionados.push({ label: g.label, incluido: sel ? sel.value === 'si' : false });
+    });
+    divGastosCustom.querySelectorAll('.pr-gasto-custom-row').forEach(row => {
+      const label = row.querySelector('.pr-gasto-custom-label').value.trim();
+      if (!label) return;
+      const incluido = row.querySelector('.pr-gasto-custom-incluido').value === 'si';
+      seleccionados.push({ label, incluido });
+    });
+    return seleccionados;
+  }
+
+  function limpiarGastos() {
+    divGastosSelector.querySelectorAll('.pr-gasto-check').forEach(chk => { chk.checked = false; });
+    divGastosSelector.querySelectorAll('.pr-gasto-incluido').forEach(sel => { sel.style.display = 'none'; sel.value = 'no'; });
+    divGastosCustom.innerHTML = '';
+    gastoCustomSeq = 0;
+  }
 
   // Texto institucional fijo — no depende de la rama. Editable antes de generar.
   taInstitucional.value = 'MVC Abogados cuenta con más de 25 años de trayectoria en el ejercicio profesional, sustentada en un proceso de capacitación permanente del equipo y en el desarrollo de herramientas propias de LegalTech —como Mi Expediente—, que le permiten al cliente acceder a información actualizada y en tiempo real sobre el estado de su causa.';
@@ -465,6 +574,7 @@ export function initPresupuestos(container) {
     actualizarEnfoque();
     actualizarCostoInaccion();
     renderFilasHonorarios();
+    renderGastosSelector();
   }
 
   function actualizarAlcance() {
@@ -684,7 +794,7 @@ export function initPresupuestos(container) {
     const clienteContacto  = container.querySelector('#pr-cliente-contacto').value.trim();
     const alcance          = taAlcance.value.trim();
     const formaPago        = container.querySelector('#pr-forma-pago').value;
-    const gastos           = container.querySelector('#pr-gastos').value.trim();
+    const gastosSeleccionados = leerGastosSeleccionados();
     const validez          = container.querySelector('#pr-validez').value || '30';
     const observaciones    = container.querySelector('#pr-observaciones').value.trim();
     const fechaHoy          = new Date().toLocaleDateString('es-AR');
@@ -756,7 +866,9 @@ export function initPresupuestos(container) {
       notaTotal ? notaTotal : null,
       honorAclaraciones ? `Aclaraciones sobre los honorarios: ${honorAclaraciones}` : null,
       `Forma de pago: ${formaPago}`,
-      gastos ? `Gastos y aranceles estimados (no incluidos en el honorario): ${gastos}` : null,
+      gastosSeleccionados.length ? '' : null,
+      gastosSeleccionados.length ? 'GASTOS Y ARANCELES ESTIMADOS' : null,
+      ...gastosSeleccionados.map(g => `• ${g.label}: ${g.incluido ? 'Incluido en el presupuesto' : 'No incluido en el presupuesto'}`),
       costoInaccionTexto ? '' : null,
       costoInaccionTexto ? 'COSTO DE LA INACCIÓN' : null,
       costoInaccionTexto ? costoInaccionTexto : null,
@@ -788,7 +900,7 @@ export function initPresupuestos(container) {
     textarea.dataset.honorarios = JSON.stringify(h);
     textarea.dataset.honorAclaraciones = honorAclaraciones;
     textarea.dataset.formaPago = formaPago;
-    textarea.dataset.gastos = gastos;
+    textarea.dataset.gastosSeleccionados = JSON.stringify(gastosSeleccionados);
     textarea.dataset.validez = validez;
     textarea.dataset.observaciones = observaciones;
     textarea.dataset.enfoqueTexto = enfoqueTexto;
@@ -815,7 +927,7 @@ export function initPresupuestos(container) {
     inpJusValor.value = JUS_VALOR_DEFAULT;
     taHonorAclaraciones.value = '';
     container.querySelector('#pr-forma-pago').value = 'Contado';
-    container.querySelector('#pr-gastos').value = '';
+    limpiarGastos();
     container.querySelector('#pr-validez').value = '30';
     container.querySelector('#pr-observaciones').value = '';
     alcanceTocadoManualmente = false;
@@ -902,10 +1014,21 @@ export function initPresupuestos(container) {
       <table>
         <tbody>
           <tr><td>Forma de pago</td><td>${esc(textarea.dataset.formaPago)}</td></tr>
-          ${textarea.dataset.gastos ? `<tr><td>Gastos y aranceles estimados</td><td>${esc(textarea.dataset.gastos)}</td></tr>` : ''}
           <tr><td>Validez del presupuesto</td><td>${esc(textarea.dataset.validez)} días corridos desde la fecha de emisión</td></tr>
         </tbody>
       </table>
+
+      ${(() => {
+        const gastosSeleccionados = JSON.parse(textarea.dataset.gastosSeleccionados || '[]');
+        return gastosSeleccionados.length
+          ? `<table>
+               <thead><tr><th colspan="2">Gastos y aranceles estimados</th></tr></thead>
+               <tbody>
+                 ${gastosSeleccionados.map(g => `<tr><td>${esc(g.label)}</td><td>${g.incluido ? 'Incluido en el presupuesto' : 'No incluido en el presupuesto'}</td></tr>`).join('')}
+               </tbody>
+             </table>`
+          : '';
+      })()}
 
       ${textarea.dataset.costoInaccionTexto ? `<div class="info-box"><strong>Costo de la inacción:</strong><br>${esc(textarea.dataset.costoInaccionTexto).replace(/\n/g, '<br>')}${textarea.dataset.ciProyeccionLinea ? `<br><br>${esc(textarea.dataset.ciProyeccionLinea)}` : ''}</div>` : ''}
 
