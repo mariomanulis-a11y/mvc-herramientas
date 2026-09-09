@@ -78,6 +78,9 @@
     <button class="nav-item" data-tool="escrito-sucesion">
       <span class="nav-icon">📜</span> Escrito de Sucesión
     </button>
+    <button class="nav-item" data-tool="divorcio">
+      <span class="nav-icon">💔</span> Divorcio (PBA)
+    </button>
     <button class="nav-item" data-tool="presupuestos">
       <span class="nav-icon">🧾</span> Presupuestos
     </button>
@@ -144,6 +147,7 @@
     'demanda-art':    { label: 'Generador de Demanda / Recurso — ART', load: () => import('./tools/demanda-art.js').then(m => m.initDemandaArt) },
     minutas:          { label: 'Generador de Minutas de Caso',        load: () => import('./tools/minutas.js').then(m => m.initMinutas) },
     'escrito-sucesion': { label: 'Generador de Escrito de Sucesión',  load: () => import('./tools/escrito-sucesion.js').then(m => m.initEscritoSucesion) },
+    divorcio:         { label: 'Generador de Divorcio (PBA)',        load: () => import('./tools/divorcio.js').then(m => m.initDivorcio) },
     presupuestos:     { label: 'Generador de Presupuestos',          load: () => import('./tools/presupuestos.js').then(m => m.initPresupuestos) },
     documentacion:    { label: 'Generador de Documentación Requerida', load: () => import('./tools/documentacion.js').then(m => m.initDocumentacion) },
     'convenio-honorarios': { label: 'Generador de Convenios de Honorarios', load: () => import('./tools/convenio-honorarios.js').then(m => m.initConvenioHonorarios) },
@@ -162,6 +166,7 @@
     'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️', 'demanda-consumidor':'🛡️',
     'amparo-salud':'🏥', 'demanda-art':'🦺', minutas:'📝',
     'escrito-sucesion':'📜',
+    divorcio:'💔',
     presupuestos:'🧾', documentacion:'📑',
     'convenio-honorarios':'🤝',
     'diagnostico-pyme':'🧭',
@@ -176,7 +181,7 @@
     'Derecho Laboral':    ['liquidacion','ley24013','ley25323','liquidacion-integral'],
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
-    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','demanda-art','minutas','escrito-sucesion','presupuestos','documentacion','convenio-honorarios'],
+    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','demanda-art','minutas','escrito-sucesion','divorcio','presupuestos','documentacion','convenio-honorarios'],
     'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme','control-jornada','politicas-rrhh','formularios-evaluacion'],
     'Asistente IA':       ['dalmacio'],
   };

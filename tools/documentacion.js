@@ -40,6 +40,36 @@ export function initDocumentacion(container) {
         'Poder especial, en caso de que algún heredero no pueda firmar personalmente',
       ],
     },
+    divorcio_conjunto: {
+      label: 'Divorcio — Presentación Conjunta (PBA)',
+      items: [
+        'DNI de ambos cónyuges (copia)',
+        'Partida de matrimonio actualizada (con menos de 6 meses de expedición, si el juzgado lo exige)',
+        'Partidas de nacimiento de los hijos/as en común, si los hay',
+        'DNI de los hijos/as en común, si corresponde por edad',
+        'Convenio regulador redactado y firmado por ambos cónyuges (arts. 438 y 439, CCCN)',
+        'Título de propiedad / documentación de los bienes gananciales a liquidar, si corresponde',
+        'Últimos recibos de sueldo o constancia de ingresos de ambos cónyuges, a los fines de la cuota alimentaria y la compensación económica',
+        'Constancia de CUIT / CUIL de ambos cónyuges',
+        'Carta poder / poder para pleitos a favor del estudio (de cada cónyuge, o poder conjunto)',
+        'Constancia de domicilio real y de domicilio electrónico (notificaciones SCBA) de cada cónyuge',
+      ],
+    },
+    divorcio_unilateral: {
+      label: 'Divorcio — Presentación Unilateral (PBA)',
+      items: [
+        'DNI del/de la peticionante (copia)',
+        'Datos completos del otro cónyuge (nombre, DNI si se conoce, domicilio real a fines de notificación)',
+        'Partida de matrimonio actualizada (con menos de 6 meses de expedición, si el juzgado lo exige)',
+        'Partidas de nacimiento de los hijos/as en común, si los hay',
+        'Propuesta de convenio regulador redactada por el/la peticionante (arts. 438 y 439, CCCN)',
+        'Título de propiedad / documentación de los bienes gananciales a liquidar, si corresponde',
+        'Últimos recibos de sueldo o constancia de ingresos del/de la peticionante, a los fines de la cuota alimentaria y la compensación económica',
+        'Constancia de CUIT / CUIL del/de la peticionante',
+        'Carta poder / poder para pleitos a favor del estudio',
+        'Constancia de domicilio real y de domicilio electrónico (notificaciones SCBA) del/de la peticionante',
+      ],
+    },
     laboral_actora_despido: {
       label: 'Laboral — Despido (Parte Actora / Trabajador)',
       items: [

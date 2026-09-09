@@ -31,6 +31,30 @@ export function initPresupuestos(container) {
       enfoque: (sub) => 'Su objetivo es asegurar la transmisión ordenada del patrimonio del causante a los herederos, evitando conflictos entre las partes y protegiendo el valor de los bienes hasta su adjudicación definitiva. Para lograrlo, nos encargamos de:',
       costoInaccion: (sub) => 'Mientras no se inicie y concluya el proceso sucesorio, los bienes registrables del causante permanecen inmovilizados: no pueden venderse, no pueden ofrecerse en garantía ni ser objeto de créditos hipotecarios, y su administración (cobro de alquileres, pago de expensas e impuestos) queda en una situación de hecho que expone a los herederos a reclamos de terceros. Cuanto más se demore el inicio del trámite, mayor es el riesgo de acumulación de deudas impagas sobre los bienes del acervo (impuestos, expensas, servicios) y de aparición de nuevos reclamantes o controversias entre herederos.',
     },
+    divorcio: {
+      label: 'Divorcio (PBA)',
+      subtipos: { presentacion_conjunta: 'Presentación Conjunta', presentacion_unilateral: 'Presentación Unilateral' },
+      campos: ['conyuge1', 'conyuge2', 'fecha_matrimonio', 'cant_hijos', 'cant_bienes', 'conflicto_intereses_divorcio', 'jurisdiccion'],
+      alcance: (sub) => sub === 'presentacion_unilateral'
+        ? 'Redacción de la petición de divorcio vincular unilateral (art. 437, CCCN) y de la propuesta de convenio regulador (arts. 438 y 439, CCCN); presentación ante el Juzgado de Familia competente; seguimiento del traslado a la contraparte y de la homologación de los acuerdos alcanzados, o de la fijación de audiencia ante la falta de acuerdo (Libro VIII, CPCC de la Provincia de Buenos Aires, texto según Ley 13.634).'
+        : 'Redacción de la petición conjunta de divorcio vincular (art. 437, CCCN) y del convenio regulador (arts. 438 y 439, CCCN) acordado entre ambos cónyuges; presentación ante el Juzgado de Familia competente; seguimiento hasta la sentencia de divorcio y la homologación del convenio (Libro VIII, CPCC de la Provincia de Buenos Aires, texto según Ley 13.634).',
+      etapas: (sub) => sub === 'presentacion_unilateral'
+        ? [
+            'Redacción de la petición y de la propuesta de convenio regulador',
+            'Presentación, traslado y eventual audiencia (art. 438, CCCN)',
+            'Sentencia de divorcio y homologación del convenio',
+          ]
+        : [
+            'Redacción de la petición conjunta y del convenio regulador',
+            'Presentación ante el Juzgado de Familia',
+            'Sentencia de divorcio y homologación del convenio',
+          ],
+      baseDesc: 'Monto de referencia (cuota alimentaria / compensación económica / bienes a liquidar)',
+      enfoque: (sub) => 'Su objetivo es obtener la disolución del vínculo matrimonial y la regulación ordenada de sus efectos (vivienda, bienes, hijos/as, compensación económica) de la manera más eficiente y menos conflictiva posible. Para lograrlo, nos encargamos de:',
+      costoInaccion: (sub) => sub === 'presentacion_unilateral'
+        ? 'La falta de una presentación técnica adecuada expone a demoras evitables en el traslado y en la fijación de la audiencia prevista en el art. 438 del CCCN, y puede derivar en una propuesta de convenio regulador que no contemple adecuadamente todos los aspectos exigidos por el art. 439 del CCCN (vivienda, bienes, compensación económica, cuidado personal, régimen de comunicación y alimentos), generando revisiones y controversias posteriores.'
+        : 'La falta de un convenio regulador completo y técnicamente preciso (art. 439, CCCN) puede dar lugar a controversias futuras entre los cónyuges sobre la vivienda, los bienes gananciales, el cuidado personal de los hijos/as o la cuota alimentaria, que podrían haberse evitado con una redacción clara desde el inicio.',
+    },
     laboral_demandada: {
       label: 'Laboral — Representación de la parte demandada (empleadora)',
       subtipos: { caba: 'CABA / Justicia Nacional del Trabajo', pba: 'Provincia de Buenos Aires' },
@@ -105,6 +129,13 @@ export function initPresupuestos(container) {
     { id: 'bienes_registrables', label: 'Bienes registrables',                        tipo: 'text',   opcional: true, placeholder: 'Inmuebles, automotores, otros' },
     { id: 'conflicto_herederos', label: '¿Existe conflicto entre herederos?',         tipo: 'checkbox' },
     { id: 'jurisdiccion',        label: 'Juzgado / jurisdicción (opcional)',          tipo: 'text',   opcional: true },
+
+    { id: 'conyuge1',            label: 'Cónyuge 1 (parte consultante / peticionante)', tipo: 'text' },
+    { id: 'conyuge2',            label: 'Cónyuge 2 / otro cónyuge (opcional)',        tipo: 'text',   opcional: true },
+    { id: 'fecha_matrimonio',    label: 'Fecha de celebración del matrimonio (opcional)', tipo: 'date', opcional: true },
+    { id: 'cant_hijos',          label: 'Cantidad de hijos/as en común (opcional)',   tipo: 'entero', opcional: true },
+    { id: 'cant_bienes',         label: 'Cantidad de bienes gananciales a liquidar (opcional)', tipo: 'entero', opcional: true },
+    { id: 'conflicto_intereses_divorcio', label: '¿Existe conflicto de intereses entre los cónyuges?', tipo: 'checkbox' },
 
     { id: 'empresa_cliente',     label: 'Empresa (cliente)',                          tipo: 'text',   placeholder: 'Empresa S.A.' },
     { id: 'actor_reclamante',    label: 'Actor / reclamante (opcional)',              tipo: 'text',   opcional: true },
@@ -990,6 +1021,60 @@ export function initPresupuestos(container) {
     });
     banner.querySelector('#pr-prefill-sucesion-descartar').addEventListener('click', () => {
       localStorage.removeItem('mvc_prefill_presupuesto_sucesion');
+      banner.remove();
+    });
+  })();
+
+  // ── Prefill desde Generador de Escrito de Divorcio ──────────────────────
+  (function detectarPrefillDivorcio() {
+    let payload;
+    try { payload = JSON.parse(localStorage.getItem('mvc_prefill_presupuesto_divorcio') || 'null'); } catch { payload = null; }
+    if (!payload || !payload.campos) return;
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#e8f4ea;border:1px solid #7ab88a;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px';
+    banner.innerHTML = `<span>📋 Hay datos de un Escrito de Divorcio cargados el ${payload.fecha || ''} — ¿los cargamos en este presupuesto?</span>
+      <span style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="pr-prefill-divorcio-cargar" type="button">Cargar</button>
+        <button class="btn btn-ghost" id="pr-prefill-divorcio-descartar" type="button">Descartar</button>
+      </span>`;
+    container.querySelector('.tool-card').insertBefore(banner, container.querySelector('.tool-card').children[1]);
+
+    banner.querySelector('#pr-prefill-divorcio-cargar').addEventListener('click', () => {
+      selRama.value = 'divorcio';
+      alcanceTocadoManualmente = false;
+      enfoqueTocadoManualmente = false;
+      costoInaccionTocadoManualmente = false;
+      selModalidad.value = 'unico';
+      selCalculo.value = 'manual';
+      actualizarRama();
+      actualizarVisibilidadBase();
+
+      if (payload.subtipo && RAMAS.divorcio.subtipos[payload.subtipo]) {
+        selSubtipo.value = payload.subtipo;
+        alcanceTocadoManualmente = false;
+        enfoqueTocadoManualmente = false;
+        costoInaccionTocadoManualmente = false;
+        actualizarAlcance();
+        actualizarEnfoque();
+        actualizarCostoInaccion();
+        renderFilasHonorarios();
+      }
+
+      Object.entries(payload.campos).forEach(([id, valor]) => {
+        const el = container.querySelector(`#pr-${id}`);
+        if (el && valor) el.value = valor;
+      });
+
+      if (payload.conflictoIntereses !== undefined) {
+        const chk = container.querySelector('#pr-conflicto_intereses_divorcio');
+        if (chk) chk.checked = !!payload.conflictoIntereses;
+      }
+
+      localStorage.removeItem('mvc_prefill_presupuesto_divorcio');
+      banner.remove();
+    });
+    banner.querySelector('#pr-prefill-divorcio-descartar').addEventListener('click', () => {
+      localStorage.removeItem('mvc_prefill_presupuesto_divorcio');
       banner.remove();
     });
   })();

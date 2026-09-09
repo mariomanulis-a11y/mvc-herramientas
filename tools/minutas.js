@@ -21,11 +21,17 @@ export function initMinutas(container) {
     amparo:     { label: 'Amparo de Salud',           destino: 'amparo-salud',       prefillKey: 'mvc_prefill_amparo',     destinoLabel: 'Generador de Amparo por Salud' },
     art:        { label: 'ART — Riesgos del Trabajo', destino: 'demanda-art',        prefillKey: 'mvc_prefill_art',        destinoLabel: 'Generador de Demanda ART' },
     sucesiones: { label: 'Sucesiones',                destino: 'escrito-sucesion',   prefillKey: 'mvc_prefill_sucesion',   destinoLabel: 'Generador de Escrito de Sucesión' },
+    divorcio:   { label: 'Divorcio',                  destino: 'divorcio',           prefillKey: 'mvc_prefill_divorcio',   destinoLabel: 'Generador de Escrito de Divorcio' },
   };
 
   const SUCESIONES_SUBTIPOS = [
     { value: 'ab_intestato',  label: 'Ab Intestato' },
     { value: 'testamentaria', label: 'Testamentaria' },
+  ];
+
+  const DIVORCIO_SUBTIPOS = [
+    { value: 'presentacion_conjunta',   label: 'Presentación conjunta (mutuo acuerdo, art. 437 CCCN)' },
+    { value: 'presentacion_unilateral', label: 'Presentación unilateral (un solo cónyuge, art. 437 CCCN)' },
   ];
 
   const CAUSALES_DESPIDO = [
@@ -393,6 +399,66 @@ export function initMinutas(container) {
         </div>
       </div>
 
+      <div id="mn-bloque-divorcio" class="mn-bloque-rama" style="display:none">
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Divorcio — datos específicos (PBA)</div>
+        <p style="font-size:.78rem;color:var(--color-muted);margin:-4px 0 10px">La parte consultante (nombre/DNI/domicilio cargados arriba) se toma como cónyuge 1. Contraparte/coactores no aplican a esta rama.</p>
+        <div class="form-row">
+          <div class="field-group" style="flex:1">
+            <label for="mn-dv_subtipo">Tipo de presentación</label>
+            <select id="mn-dv_subtipo">${DIVORCIO_SUBTIPOS.map(s => `<option value="${s.value}">${s.label}</option>`).join('')}</select>
+          </div>
+        </div>
+
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Cónyuge 2 / otro cónyuge</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+          <div class="field-group"><label for="mn-dv_conyuge2_nombre">Nombre completo</label><input type="text" id="mn-dv_conyuge2_nombre"></div>
+          <div class="field-group"><label for="mn-dv_conyuge2_dni">DNI (opcional en presentación unilateral)</label><input type="text" id="mn-dv_conyuge2_dni"></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_conyuge2_domicilio">Domicilio real (a fines de notificación)</label><input type="text" id="mn-dv_conyuge2_domicilio"></div>
+        </div>
+
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Matrimonio</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+          <div class="field-group"><label for="mn-dv_fecha_matrimonio">Fecha de celebración</label><input type="date" id="mn-dv_fecha_matrimonio"></div>
+          <div class="field-group"><label for="mn-dv_lugar_matrimonio">Lugar / Registro Civil (opcional)</label><input type="text" id="mn-dv_lugar_matrimonio"></div>
+          <div class="field-group"><label for="mn-dv_acta_matrimonio">Acta N° / Tomo / Folio (opcional)</label><input type="text" id="mn-dv_acta_matrimonio"></div>
+          <div class="field-group"><label for="mn-dv_ultimo_domicilio_conyugal">Último domicilio conyugal (competencia — art. 717 CCCN)</label><input type="text" id="mn-dv_ultimo_domicilio_conyugal"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group" style="align-self:flex-end">
+            <label class="checkbox-label"><input type="checkbox" id="mn-dv_conflicto_intereses"> ¿Conflicto de intereses entre los cónyuges respecto del convenio?</label>
+          </div>
+          <div class="field-group" id="mn-dv-wrap-otro-propone" style="align-self:flex-end;display:none">
+            <label class="checkbox-label"><input type="checkbox" id="mn-dv_otro_conyuge_propone"> El otro cónyuge propondría su propio convenio (art. 438, 2° párr., CCCN)</label>
+          </div>
+        </div>
+
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Hijos/as en común</div>
+        <div id="mn-dv-hijos-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+          <button class="btn btn-ghost" id="mn-add-dv-hijo" type="button">+ Agregar hijo/a (máx. 10)</button>
+        </div>
+        <div class="field-group" style="margin-top:6px">
+          <label class="checkbox-label"><input type="checkbox" id="mn-dv_hijo_capacidad_restringida"> Alguno de los hijos/as en común es mayor de edad con capacidad restringida (art. 658, CCCN)</label>
+        </div>
+
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Bienes gananciales a liquidar</div>
+        <div id="mn-dv-bienes-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div class="form-row" style="justify-content:flex-start;margin-top:6px">
+          <button class="btn btn-ghost" id="mn-add-dv-bien" type="button">+ Agregar bien (máx. 15)</button>
+        </div>
+
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:16px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Convenio regulador — borrador (arts. 438/439, CCCN)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_vivienda_convenio">Atribución de la vivienda familiar (opcional)</label><textarea id="mn-dv_vivienda_convenio" rows="2"></textarea></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_compensacion_economica_detalle">Compensación económica (opcional)</label><textarea id="mn-dv_compensacion_economica_detalle" rows="2"></textarea></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_cuidado_personal">Cuidado personal de los hijos/as (si corresponde)</label><textarea id="mn-dv_cuidado_personal" rows="2"></textarea></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_regimen_comunicacion">Régimen de comunicación (si corresponde)</label><textarea id="mn-dv_regimen_comunicacion" rows="2"></textarea></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_alimentos_hijos">Cuota alimentaria a favor de los hijos/as (si corresponde)</label><textarea id="mn-dv_alimentos_hijos" rows="2"></textarea></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-dv_otros_acuerdos">Otros acuerdos (opcional)</label><textarea id="mn-dv_otros_acuerdos" rows="2"></textarea></div>
+        </div>
+      </div>
+
       <!-- ══ Bloque común: cronología, documentación, testigos, gestiones, valoración ══ -->
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:22px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Cronología de hechos</div>
       <div id="mn-cronologia-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -459,6 +525,7 @@ export function initMinutas(container) {
     amparo: container.querySelector('#mn-bloque-amparo'),
     art: container.querySelector('#mn-bloque-art'),
     sucesiones: container.querySelector('#mn-bloque-sucesiones'),
+    divorcio: container.querySelector('#mn-bloque-divorcio'),
   };
   const bloqueContraparte = container.querySelector('#mn-bloque-contraparte');
   const bloqueCoactores = container.querySelector('#mn-bloque-coactores');
@@ -476,8 +543,9 @@ export function initMinutas(container) {
   function actualizarBloqueRama() {
     ramaActual = selRama.value;
     Object.entries(bloques).forEach(([k, el]) => { el.style.display = k === ramaActual ? 'block' : 'none'; });
-    bloqueContraparte.style.display = ramaActual === 'sucesiones' ? 'none' : 'block';
-    bloqueCoactores.style.display = ramaActual === 'sucesiones' ? 'none' : 'block';
+    const esRamaSinContraparte = ramaActual === 'sucesiones' || ramaActual === 'divorcio';
+    bloqueContraparte.style.display = esRamaSinContraparte ? 'none' : 'block';
+    bloqueCoactores.style.display = esRamaSinContraparte ? 'none' : 'block';
   }
   selRama.addEventListener('change', actualizarBloqueRama);
   actualizarBloqueRama();
@@ -503,6 +571,17 @@ export function initMinutas(container) {
   actualizarBloqueTestamentoMinuta();
 
   chkSucAdministrador.addEventListener('change', () => { wrapSucAdministrador.style.display = chkSucAdministrador.checked ? 'block' : 'none'; });
+
+  // ── Divorcio: variante unilateral ────────────────────────────────────────
+  const selDvSubtipo = container.querySelector('#mn-dv_subtipo');
+  const wrapDvOtroPropone = container.querySelector('#mn-dv-wrap-otro-propone');
+  function actualizarDivorcioUnilateral() {
+    const esUnilateral = selDvSubtipo.value === 'presentacion_unilateral';
+    wrapDvOtroPropone.style.display = esUnilateral ? 'block' : 'none';
+    if (!esUnilateral) container.querySelector('#mn-dv_otro_conyuge_propone').checked = false;
+  }
+  selDvSubtipo.addEventListener('change', actualizarDivorcioUnilateral);
+  actualizarDivorcioUnilateral();
 
   // ── Consumidor: tipos dependientes de la materia ────────────────────────
   const selCMateria = container.querySelector('#mn-c_materia');
@@ -598,6 +677,27 @@ export function initMinutas(container) {
   ];
   container.querySelector('#mn-add-suc-heredero').addEventListener('click', () =>
     crearFilaDinamica({ wrapper: wrapSucHerederos(), prefix: 'mn-suc-heredero', campos: SUC_HEREDERO_CAMPOS, max: MAX_SUC_HEREDEROS, contadorRef: sucHerederosContador }));
+
+  const wrapDvHijos = () => container.querySelector('#mn-dv-hijos-wrapper');
+  const dvHijosContador = { count: 0, activos: 0 };
+  const MAX_DV_HIJOS = 10;
+  const DV_HIJO_CAMPOS = [
+    { id: 'nombre', tipo: 'text', placeholder: 'Nombre y apellido', flex: 2 },
+    { id: 'fecha_nacimiento', tipo: 'date', flex: 1 },
+    { id: 'dni', tipo: 'text', placeholder: 'DNI (opcional)', flex: 1 },
+  ];
+  container.querySelector('#mn-add-dv-hijo').addEventListener('click', () =>
+    crearFilaDinamica({ wrapper: wrapDvHijos(), prefix: 'mn-dv-hijo', campos: DV_HIJO_CAMPOS, max: MAX_DV_HIJOS, contadorRef: dvHijosContador }));
+
+  const wrapDvBienes = () => container.querySelector('#mn-dv-bienes-wrapper');
+  const dvBienesContador = { count: 0, activos: 0 };
+  const MAX_DV_BIENES = 15;
+  const DV_BIEN_CAMPOS = [
+    { id: 'descripcion', tipo: 'text', placeholder: 'Descripción del bien (inmueble, automotor, cuenta, etc.)', flex: 2 },
+    { id: 'atribucion', tipo: 'text', placeholder: 'Atribución / forma de reparto propuesta', flex: 2 },
+  ];
+  container.querySelector('#mn-add-dv-bien').addEventListener('click', () =>
+    crearFilaDinamica({ wrapper: wrapDvBienes(), prefix: 'mn-dv-bien', campos: DV_BIEN_CAMPOS, max: MAX_DV_BIENES, contadorRef: dvBienesContador }));
 
   function leerLista(wrapper, prefix, camposIds) {
     return Array.from(wrapper.querySelectorAll(`[id^="${prefix}-row-"]`)).map(row => {
@@ -748,6 +848,41 @@ ${herederosTexto}
 
 Administrador/a provisional propuesto/a: ${chkSucAdministrador.checked ? (val('mn-suc_administrador_nombre') || '(a designar)') : 'No se solicita'}`;
     }
+    if (ramaActual === 'divorcio') {
+      const esUnilateral = container.querySelector('#mn-dv_subtipo').value === 'presentacion_unilateral';
+      const hijos = leerLista(wrapDvHijos(), 'mn-dv-hijo', ['nombre', 'fecha_nacimiento', 'dni']);
+      const bienes = leerLista(wrapDvBienes(), 'mn-dv-bien', ['descripcion', 'atribucion']);
+      const hijosTexto = hijos.length
+        ? hijos.map(h => `- ${h.nombre || '[NOMBRE]'} — Fecha de nacimiento: ${fmtFechaISO(h.fecha_nacimiento) || '-'} — DNI: ${h.dni || '-'}`).join('\n')
+        : '- (sin hijos/as en común denunciados)';
+      const bienesTexto = bienes.length
+        ? bienes.map(b => `- ${b.descripcion || '[BIEN]'} — Atribución propuesta: ${b.atribucion || '-'}`).join('\n')
+        : '- (sin bienes gananciales denunciados)';
+      return `DIVORCIO — DATOS ESPECÍFICOS
+Tipo de presentación: ${container.querySelector('#mn-dv_subtipo').selectedOptions[0].textContent}
+Cónyuge 1 (parte consultante): ${val('mn-cliente_nombre') || '-'} — DNI: ${val('mn-cliente_dni') || '-'} — Domicilio: ${val('mn-cliente_domicilio') || '-'}
+Cónyuge 2 / otro cónyuge: ${val('mn-dv_conyuge2_nombre') || '-'} — DNI: ${val('mn-dv_conyuge2_dni') || '-'} — Domicilio: ${val('mn-dv_conyuge2_domicilio') || '-'}
+Fecha de celebración del matrimonio: ${fmtFechaISO(val('mn-dv_fecha_matrimonio')) || '-'}
+Lugar / Registro Civil: ${val('mn-dv_lugar_matrimonio') || '-'}
+Acta N° / Tomo / Folio: ${val('mn-dv_acta_matrimonio') || '-'}
+Último domicilio conyugal: ${val('mn-dv_ultimo_domicilio_conyugal') || '-'}
+¿Conflicto de intereses entre los cónyuges?: ${container.querySelector('#mn-dv_conflicto_intereses').checked ? 'Sí' : 'No'}${esUnilateral ? `\nEl otro cónyuge propondría su propio convenio (art. 438, 2° párr., CCCN): ${container.querySelector('#mn-dv_otro_conyuge_propone').checked ? 'Sí' : 'No'}` : ''}
+
+Hijos/as en común:
+${hijosTexto}
+¿Hijo/a mayor con capacidad restringida?: ${container.querySelector('#mn-dv_hijo_capacidad_restringida').checked ? 'Sí' : 'No'}
+
+Bienes gananciales a liquidar:
+${bienesTexto}
+
+Convenio regulador — borrador:
+Vivienda familiar: ${val('mn-dv_vivienda_convenio') || '-'}
+Compensación económica: ${val('mn-dv_compensacion_economica_detalle') || '-'}
+Cuidado personal: ${val('mn-dv_cuidado_personal') || '-'}
+Régimen de comunicación: ${val('mn-dv_regimen_comunicacion') || '-'}
+Cuota alimentaria: ${val('mn-dv_alimentos_hijos') || '-'}
+Otros acuerdos: ${val('mn-dv_otros_acuerdos') || '-'}`;
+    }
     return '';
   }
 
@@ -856,6 +991,8 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     wrapCoactores().innerHTML = ''; coactoresContador.count = 0; coactoresContador.activos = 0;
     wrapCodemandados().innerHTML = ''; codemandadosContador.count = 0; codemandadosContador.activos = 0;
     wrapSucHerederos().innerHTML = ''; sucHerederosContador.count = 0; sucHerederosContador.activos = 0;
+    wrapDvHijos().innerHTML = ''; dvHijosContador.count = 0; dvHijosContador.activos = 0;
+    wrapDvBienes().innerHTML = ''; dvBienesContador.count = 0; dvBienesContador.activos = 0;
     container.querySelector('#mn-d_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-c_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-a_plazo_resultado').innerHTML = '';
@@ -866,6 +1003,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     chkSucAdministrador.checked = false;
     wrapSucAdministrador.style.display = 'none';
     actualizarBloqueTestamentoMinuta();
+    actualizarDivorcioUnilateral();
     actualizarBloqueRama();
     divRes.style.display = 'none';
     divEnviarConf.style.display = 'none';
@@ -1047,6 +1185,37 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
         conflictoHerederos: container.querySelector('#mn-suc_conflicto_herederos').checked,
         administradorCheck: chkSucAdministrador.checked,
         herederos,
+      };
+    }
+    if (ramaActual === 'divorcio') {
+      const hijos = leerLista(wrapDvHijos(), 'mn-dv-hijo', ['nombre', 'fecha_nacimiento', 'dni']);
+      const bienes = leerLista(wrapDvBienes(), 'mn-dv-bien', ['descripcion', 'atribucion']);
+      return {
+        ...base,
+        subtipo: val('mn-dv_subtipo') || container.querySelector('#mn-dv_subtipo').value,
+        campos: {
+          conyuge1_nombre: val('mn-cliente_nombre'),
+          conyuge1_dni: val('mn-cliente_dni'),
+          conyuge1_domicilio: val('mn-cliente_domicilio'),
+          conyuge2_nombre: val('mn-dv_conyuge2_nombre'),
+          conyuge2_dni: val('mn-dv_conyuge2_dni'),
+          conyuge2_domicilio: val('mn-dv_conyuge2_domicilio'),
+          fecha_matrimonio: val('mn-dv_fecha_matrimonio'),
+          lugar_matrimonio: val('mn-dv_lugar_matrimonio'),
+          acta_matrimonio: val('mn-dv_acta_matrimonio'),
+          ultimo_domicilio_conyugal: val('mn-dv_ultimo_domicilio_conyugal'),
+          vivienda_convenio: val('mn-dv_vivienda_convenio'),
+          compensacion_economica_detalle: val('mn-dv_compensacion_economica_detalle'),
+          cuidado_personal: val('mn-dv_cuidado_personal'),
+          regimen_comunicacion: val('mn-dv_regimen_comunicacion'),
+          alimentos_hijos: val('mn-dv_alimentos_hijos'),
+          otros_acuerdos: val('mn-dv_otros_acuerdos'),
+        },
+        conflictoIntereses: container.querySelector('#mn-dv_conflicto_intereses').checked,
+        hijoCapacidadRestringida: container.querySelector('#mn-dv_hijo_capacidad_restringida').checked,
+        otroConyugePropone: container.querySelector('#mn-dv_otro_conyuge_propone').checked,
+        hijos,
+        bienes,
       };
     }
     return base;
