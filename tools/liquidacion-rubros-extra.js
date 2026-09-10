@@ -4,14 +4,43 @@
 //     que ambas calculadoras ya calculan automáticamente sobre el año de extinción).
 //   • Haberes adeudados (salarios impagos).
 //   • Otros rubros adeudados (lista abierta, ampliable).
-//   • Diferencias salariales según CCT (opcional).
-//   • Horas extra al 50% y al 100% (opcional) — la cantidad de horas se deriva de una
-//     declaración de días trabajados y horas extra por día, en lugar de tipearse directamente.
+//   • Diferencias salariales según CCT, mes a mes (hasta 24 meses, cada uno con su propio
+//     selector de mes/año), con la opción de incluir el detalle completo en la exportación
+//     de la liquidación o solo el total, y un export propio e independiente del detalle.
+//   • Horas extra al 50% y al 100% (Art. 201 LCT), calculadas a partir de una "semana tipo"
+//     (días de la semana tildados con horario de entrada/salida) multiplicada por la cantidad
+//     de semanas del período reclamado, más feriados trabajados cargados aparte. El cálculo
+//     respeta el doble tope de la Ley 11.544 (8 hs diarias o 48 semanales, arts. 196/197 LCT)
+//     para el recargo del 50%, y aplica el 100% sin tope a partir de la primera hora en sábado
+//     después de las 13 hs, domingo y feriados (arts. 201 y 204 LCT).
 // Se usa desde tools/liquidacion.js y tools/liquidacion-integral.js para no duplicar esta
 // lógica en ambos archivos (que ya comparten casi la totalidad de las fórmulas LCT).
+import { exportarPDF, exportarCSV } from './exportar.js';
+
+const DIAS_SEMANA = [
+  { key: 'lun', label: 'Lunes' },
+  { key: 'mar', label: 'Martes' },
+  { key: 'mie', label: 'Miércoles' },
+  { key: 'jue', label: 'Jueves' },
+  { key: 'vie', label: 'Viernes' },
+  { key: 'sab', label: 'Sábado' },
+  { key: 'dom', label: 'Domingo' },
+];
+const DIAS_COMUNES = ['lun', 'mar', 'mie', 'jue', 'vie'];
+const CORTE_SABADO_MIN = 13 * 60;
+const NOMBRES_MES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MAX_MESES_CCT = 24;
 
 function fmt(n) {
   return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function round2(n) {
+  return Math.round(n * 100) / 100;
+}
+function formatearMes(mesStr) {
+  if (!mesStr) return '';
+  const [y, m] = mesStr.split('-').map(Number);
+  return `${NOMBRES_MES[m - 1]}-${y}`;
 }
 
 export function renderRubrosExtra(p) {
@@ -43,23 +72,17 @@ export function renderRubrosExtra(p) {
       Calcular diferencias salariales según CCT
     </label>
     <div id="${p}-cct-campos" style="display:none;padding:.7rem .9rem;background:rgba(255,255,255,.04);border-radius:6px;margin-top:.4rem">
-      <div class="form-row">
-        <div class="field-group">
-          <label for="${p}-cct-rem-debida">Remuneración según escala CCT (debida) ($)</label>
-          <input type="number" id="${p}-cct-rem-debida" min="0" step="0.01" placeholder="Ej: 600000">
-          <span class="field-error" id="err-${p}-cct-rem-debida"></span>
-        </div>
-        <div class="field-group">
-          <label for="${p}-cct-rem-abonada">Remuneración efectivamente abonada ($)</label>
-          <input type="number" id="${p}-cct-rem-abonada" min="0" step="0.01" placeholder="Ej: 500000">
-          <span class="field-error" id="err-${p}-cct-rem-abonada"></span>
-        </div>
-      </div>
-      <div class="field-group">
-        <label for="${p}-cct-meses">Meses del período reclamado</label>
-        <input type="number" id="${p}-cct-meses" min="1" step="1" placeholder="Ej: 12">
-        <span class="field-error" id="err-${p}-cct-meses"></span>
-      </div>
+      <p style="font-size:.78rem;color:var(--color-muted);margin:0 0 8px">Cargá mes por mes (hasta ${MAX_MESES_CCT} meses, no necesariamente consecutivos) la remuneración que correspondía según el CCT y la efectivamente abonada.</p>
+      <div id="${p}-cct-meses-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <span class="field-error" id="err-${p}-cct-meses-list"></span>
+      <button type="button" class="btn btn-ghost" id="${p}-cct-meses-agregar" style="margin-top:8px;align-self:flex-start">+ Agregar mes</button>
+      <div id="${p}-cct-resumen" style="font-size:.82rem;color:var(--color-muted);margin-top:.5rem"></div>
+
+      <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500;margin-top:1rem;font-size:.85rem">
+        <input type="checkbox" id="${p}-cct-incluir-detalle" checked>
+        Incluir el detalle mes a mes en el PDF/CSV de la liquidación (si se destilda, ahí solo figura el total)
+      </label>
+      <p style="font-size:.76rem;color:var(--color-muted);margin:.3rem 0 0">El detalle completo siempre se puede exportar aparte, con los botones que aparecen junto al resultado.</p>
     </div>
 
     <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500;margin-top:1.2rem">
@@ -67,35 +90,54 @@ export function renderRubrosExtra(p) {
       Calcular horas extra al 50% y al 100% (Art. 201 LCT)
     </label>
     <div id="${p}-he-campos" style="display:none;padding:.7rem .9rem;background:rgba(255,255,255,.04);border-radius:6px;margin-top:.4rem">
-      <p style="font-size:.78rem;color:var(--color-muted);margin:0 0 8px">Declará los días trabajados con horas extra y las horas extra por día — la cantidad total de horas extra se calcula automáticamente a partir de esa declaración. Valor hora por defecto: sueldo mensual / 200 (8 hs × 25 días), editable.</p>
+      <p style="font-size:.78rem;color:var(--color-muted);margin:0 0 8px">Declará una semana tipo (la jornada habitual reclamada): tildá los días trabajados y su horario. El sistema calcula el excedente sobre la jornada legal (arts. 196/197 LCT y Ley 11.544 — 8 hs diarias o 48 semanales, lo que se alcance primero) al 50%, separa automáticamente el sábado antes/después de las 13 hs, computa el domingo íntegro al 100%, y multiplica todo por la cantidad de semanas del período. Los feriados trabajados se cargan aparte y no se multiplican.</p>
+
       <div class="form-row">
+        <div class="field-group">
+          <label for="${p}-he-jornada-diaria">Jornada normal diaria (hs)</label>
+          <input type="number" id="${p}-he-jornada-diaria" min="0" step="0.5" value="8">
+        </div>
+        <div class="field-group">
+          <label for="${p}-he-jornada-semanal">Jornada normal semanal (hs)</label>
+          <input type="number" id="${p}-he-jornada-semanal" min="0" step="0.5" value="48">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field-group">
+          <label for="${p}-he-semanas">Cantidad de semanas del período reclamado</label>
+          <input type="number" id="${p}-he-semanas" min="0" step="1" placeholder="Ej: 52">
+          <span class="field-error" id="err-${p}-he-semanas"></span>
+        </div>
         <div class="field-group">
           <label for="${p}-he-valorhora">Valor hora ($) — opcional</label>
           <input type="number" id="${p}-he-valorhora" min="0" step="0.01" placeholder="Se autocompleta con rem / 200">
         </div>
       </div>
-      <div class="form-row">
-        <div class="field-group">
-          <label for="${p}-he50-dias">Días con horas extra al 50% <span style="font-weight:400;opacity:.7">(hábiles y sábados hasta las 13 hs)</span></label>
-          <input type="number" id="${p}-he50-dias" min="0" step="1" placeholder="Ej: 20">
-        </div>
-        <div class="field-group">
-          <label for="${p}-he50-horasxdia">Horas extra por día (50%)</label>
-          <input type="number" id="${p}-he50-horasxdia" min="0" step="0.5" placeholder="Ej: 2">
-        </div>
+
+      <div id="${p}-he-dias-grid" style="display:flex;flex-direction:column;gap:6px;margin-top:.6rem">
+        ${DIAS_SEMANA.map(d => `
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;min-width:110px;font-weight:500">
+              <input type="checkbox" id="${p}-he-dia-${d.key}-check">
+              ${d.label}
+            </label>
+            <input type="time" id="${p}-he-dia-${d.key}-desde" disabled style="max-width:110px">
+            <span style="opacity:.6">a</span>
+            <input type="time" id="${p}-he-dia-${d.key}-hasta" disabled style="max-width:110px">
+            ${d.key === 'sab' ? '<span style="font-size:.72rem;color:var(--color-muted)">(se separa solo antes / después de las 13 hs)</span>' : ''}
+            ${d.key === 'dom' ? '<span style="font-size:.72rem;color:var(--color-muted)">(100% completo)</span>' : ''}
+          </div>
+        `).join('')}
       </div>
-      <div class="form-row">
-        <div class="field-group">
-          <label for="${p}-he100-dias">Días con horas extra al 100% <span style="font-weight:400;opacity:.7">(sábados después de las 13 hs, domingos y feriados)</span></label>
-          <input type="number" id="${p}-he100-dias" min="0" step="1" placeholder="Ej: 4">
-        </div>
-        <div class="field-group">
-          <label for="${p}-he100-horasxdia">Horas extra por día (100%)</label>
-          <input type="number" id="${p}-he100-horasxdia" min="0" step="0.5" placeholder="Ej: 8">
-        </div>
+      <span class="field-error" id="err-${p}-he-dias"></span>
+
+      <div class="field-group" style="margin-top:.8rem">
+        <label>Feriados trabajados durante el período (opcional, siempre al 100%, no se multiplican por la cantidad de semanas)</label>
+        <div id="${p}-he-feriados-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        <button type="button" class="btn btn-ghost" id="${p}-he-feriados-agregar" style="margin-top:8px;align-self:flex-start">+ Agregar feriado trabajado</button>
       </div>
-      <span class="field-error" id="err-${p}-he50-dias"></span>
-      <div id="${p}-he-resumen" style="font-size:.82rem;color:var(--color-muted);margin-top:.4rem"></div>
+
+      <div id="${p}-he-resumen" style="font-size:.82rem;color:var(--color-muted);margin-top:.6rem"></div>
     </div>
   `;
 }
@@ -113,43 +155,251 @@ function agregarOtroRubroRow(listEl) {
   listEl.appendChild(row);
 }
 
+function agregarFeriadoRow(listEl, onChange) {
+  const row = document.createElement('div');
+  row.setAttribute('data-feriado-row', '1');
+  row.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+  row.innerHTML = `
+    <input type="date" data-feriado-fecha style="max-width:160px" title="Fecha del feriado (opcional)">
+    <input type="number" data-feriado-horas min="0" step="0.5" placeholder="Horas trabajadas" style="max-width:160px">
+    <button type="button" class="btn btn-ghost" data-feriado-quitar style="padding:6px 10px">✕</button>
+  `;
+  row.querySelector('[data-feriado-quitar]').addEventListener('click', () => { row.remove(); onChange(); });
+  row.querySelector('[data-feriado-horas]').addEventListener('input', onChange);
+  listEl.appendChild(row);
+}
+
+function agregarMesCCTRow(listEl, agregarBtn) {
+  const filasActuales = listEl.querySelectorAll('[data-cct-row]').length;
+  if (filasActuales >= MAX_MESES_CCT) return;
+  const row = document.createElement('div');
+  row.setAttribute('data-cct-row', '1');
+  row.style.cssText = 'display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;padding:.4rem;background:rgba(255,255,255,.03);border-radius:6px';
+  row.innerHTML = `
+    <div class="field-group" style="flex:1;min-width:130px;margin:0">
+      <label style="font-size:.72rem">Mes</label>
+      <input type="month" data-cct-mes>
+    </div>
+    <div class="field-group" style="flex:1;min-width:150px;margin:0">
+      <label style="font-size:.72rem">Remuneración CCT ($)</label>
+      <input type="number" data-cct-rem-cct min="0" step="0.01" placeholder="Ej: 600000">
+    </div>
+    <div class="field-group" style="flex:1;min-width:150px;margin:0">
+      <label style="font-size:.72rem">Remuneración abonada ($)</label>
+      <input type="number" data-cct-rem-abonada min="0" step="0.01" placeholder="Ej: 500000">
+    </div>
+    <button type="button" class="btn btn-ghost" data-cct-quitar style="padding:6px 10px;margin-top:18px">✕</button>
+    <span class="field-error" data-cct-row-error style="flex-basis:100%"></span>
+  `;
+  row.querySelector('[data-cct-quitar]').addEventListener('click', () => {
+    row.remove();
+    if (agregarBtn) agregarBtn.disabled = listEl.querySelectorAll('[data-cct-row]').length >= MAX_MESES_CCT;
+  });
+  listEl.appendChild(row);
+  if (agregarBtn) agregarBtn.disabled = listEl.querySelectorAll('[data-cct-row]').length >= MAX_MESES_CCT;
+}
+
+function parseHora(str) {
+  if (!str) return null;
+  const partes = str.split(':').map(Number);
+  if (partes.length < 2 || isNaN(partes[0]) || isNaN(partes[1])) return null;
+  return partes[0] * 60 + partes[1];
+}
+
+function leerHorarioDia(container, p, key) {
+  const chk = container.querySelector(`#${p}-he-dia-${key}-check`);
+  if (!chk || !chk.checked) return null;
+  const desdeStr = container.querySelector(`#${p}-he-dia-${key}-desde`).value;
+  const hastaStr = container.querySelector(`#${p}-he-dia-${key}-hasta`).value;
+  if (!desdeStr || !hastaStr) return { error: true };
+  const desdeMin = parseHora(desdeStr);
+  const hastaMin = parseHora(hastaStr);
+  if (desdeMin === null || hastaMin === null || hastaMin <= desdeMin) return { error: true };
+  return { desdeMin, hastaMin, horas: (hastaMin - desdeMin) / 60 };
+}
+
+function calcularHorasExtraSemana(container, p) {
+  let horasComunSemana = 0;
+  let diasComunesTrabajados = 0;
+  let horas100PorSemana = 0;
+  let hayError = false;
+
+  DIAS_COMUNES.forEach(key => {
+    const d = leerHorarioDia(container, p, key);
+    if (d && d.error) hayError = true;
+    else if (d) { horasComunSemana += d.horas; diasComunesTrabajados++; }
+  });
+
+  const sab = leerHorarioDia(container, p, 'sab');
+  if (sab && sab.error) {
+    hayError = true;
+  } else if (sab) {
+    if (sab.hastaMin <= CORTE_SABADO_MIN) {
+      horasComunSemana += sab.horas; diasComunesTrabajados++;
+    } else if (sab.desdeMin >= CORTE_SABADO_MIN) {
+      horas100PorSemana += sab.horas;
+    } else {
+      horasComunSemana += (CORTE_SABADO_MIN - sab.desdeMin) / 60;
+      horas100PorSemana += (sab.hastaMin - CORTE_SABADO_MIN) / 60;
+      diasComunesTrabajados++;
+    }
+  }
+
+  const dom = leerHorarioDia(container, p, 'dom');
+  if (dom && dom.error) hayError = true;
+  else if (dom) horas100PorSemana += dom.horas;
+
+  return { horasComunSemana, diasComunesTrabajados, horas100PorSemana, hayError };
+}
+
+function calcularExtrasTotales(container, p) {
+  const semana = calcularHorasExtraSemana(container, p);
+  const jornadaDiaria = parseFloat(container.querySelector(`#${p}-he-jornada-diaria`).value) || 8;
+  const jornadaSemanal = parseFloat(container.querySelector(`#${p}-he-jornada-semanal`).value) || 48;
+  const tope = Math.min(semana.diasComunesTrabajados * jornadaDiaria, jornadaSemanal);
+  const horas50PorSemana = Math.max(0, semana.horasComunSemana - tope);
+  const semanas = parseFloat(container.querySelector(`#${p}-he-semanas`).value) || 0;
+
+  let horasFeriados = 0;
+  container.querySelectorAll(`#${p}-he-feriados-list [data-feriado-row]`).forEach(row => {
+    const h = parseFloat(row.querySelector('[data-feriado-horas]').value);
+    if (!isNaN(h) && h > 0) horasFeriados += h;
+  });
+
+  const horas50Total = horas50PorSemana * semanas;
+  const horas100Total = semana.horas100PorSemana * semanas + horasFeriados;
+
+  return { ...semana, jornadaDiaria, jornadaSemanal, tope, horas50PorSemana, semanas, horasFeriados, horas50Total, horas100Total };
+}
+
+function leerFilasCCT(container, p) {
+  const filas = [];
+  container.querySelectorAll(`#${p}-cct-meses-list [data-cct-row]`).forEach(row => {
+    const mesEl = row.querySelector('[data-cct-mes]');
+    const ccTel = row.querySelector('[data-cct-rem-cct]');
+    const abEl  = row.querySelector('[data-cct-rem-abonada]');
+    const errEl = row.querySelector('[data-cct-row-error]');
+    if (errEl) errEl.textContent = '';
+    row.querySelectorAll('input').forEach(i => i.classList.remove('error'));
+
+    const mes = mesEl.value;
+    const remCCTStr = ccTel.value;
+    const remAbStr  = abEl.value;
+    const intentado = mes || remCCTStr || remAbStr;
+    if (!intentado) return;
+
+    const remCCT = parseFloat(remCCTStr);
+    const remAb  = parseFloat(remAbStr);
+    let error = '';
+    if (!mes) error = 'Falta el mes.';
+    else if (!remCCTStr || isNaN(remCCT) || remCCT <= 0) error = 'Falta la remuneración según CCT.';
+    else if (!remAbStr || isNaN(remAb) || remAb < 0) error = 'Falta la remuneración abonada.';
+    else if (remCCT <= remAb) error = 'La remuneración CCT debe ser mayor a la abonada.';
+
+    if (error) {
+      if (errEl) errEl.textContent = error;
+      mesEl.classList.toggle('error', !mes);
+      ccTel.classList.toggle('error', !remCCTStr || isNaN(remCCT) || remCCT <= 0 || (!isNaN(remAb) && remCCT <= remAb));
+      abEl.classList.toggle('error', !remAbStr || isNaN(remAb) || remAb < 0);
+      filas.push({ error });
+    } else {
+      filas.push({ mes, remCCT, remAb, diferencia: remCCT - remAb });
+    }
+  });
+  return filas;
+}
+
 export function wireRubrosExtra(container, p) {
-  const cctCheck  = container.querySelector(`#${p}-cct-check`);
-  const cctCampos = container.querySelector(`#${p}-cct-campos`);
-  if (cctCheck && cctCampos) {
-    cctCheck.addEventListener('change', () => { cctCampos.style.display = cctCheck.checked ? 'block' : 'none'; });
-  }
-
-  const heCheck  = container.querySelector(`#${p}-he-check`);
-  const heCampos = container.querySelector(`#${p}-he-campos`);
-  if (heCheck && heCampos) {
-    heCheck.addEventListener('change', () => { heCampos.style.display = heCheck.checked ? 'block' : 'none'; });
-  }
-
+  // Otros rubros adeudados
   const otrosList = container.querySelector(`#${p}-otros-rubros-list`);
   const otrosBtn  = container.querySelector(`#${p}-otros-rubros-agregar`);
   if (otrosBtn && otrosList) {
     otrosBtn.addEventListener('click', () => agregarOtroRubroRow(otrosList));
   }
 
-  const he50Dias   = container.querySelector(`#${p}-he50-dias`);
-  const he50Horas  = container.querySelector(`#${p}-he50-horasxdia`);
-  const he100Dias  = container.querySelector(`#${p}-he100-dias`);
-  const he100Horas = container.querySelector(`#${p}-he100-horasxdia`);
-  const heResumen  = container.querySelector(`#${p}-he-resumen`);
+  // Diferencias CCT
+  const cctCheck  = container.querySelector(`#${p}-cct-check`);
+  const cctCampos = container.querySelector(`#${p}-cct-campos`);
+  const cctList   = container.querySelector(`#${p}-cct-meses-list`);
+  const cctAgregarBtn = container.querySelector(`#${p}-cct-meses-agregar`);
+  if (cctCheck && cctCampos) {
+    cctCheck.addEventListener('change', () => { cctCampos.style.display = cctCheck.checked ? 'block' : 'none'; });
+  }
+  if (cctAgregarBtn && cctList) {
+    cctAgregarBtn.addEventListener('click', () => agregarMesCCTRow(cctList, cctAgregarBtn));
+    // Primera fila lista para usar apenas se tilda el checkbox.
+    if (cctCheck) {
+      cctCheck.addEventListener('change', () => {
+        if (cctCheck.checked && cctList.querySelectorAll('[data-cct-row]').length === 0) {
+          agregarMesCCTRow(cctList, cctAgregarBtn);
+        }
+      });
+    }
+  }
+
+  // Horas extra
+  const heCheck  = container.querySelector(`#${p}-he-check`);
+  const heCampos = container.querySelector(`#${p}-he-campos`);
+  if (heCheck && heCampos) {
+    heCheck.addEventListener('change', () => { heCampos.style.display = heCheck.checked ? 'block' : 'none'; });
+  }
+
+  const heResumen = container.querySelector(`#${p}-he-resumen`);
   function actualizarResumenHE() {
     if (!heResumen) return;
-    const h50  = (parseFloat(he50Dias  && he50Dias.value)  || 0) * (parseFloat(he50Horas  && he50Horas.value)  || 0);
-    const h100 = (parseFloat(he100Dias && he100Dias.value) || 0) * (parseFloat(he100Horas && he100Horas.value) || 0);
-    if (h50 === 0 && h100 === 0) { heResumen.textContent = ''; return; }
-    heResumen.textContent = `Total declarado: ${h50} hora(s) extra al 50% + ${h100} hora(s) extra al 100% = ${h50 + h100} hora(s) extra en total.`;
+    const datos = calcularExtrasTotales(container, p);
+    if (datos.hayError) {
+      heResumen.textContent = 'Revisá los horarios: la salida debe ser posterior a la entrada en cada día tildado.';
+      return;
+    }
+    if (datos.horasComunSemana === 0 && datos.horas100PorSemana === 0 && datos.horasFeriados === 0) {
+      heResumen.textContent = '';
+      return;
+    }
+    const partes = [];
+    partes.push(`Semana tipo: ${round2(datos.horasComunSemana)} hs en tramo común (tope aplicado: ${round2(datos.tope)} hs) → ${round2(datos.horas50PorSemana)} hs extra al 50% y ${round2(datos.horas100PorSemana)} hs extra al 100% por semana.`);
+    if (datos.semanas > 0) {
+      partes.push(`× ${datos.semanas} semana(s) = ${round2(datos.horas50Total)} hs al 50% y ${round2(datos.horas100PorSemana * datos.semanas)} hs al 100% en el período.`);
+    } else {
+      partes.push('Falta indicar la cantidad de semanas del período para totalizar.');
+    }
+    if (datos.horasFeriados > 0) partes.push(`+ ${round2(datos.horasFeriados)} hs de feriados trabajados (100%, sin multiplicar).`);
+    partes.push(`Total: ${round2(datos.horas50Total)} hs al 50% + ${round2(datos.horas100Total)} hs al 100%.`);
+    heResumen.textContent = partes.join(' ');
   }
-  [he50Dias, he50Horas, he100Dias, he100Horas].forEach(el => { if (el) el.addEventListener('input', actualizarResumenHE); });
+
+  DIAS_SEMANA.forEach(d => {
+    const chk    = container.querySelector(`#${p}-he-dia-${d.key}-check`);
+    const desde  = container.querySelector(`#${p}-he-dia-${d.key}-desde`);
+    const hasta  = container.querySelector(`#${p}-he-dia-${d.key}-hasta`);
+    if (!chk) return;
+    chk.addEventListener('change', () => {
+      desde.disabled = !chk.checked;
+      hasta.disabled = !chk.checked;
+      actualizarResumenHE();
+    });
+    desde.addEventListener('input', actualizarResumenHE);
+    hasta.addEventListener('input', actualizarResumenHE);
+  });
+
+  ['he-jornada-diaria', 'he-jornada-semanal', 'he-semanas'].forEach(id => {
+    const el = container.querySelector(`#${p}-${id}`);
+    if (el) el.addEventListener('input', actualizarResumenHE);
+  });
+
+  const feriadosList = container.querySelector(`#${p}-he-feriados-list`);
+  const feriadosBtn  = container.querySelector(`#${p}-he-feriados-agregar`);
+  if (feriadosBtn && feriadosList) {
+    feriadosBtn.addEventListener('click', () => agregarFeriadoRow(feriadosList, actualizarResumenHE));
+  }
 }
 
 // Lee y valida los campos renderizados por renderRubrosExtra(p), y devuelve
-// { valid, conceptos } con el mismo shape { label, monto, base, fundamento, esDescuento }
-// que ya usan liquidacion.js y liquidacion-integral.js en sus arrays de conceptos.
+// { valid, conceptos, cctDetalle, cctIncluirDetalle } — conceptos con el mismo shape
+// { label, monto, base, fundamento, esDescuento } que ya usan liquidacion.js y
+// liquidacion-integral.js en sus arrays de conceptos. cctDetalle es la lista de meses
+// válidos cargados (para el export separado), independientemente de si el detalle se
+// incluye o no en el export principal (cctIncluirDetalle).
 export function leerYValidarRubrosExtra(container, p, { rem, setError }) {
   let valid = true;
   const conceptos = [];
@@ -197,88 +447,120 @@ export function leerYValidarRubrosExtra(container, p, { rem, setError }) {
     }
   });
 
-  // ── Diferencias salariales según CCT (opcional) ─────────────────────────
+  // ── Diferencias salariales según CCT, mes a mes (hasta 24 meses) ────────
   const cctCheck = container.querySelector(`#${p}-cct-check`).checked;
+  let cctDetalle = [];
+  let cctIncluirDetalle = true;
   if (cctCheck) {
-    const remDebidaStr  = container.querySelector(`#${p}-cct-rem-debida`).value;
-    const remAbonadaStr = container.querySelector(`#${p}-cct-rem-abonada`).value;
-    const mesesStr       = container.querySelector(`#${p}-cct-meses`).value;
-    const remDebida  = parseFloat(remDebidaStr);
-    const remAbonada = parseFloat(remAbonadaStr);
-    const meses       = parseFloat(mesesStr);
+    const filas = leerFilasCCT(container, p);
+    const filasError = filas.filter(f => f.error);
+    const filasOk = filas.filter(f => !f.error);
 
-    let cctValid = true;
-    if (!remDebidaStr || isNaN(remDebida) || remDebida <= 0) {
-      setError(`${p}-cct-rem-debida`, `err-${p}-cct-rem-debida`, 'Ingresá la remuneración según CCT.');
-      cctValid = false;
-    }
-    if (!remAbonadaStr || isNaN(remAbonada) || remAbonada < 0) {
-      setError(`${p}-cct-rem-abonada`, `err-${p}-cct-rem-abonada`, 'Ingresá la remuneración abonada.');
-      cctValid = false;
-    }
-    if (!mesesStr || isNaN(meses) || meses <= 0) {
-      setError(`${p}-cct-meses`, `err-${p}-cct-meses`, 'Ingresá la cantidad de meses.');
-      cctValid = false;
-    }
-    if (cctValid && remDebida <= remAbonada) {
-      setError(`${p}-cct-rem-debida`, `err-${p}-cct-rem-debida`, 'Debe ser mayor a la remuneración abonada.');
-      cctValid = false;
-    }
-    if (!cctValid) {
+    if (filasError.length > 0) {
+      setError(`${p}-cct-meses-list`, `err-${p}-cct-meses-list`, 'Revisá los meses cargados: hay filas incompletas o inconsistentes (marcadas en rojo).');
+      valid = false;
+    } else if (filasOk.length === 0) {
+      setError(`${p}-cct-meses-list`, `err-${p}-cct-meses-list`, 'Agregá al menos un mes con ambas remuneraciones.');
       valid = false;
     } else {
-      const diferenciaMensual = remDebida - remAbonada;
-      const monto = diferenciaMensual * meses;
-      conceptos.push({
-        label: 'Diferencias salariales según CCT',
-        monto,
-        base: `(${fmt(remDebida)} − ${fmt(remAbonada)}) × ${meses} mes(es)`,
-        fundamento: 'Corresponde el pago de las diferencias salariales resultantes del incorrecto encuadre convencional o categorización del/de la trabajador/a, en tanto se le abonó una remuneración inferior a la prevista en el Convenio Colectivo de Trabajo aplicable a la actividad o categoría efectivamente desempeñada (art. 74 LCT y ccdtes. del CCT de aplicación).',
-      });
+      cctDetalle = filasOk;
+      cctIncluirDetalle = container.querySelector(`#${p}-cct-incluir-detalle`).checked;
+      const fundamentoCCT = 'Corresponde el pago de las diferencias salariales resultantes del incorrecto encuadre convencional o categorización del/de la trabajador/a, calculadas mes a mes como la diferencia entre la remuneración prevista en el Convenio Colectivo de Trabajo aplicable y la efectivamente abonada (art. 74 LCT y ccdtes. del CCT de aplicación).';
+
+      if (cctIncluirDetalle) {
+        filasOk.forEach((f, i) => {
+          conceptos.push({
+            label: `Diferencia salarial CCT — ${formatearMes(f.mes)}`,
+            monto: f.diferencia,
+            base: `${fmt(f.remCCT)} − ${fmt(f.remAb)}`,
+            fundamento: i === 0 ? fundamentoCCT : undefined,
+          });
+        });
+      } else {
+        const totalCCT = filasOk.reduce((acc, f) => acc + f.diferencia, 0);
+        conceptos.push({
+          label: `Diferencias salariales según CCT — total de ${filasOk.length} mes(es)`,
+          monto: totalCCT,
+          base: `Suma de diferencias mensuales de ${filasOk.length} mes(es) — detalle exportable por separado`,
+          fundamento: fundamentoCCT,
+        });
+      }
     }
   }
 
-  // ── Horas extra al 50% y al 100% (opcional) ─────────────────────────────
+  // ── Horas extra al 50% y al 100% (semana tipo × cantidad de semanas) ────
   const heCheck = container.querySelector(`#${p}-he-check`).checked;
   if (heCheck) {
-    const valorHoraStr = container.querySelector(`#${p}-he-valorhora`).value;
-    let valorHora = parseFloat(valorHoraStr);
-    const valorHoraAuto = !valorHoraStr || isNaN(valorHora) || valorHora <= 0;
-    if (valorHoraAuto) valorHora = remBase / 200;
-
-    const dias50       = parseFloat(container.querySelector(`#${p}-he50-dias`).value)       || 0;
-    const horasXDia50  = parseFloat(container.querySelector(`#${p}-he50-horasxdia`).value)  || 0;
-    const dias100      = parseFloat(container.querySelector(`#${p}-he100-dias`).value)      || 0;
-    const horasXDia100 = parseFloat(container.querySelector(`#${p}-he100-horasxdia`).value) || 0;
-
-    const horas50  = dias50  * horasXDia50;
-    const horas100 = dias100 * horasXDia100;
-
-    if (horas50 <= 0 && horas100 <= 0) {
-      setError(`${p}-he50-dias`, `err-${p}-he50-dias`, 'Declará al menos un día y una hora extra trabajados (50% o 100%).');
+    const datos = calcularExtrasTotales(container, p);
+    if (datos.hayError) {
+      setError(`${p}-he-dias`, `err-${p}-he-dias`, 'Revisá los horarios cargados: la hora de salida debe ser posterior a la de entrada en cada día tildado.');
+      valid = false;
+    } else if (datos.horasComunSemana === 0 && datos.horas100PorSemana === 0 && datos.horasFeriados === 0) {
+      setError(`${p}-he-dias`, `err-${p}-he-dias`, 'Tildá al menos un día trabajado (con su horario) o cargá un feriado trabajado.');
+      valid = false;
+    } else if ((datos.horas50PorSemana > 0 || datos.horas100PorSemana > 0) && (!datos.semanas || datos.semanas <= 0)) {
+      setError(`${p}-he-semanas`, `err-${p}-he-semanas`, 'Ingresá la cantidad de semanas del período reclamado.');
       valid = false;
     } else {
+      const valorHoraStr = container.querySelector(`#${p}-he-valorhora`).value;
+      let valorHora = parseFloat(valorHoraStr);
+      const valorHoraAuto = !valorHoraStr || isNaN(valorHora) || valorHora <= 0;
+      if (valorHoraAuto) valorHora = remBase / 200;
       const valorHoraNota = valorHoraAuto ? ' [valor hora = rem / 200]' : '';
-      if (horas50 > 0) {
-        const monto50 = horas50 * valorHora * 1.5;
+
+      if (datos.horas50Total > 0) {
         conceptos.push({
-          label: `Horas extra al 50% — ${horas50} hora(s) (${dias50} día(s) × ${horasXDia50} hs/día)`,
-          monto: monto50,
-          base: `${horas50} hs × ${fmt(valorHora)}${valorHoraNota} × 150%`,
-          fundamento: 'Corresponde el pago de las horas suplementarias trabajadas en exceso de la jornada legal en días hábiles y sábados hasta las 13 horas, con el recargo del cincuenta por ciento (50%) previsto en el art. 201 LCT.',
+          label: `Horas extra al 50% — ${round2(datos.horas50Total)} hora(s) (semana tipo: ${round2(datos.horas50PorSemana)} hs × ${datos.semanas} semana(s))`,
+          monto: datos.horas50Total * valorHora * 1.5,
+          base: `${round2(datos.horas50Total)} hs × ${fmt(valorHora)}${valorHoraNota} × 150%`,
+          fundamento: `Corresponde el pago de las horas suplementarias trabajadas en exceso de la jornada legal (arts. 196 y 197 LCT, y Ley 11.544 — ${datos.jornadaDiaria} hs diarias o ${datos.jornadaSemanal} hs semanales, lo que se alcance primero) en días comunes, incluido el sábado hasta las 13 horas, con el recargo del cincuenta por ciento (50%) previsto en el art. 201 LCT.`,
         });
       }
-      if (horas100 > 0) {
-        const monto100 = horas100 * valorHora * 2;
+      if (datos.horas100Total > 0) {
+        const detalleFeriados = datos.horasFeriados > 0 ? ` + ${round2(datos.horasFeriados)} hs de feriados trabajados` : '';
         conceptos.push({
-          label: `Horas extra al 100% — ${horas100} hora(s) (${dias100} día(s) × ${horasXDia100} hs/día)`,
-          monto: monto100,
-          base: `${horas100} hs × ${fmt(valorHora)}${valorHoraNota} × 200%`,
-          fundamento: 'Corresponde el pago de las horas suplementarias trabajadas en exceso de la jornada legal en sábados después de las 13 horas, domingos y días feriados, con el recargo del cien por ciento (100%) previsto en el art. 201 LCT.',
+          label: `Horas extra al 100% — ${round2(datos.horas100Total)} hora(s) (semana tipo: ${round2(datos.horas100PorSemana)} hs × ${datos.semanas} semana(s)${detalleFeriados})`,
+          monto: datos.horas100Total * valorHora * 2,
+          base: `${round2(datos.horas100Total)} hs × ${fmt(valorHora)}${valorHoraNota} × 200%`,
+          fundamento: 'Corresponde el pago de las horas trabajadas en sábado después de las 13 horas, domingo y feriados, con el recargo del cien por ciento (100%) previsto en el art. 201 LCT, en tanto se trata de tiempo cuya prestación se encuentra prohibida por el art. 204 LCT (salvo excepciones del art. 203), por lo que reviste carácter suplementario desde la primera hora, sin necesidad de superar la jornada legal.',
         });
       }
     }
   }
 
-  return { valid, conceptos };
+  return { valid, conceptos, cctDetalle, cctIncluirDetalle };
+}
+
+// Exportación independiente del detalle de diferencias CCT (siempre completo, más allá
+// de si se incluyó o no en el export principal de la liquidación).
+export function exportarDetalleCCTPDF(tituloHerramienta, nombreTrabajador, cctDetalle) {
+  const total = cctDetalle.reduce((acc, f) => acc + f.diferencia, 0);
+  const filasHtml = cctDetalle.map(f => `
+    <tr>
+      <td>${formatearMes(f.mes)}</td>
+      <td class="monto">${fmt(f.remCCT)}</td>
+      <td class="monto">${fmt(f.remAb)}</td>
+      <td class="monto">${fmt(f.diferencia)}</td>
+    </tr>`).join('');
+  const html = `
+    ${nombreTrabajador ? `<div class="info-box"><strong>Trabajador:</strong> ${nombreTrabajador}</div>` : ''}
+    <table>
+      <thead><tr><th>Mes</th><th>Remuneración CCT</th><th>Remuneración abonada</th><th>Diferencia</th></tr></thead>
+      <tbody>
+        ${filasHtml}
+        <tr class="total-row"><td>TOTAL</td><td></td><td></td><td class="monto">${fmt(total)}</td></tr>
+      </tbody>
+    </table>
+    <div class="result-big">TOTAL DIFERENCIAS CCT: ${fmt(total)}</div>`;
+  exportarPDF(`Detalle de diferencias salariales según CCT — ${tituloHerramienta}`, html);
+}
+
+export function exportarDetalleCCTCSV(nombreBase, cctDetalle) {
+  const total = cctDetalle.reduce((acc, f) => acc + f.diferencia, 0);
+  const filas = [
+    ['Mes', 'Remuneración CCT ($)', 'Remuneración abonada ($)', 'Diferencia ($)'],
+    ...cctDetalle.map(f => [formatearMes(f.mes), f.remCCT.toFixed(2), f.remAb.toFixed(2), f.diferencia.toFixed(2)]),
+    ['TOTAL', '', '', total.toFixed(2)],
+  ];
+  exportarCSV(nombreBase, filas);
 }

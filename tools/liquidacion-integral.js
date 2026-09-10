@@ -12,7 +12,7 @@
 // sitio; esta calculadora combinada es un atajo para el caso de uso más habitual (liquidar
 // y, en el mismo acto, evaluar los daños conexos) y no las reemplaza.
 import { exportarPDF, exportarCSV } from './exportar.js';
-import { renderRubrosExtra, wireRubrosExtra, leerYValidarRubrosExtra } from './liquidacion-rubros-extra.js';
+import { renderRubrosExtra, wireRubrosExtra, leerYValidarRubrosExtra, exportarDetalleCCTPDF, exportarDetalleCCTCSV } from './liquidacion-rubros-extra.js';
 
 export function initLiquidacionIntegral(container) {
   container.innerHTML = `
@@ -623,8 +623,26 @@ export function initLiquidacionIntegral(container) {
         <button class="btn btn-ghost" id="lid-pdf">📄 Exportar PDF</button>
         <button class="btn btn-ghost" id="lid-csv">📊 Exportar CSV</button>
       </div>
+
+      ${rubrosExtra.cctDetalle.length > 0 ? `
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--color-border);">
+        <p style="font-size:.8rem;color:var(--color-muted);margin:0 0 8px">Detalle mes a mes de diferencias salariales CCT (independiente de la liquidación):</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-ghost" id="lid-cct-pdf">📄 Exportar detalle CCT (PDF)</button>
+          <button class="btn btn-ghost" id="lid-cct-csv">📊 Exportar detalle CCT (CSV)</button>
+        </div>
+      </div>` : ''}
     `;
     resultDiv.style.display = 'block';
+
+    if (rubrosExtra.cctDetalle.length > 0) {
+      container.querySelector('#lid-cct-pdf').addEventListener('click', () => {
+        exportarDetalleCCTPDF('Calculadora Liquidación Integral con Daños', nombre, rubrosExtra.cctDetalle);
+      });
+      container.querySelector('#lid-cct-csv').addEventListener('click', () => {
+        exportarDetalleCCTCSV('DiferenciasCCT' + (nombre ? '_' + nombre : ''), rubrosExtra.cctDetalle);
+      });
+    }
 
     // — Copiar resumen
     container.querySelector('#lid-copiar').addEventListener('click', () => {

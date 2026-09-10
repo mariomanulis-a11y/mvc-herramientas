@@ -1,7 +1,7 @@
 // liquidacion.js — Liquidación Laboral LCT (Ley 20744)
 // Panel Legal — Herramienta de liquidación final
 import { exportarPDF, exportarCSV } from './exportar.js';
-import { renderRubrosExtra, wireRubrosExtra, leerYValidarRubrosExtra } from './liquidacion-rubros-extra.js';
+import { renderRubrosExtra, wireRubrosExtra, leerYValidarRubrosExtra, exportarDetalleCCTPDF, exportarDetalleCCTCSV } from './liquidacion-rubros-extra.js';
 
 export function initLiquidacion(container) {
   container.innerHTML = `
@@ -395,8 +395,26 @@ export function initLiquidacion(container) {
         <button class="btn btn-ghost" id="liq-pdf">📄 Exportar PDF</button>
         <button class="btn btn-ghost" id="liq-csv">📊 Exportar CSV</button>
       </div>
+
+      ${rubrosExtra.cctDetalle.length > 0 ? `
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--color-border);">
+        <p style="font-size:.8rem;color:var(--color-muted);margin:0 0 8px">Detalle mes a mes de diferencias salariales CCT (independiente de la liquidación):</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-ghost" id="liq-cct-pdf">📄 Exportar detalle CCT (PDF)</button>
+          <button class="btn btn-ghost" id="liq-cct-csv">📊 Exportar detalle CCT (CSV)</button>
+        </div>
+      </div>` : ''}
     `;
     resultDiv.style.display = 'block';
+
+    if (rubrosExtra.cctDetalle.length > 0) {
+      container.querySelector('#liq-cct-pdf').addEventListener('click', () => {
+        exportarDetalleCCTPDF('Liquidación Laboral — LCT', nombre, rubrosExtra.cctDetalle);
+      });
+      container.querySelector('#liq-cct-csv').addEventListener('click', () => {
+        exportarDetalleCCTCSV('DiferenciasCCT' + (nombre ? '_' + nombre : ''), rubrosExtra.cctDetalle);
+      });
+    }
 
     // — Copiar resumen
     container.querySelector('#liq-copiar').addEventListener('click', () => {
