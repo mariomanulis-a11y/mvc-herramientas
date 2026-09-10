@@ -4,6 +4,7 @@
 // cálculo manual o automático (% sobre un monto base), y equivalente en Jus
 // arancelario (Ley 14.967).
 import { exportarPDF } from './exportar.js';
+import { initGuardarMiExpediente } from './mi-expediente.js';
 
 export function initPresupuestos(container) {
 
@@ -391,6 +392,7 @@ export function initPresupuestos(container) {
           <button class="btn btn-success" id="pr-copiar">📋 Copiar texto</button>
           <button class="btn btn-ghost"   id="pr-pdf">📄 Exportar PDF</button>
           <button class="btn btn-ghost"   id="pr-reset-texto">Restablecer</button>
+          <button class="btn btn-ghost"   id="pr-guardar-me">💾 Guardar en Mi Expediente</button>
         </div>
       </div>
 
@@ -965,6 +967,18 @@ export function initPresupuestos(container) {
 
   btnReset.addEventListener('click', () => {
     if (ultimoTextoGenerado) textarea.value = ultimoTextoGenerado;
+  });
+
+  initGuardarMiExpediente(container.querySelector('#pr-guardar-me'), {
+    herramienta: 'presupuestos',
+    categoria: 'Presupuestos',
+    textarea,
+    obtenerMeta: () => ({
+      titulo: textarea.dataset.titulo,
+      cliente: textarea.dataset.cliente,
+      rama: selRama.value,
+      subtipo: RAMAS[selRama.value].subtipos ? selSubtipo.value : null,
+    }),
   });
 
   container.querySelector('#pr-pdf').addEventListener('click', () => {

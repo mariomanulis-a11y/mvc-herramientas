@@ -10,6 +10,7 @@
 // Juzgados de Familia se rige por el Libro VIII (Proceso de Familia) del Código Procesal Civil y
 // Comercial, texto según Ley 13.634 (art. 15, Ley 13.634).
 import { exportarPDF, exportarWord } from './exportar.js';
+import { initGuardarMiExpediente } from './mi-expediente.js';
 
 export function initDivorcio(container) {
 
@@ -169,6 +170,7 @@ export function initDivorcio(container) {
         <textarea id="dv-texto" rows="26" style="width:100%;resize:vertical;font-family:inherit;font-size:.88rem;padding:12px;border:1px solid var(--color-border);border-radius:6px;background:#ffffff;color:#1a1a1a;line-height:1.6"></textarea>
         <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">
           <button class="btn btn-success" id="dv-copiar">📋 Copiar texto</button>
+          <button class="btn btn-ghost"   id="dv-guardar-me">💾 Guardar en Mi Expediente</button>
           <button class="btn btn-ghost"   id="dv-word">📝 Exportar Word (.doc editable)</button>
           <button class="btn btn-ghost"   id="dv-pdf">📄 Exportar PDF</button>
           <button class="btn btn-ghost"   id="dv-reset-texto">Restablecer</button>
@@ -587,6 +589,18 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     if (!texto) return;
     const lineas = texto.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     exportarPDF(`Divorcio — ${val('dv-conyuge1_nombre') || 'conyuge 1'} y ${val('dv-conyuge2_nombre') || 'conyuge 2'}`, `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>`);
+  });
+
+  initGuardarMiExpediente(container.querySelector('#dv-guardar-me'), {
+    herramienta: 'divorcio',
+    categoria: 'Escritos judiciales',
+    textarea,
+    obtenerMeta: () => ({
+      titulo: `Divorcio (PBA) — ${MATERIAS[materiaActual].tipos[selTipo.value]?.label || ''} — ${val('dv-conyuge1_nombre') || 'cónyuge 1'} y ${val('dv-conyuge2_nombre') || 'cónyuge 2'}`,
+      cliente: [val('dv-conyuge1_nombre'), val('dv-conyuge2_nombre')].filter(Boolean).join(' y '),
+      rama: materiaActual,
+      subtipo: selTipo.value,
+    }),
   });
 
   // ── Enviar a Generador de Presupuestos ───────────────────────────────────

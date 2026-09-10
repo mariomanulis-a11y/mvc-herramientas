@@ -5,6 +5,7 @@
 // Generador de Demanda correspondiente para no volver a tipearlos.
 import { exportarPDF } from './exportar.js';
 import { calcularHabiles, calcularCorridos, calcularAnios, proximaHabil, esNoHabil, fmtFecha, diaSemana, motivoNoHabil } from './dias-habiles.js';
+import { initGuardarMiExpediente } from './mi-expediente.js';
 
 export function initMinutas(container) {
 
@@ -507,6 +508,7 @@ export function initMinutas(container) {
         <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">
           <button class="btn btn-success" id="mn-copiar">📋 Copiar texto</button>
           <button class="btn btn-ghost"   id="mn-pdf">📄 Exportar PDF</button>
+          <button class="btn btn-ghost"   id="mn-guardar-me">💾 Guardar en Mi Expediente</button>
           <button class="btn btn-ghost"   id="mn-enviar">➡️ Enviar a Generador de Demanda</button>
         </div>
         <div id="mn-enviar-confirmacion" style="display:none;margin-top:10px"></div>
@@ -1026,6 +1028,18 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     if (!texto) return;
     const lineas = texto.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     exportarPDF(`Minuta de caso — ${val('mn-cliente_nombre') || 'consultante'}`, `<div class="info-box" style="font-size:12px;line-height:1.7">${lineas}</div>`);
+  });
+
+  initGuardarMiExpediente(container.querySelector('#mn-guardar-me'), {
+    herramienta: 'minutas',
+    categoria: 'Minutas',
+    textarea,
+    obtenerMeta: () => ({
+      titulo: `Minuta — ${RAMAS[ramaActual].label} — ${val('mn-cliente_nombre') || 'consultante'}`,
+      cliente: val('mn-cliente_nombre'),
+      rama: ramaActual,
+      subtipo: null,
+    }),
   });
 
   // ── Enviar a Generador de Demanda ────────────────────────────────────────
