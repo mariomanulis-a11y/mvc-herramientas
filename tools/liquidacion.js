@@ -1,6 +1,7 @@
 // liquidacion.js — Liquidación Laboral LCT (Ley 20744)
 // Panel Legal — Herramienta de liquidación final
 import { exportarPDF, exportarCSV } from './exportar.js';
+import { renderRubrosExtra, wireRubrosExtra, leerYValidarRubrosExtra } from './liquidacion-rubros-extra.js';
 
 export function initLiquidacion(container) {
   container.innerHTML = `
@@ -61,6 +62,8 @@ export function initLiquidacion(container) {
         </label>
       </div>
 
+      ${renderRubrosExtra('liq')}
+
       <div style="margin-top:1.2rem;">
         <button class="btn btn-primary" id="liq-calcular">Calcular liquidación</button>
       </div>
@@ -100,6 +103,7 @@ export function initLiquidacion(container) {
 
   const btn = container.querySelector('#liq-calcular');
   btn.addEventListener('click', calcular);
+  wireRubrosExtra(container, 'liq');
 
   function fmt(n) {
     return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -156,6 +160,12 @@ export function initLiquidacion(container) {
       setError('liq-rem', 'err-liq-rem', 'Ingresá una remuneración válida mayor a 0.');
       valid = false;
     }
+
+    const rubrosExtra = leerYValidarRubrosExtra(container, 'liq', {
+      rem: isNaN(rem) ? 0 : rem,
+      setError,
+    });
+    if (!rubrosExtra.valid) valid = false;
 
     if (!valid) return;
 
@@ -310,6 +320,7 @@ export function initLiquidacion(container) {
     if (preavisoPositivo && sacPreaviso > 0)  conceptos.push({ label: 'SAC sobre preaviso', monto: sacPreaviso, base: sacPreavisoBase, fundamento: 'Procede en virtud del carácter remuneratorio del preaviso indemnizado (art. 232 LCT), que conforme doctrina y jurisprudencia mayoritaria incide en el cálculo del sueldo anual complementario (arts. 121 y ccdtes. LCT).' });
     if (!sacCobrado && sacProp > 0)           conceptos.push({ label: 'SAC proporcional', monto: sacProp, base: sacPropBase, fundamento: 'Procede conforme el art. 123 LCT, que reconoce el derecho a percibir la parte proporcional del sueldo anual complementario correspondiente al semestre en que se produjo la extinción, calculada sobre el tiempo efectivamente trabajado en dicho semestre.' });
     if (vacProp > 0) conceptos.push({ label: `Vacaciones proporcionales (Art. 156 LCT) — ${diasVac} días/año`, monto: vacProp, base: vacPropBase, fundamento: 'Procede conforme el art. 156 LCT, que reconoce al trabajador cuya relación se extingue sin haber gozado de las vacaciones que le correspondían el derecho a una indemnización sustitutiva, calculada en proporción al tiempo trabajado en el año, sobre la base de los días de descanso previstos según su antigüedad (art. 150 LCT).' });
+    conceptos.push(...rubrosExtra.conceptos);
 
     const total = conceptos.reduce((acc, c) => acc + c.monto, 0);
 

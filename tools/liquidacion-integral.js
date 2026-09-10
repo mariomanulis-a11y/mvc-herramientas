@@ -12,6 +12,7 @@
 // sitio; esta calculadora combinada es un atajo para el caso de uso más habitual (liquidar
 // y, en el mismo acto, evaluar los daños conexos) y no las reemplaza.
 import { exportarPDF, exportarCSV } from './exportar.js';
+import { renderRubrosExtra, wireRubrosExtra, leerYValidarRubrosExtra } from './liquidacion-rubros-extra.js';
 
 export function initLiquidacionIntegral(container) {
   container.innerHTML = `
@@ -74,6 +75,8 @@ export function initLiquidacionIntegral(container) {
           Ya cobró el SAC del semestre en curso (no se incluye SAC proporcional)
         </label>
       </div>
+
+      ${renderRubrosExtra('lid')}
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:1.6rem 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">2. Daño por registración deficiente y mora en el pago <span style="font-weight:400;text-transform:none;opacity:.75">(ex Ley 25.323)</span></div>
 
@@ -211,6 +214,7 @@ export function initLiquidacionIntegral(container) {
   });
 
   container.querySelector('#lid-calcular').addEventListener('click', calcular);
+  wireRubrosExtra(container, 'lid');
 
   function fmt(n) {
     return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -327,6 +331,12 @@ export function initLiquidacionIntegral(container) {
         }
       }
     }
+
+    const rubrosExtra = leerYValidarRubrosExtra(container, 'lid', {
+      rem: isNaN(rem) ? 0 : rem,
+      setError,
+    });
+    if (!rubrosExtra.valid) valid = false;
 
     if (!valid) return;
 
@@ -474,6 +484,7 @@ export function initLiquidacionIntegral(container) {
     if (preavisoPositivo && sacPreaviso > 0)  conceptosLiq.push({ label: 'SAC sobre preaviso', monto: sacPreaviso, base: sacPreavisoBase, fundamento: 'Procede en virtud del carácter remuneratorio del preaviso indemnizado (art. 232 LCT), que conforme doctrina y jurisprudencia mayoritaria incide en el cálculo del sueldo anual complementario (arts. 121 y ccdtes. LCT).' });
     if (!sacCobrado && sacProp > 0)           conceptosLiq.push({ label: 'SAC proporcional', monto: sacProp, base: sacPropBase, fundamento: 'Procede conforme el art. 123 LCT, que reconoce el derecho a percibir la parte proporcional del sueldo anual complementario correspondiente al semestre en que se produjo la extinción, calculada sobre el tiempo efectivamente trabajado en dicho semestre.' });
     if (vacProp > 0) conceptosLiq.push({ label: `Vacaciones proporcionales (Art. 156 LCT) — ${diasVac} días/año`, monto: vacProp, base: vacPropBase, fundamento: 'Procede conforme el art. 156 LCT, que reconoce al trabajador cuya relación se extingue sin haber gozado de las vacaciones que le correspondían el derecho a una indemnización sustitutiva, calculada en proporción al tiempo trabajado en el año, sobre la base de los días de descanso previstos según su antigüedad (art. 150 LCT).' });
+    conceptosLiq.push(...rubrosExtra.conceptos);
 
     const totalLiq = conceptosLiq.reduce((acc, c) => acc + c.monto, 0);
 
