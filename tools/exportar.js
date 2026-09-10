@@ -2,8 +2,10 @@
 
 const WA_NUMERO_1 = '1144496992';
 const WA_NUMERO_2 = '1155781501';
+const WA_NUMERO_3 = '1138224662';
 const WA_URL_1    = `https://wa.me/54${WA_NUMERO_1}`;
 const WA_URL_2    = `https://wa.me/54${WA_NUMERO_2}`;
+const WA_URL_3    = `https://wa.me/54${WA_NUMERO_3}`;
 const EMAIL       = 'mvcabogadospilar@gmail.com';
 
 /**
@@ -58,7 +60,7 @@ export function exportarPDF(titulo, htmlBody, opts = {}) {
       <div class="mvc-sub">Soluciones Jurídicas</div>
     </div>
     <div class="mvc-contact">
-      WhatsApp: <a href="${WA_URL_1}">${WA_NUMERO_1}</a> / <a href="${WA_URL_2}">${WA_NUMERO_2}</a><br>
+      WhatsApp: <a href="${WA_URL_1}">${WA_NUMERO_1}</a> / <a href="${WA_URL_2}">${WA_NUMERO_2}</a> / <a href="${WA_URL_3}">${WA_NUMERO_3}</a><br>
       Email: <a href="mailto:${EMAIL}">${EMAIL}</a><br>
       Pilar, Provincia de Buenos Aires, Argentina
     </div>
