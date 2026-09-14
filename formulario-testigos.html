@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datos de Testigos — MVC Abogados</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Página standalone (no forma parte del panel con sidebar): centrada, ancho de lectura cómodo desde el celular */
+    body { display: block; min-height: 100vh; padding: 24px 16px 60px; }
+    .ft-wrap { max-width: 640px; margin: 0 auto; }
+    .ft-header { text-align: center; margin-bottom: 20px; }
+    .ft-header .brand-logo { font-size: 1.3rem; font-weight: 800; letter-spacing: -.5px; color: var(--color-text); }
+    .ft-header .brand-logo span { color: var(--color-accent); }
+    .ft-header .ft-sub { font-size: .82rem; color: var(--color-muted); margin-top: 4px; }
+    .ft-contexto { font-size: .85rem; color: var(--color-muted); background: var(--color-card); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px; margin-bottom: 18px; }
+    .ft-contexto strong { color: var(--color-text); }
+    #ft-mensaje-box textarea { min-height: 220px; font-family: inherit; font-size: .85rem; line-height: 1.6; }
+    .ft-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="ft-wrap">
+    <div class="ft-header">
+      <div class="brand-logo">MVC <span>ABOGADOS</span></div>
+      <div class="ft-sub">Formulario de datos de testigos</div>
+    </div>
+
+    <div id="ft-contexto" class="ft-contexto ft-hidden"></div>
+
+    <div class="tool-card">
+      <h2>Datos de los testigos</h2>
+      <p class="tool-desc">Completá los datos de cada testigo y, al finalizar, enviánoslos por WhatsApp o mail con el botón de abajo. No se guarda nada en ningún servidor: el mensaje lo enviás vos mismo/a.</p>
+
+      <div id="ft-testigos-holder"></div>
+
+      <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:16px">
+        <button class="btn btn-primary" id="ft-generar">Generar mensaje</button>
+      </div>
+    </div>
+
+    <div id="ft-resultado" class="tool-card ft-hidden">
+      <h2>Mensaje listo para enviar</h2>
+      <div id="ft-mensaje-box" class="field-group">
+        <textarea id="ft-texto" readonly></textarea>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-success" id="ft-whatsapp" target="_blank" rel="noopener">📱 Enviar por WhatsApp</a>
+        <a class="btn btn-ghost" id="ft-mail">✉️ Enviar por mail</a>
+        <button class="btn btn-ghost" id="ft-copiar">📋 Copiar texto</button>
+      </div>
+    </div>
+
+    <p style="margin-top:20px;font-size:.75rem;color:var(--color-muted);text-align:center">
+      MVC Abogados — Pilar, Provincia de Buenos Aires, Argentina
+    </p>
+  </div>
+
+  <script type="module">
+    import { renderTestigosSection, wireTestigosSection, leerTestigos, formatearTestigosTexto } from './tools/testigos.js';
+
+    const WA_NUMERO = '1144496992';
+    const EMAIL = 'mvcabogadospilar@gmail.com';
+
+    const holder = document.getElementById('ft-testigos-holder');
+    holder.innerHTML = renderTestigosSection('ft', {
+      titulo: 'Testigos',
+      ayuda: 'Agregá un bloque por cada testigo. Podés cargar los que necesites.',
+    });
+    const testigosUI = wireTestigosSection(document, 'ft');
+    testigosUI.agregarFila(); // arranca con un testigo vacío para no obligar a tocar "+ Agregar"
+
+    // Contexto opcional desde la URL (?cliente=...&caso=...), informado por el estudio al compartir el link
+    const params = new URLSearchParams(location.search);
+    const cliente = params.get('cliente') || '';
+    const caso = params.get('caso') || '';
+    if (cliente || caso) {
+      const div = document.getElementById('ft-contexto');
+      div.classList.remove('ft-hidden');
+      div.innerHTML = (cliente ? `<strong>Cliente:</strong> ${escHtml(cliente)}<br>` : '') +
+                      (caso ? `<strong>Referencia:</strong> ${escHtml(caso)}` : '');
+    }
+
+    document.getElementById('ft-generar').addEventListener('click', () => {
+      const testigos = leerTestigos(document, 'ft');
+      if (testigos.length === 0) {
+        alert('Completá los datos de al menos un testigo antes de generar el mensaje.');
+        return;
+      }
+      const encabezado = [
+        'Datos de testigos',
+        cliente ? `Cliente: ${cliente}` : '',
+        caso ? `Referencia: ${caso}` : '',
+      ].filter(Boolean).join('\n');
+
+      const texto = (encabezado ? encabezado + '\n\n' : '') + formatearTestigosTexto(testigos);
+
+      document.getElementById('ft-texto').value = texto;
+      document.getElementById('ft-resultado').classList.remove('ft-hidden');
+
+      const encoded = encodeURIComponent(texto);
+      document.getElementById('ft-whatsapp').href = `https://wa.me/54${WA_NUMERO}?text=${encoded}`;
+      document.getElementById('ft-mail').href = `mailto:${EMAIL}?subject=${encodeURIComponent('Datos de testigos' + (caso ? ' — ' + caso : ''))}&body=${encoded}`;
+
+      document.getElementById('ft-resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('ft-copiar').addEventListener('click', () => {
+      const texto = document.getElementById('ft-texto').value;
+      if (!texto) return;
+      const btn = document.getElementById('ft-copiar');
+      navigator.clipboard.writeText(texto).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copiado ✓';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      }).catch(() => { prompt('Copiá el texto:', texto); });
+    });
+
+    function escHtml(s) {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+  </script>
+
+</body>
+</html>

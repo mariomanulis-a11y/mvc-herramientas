@@ -2,6 +2,7 @@
 // Checklist editable (tildando opciones) para informarle al cliente qué
 // documentación debe presentar, según el tipo de trámite.
 import { exportarPDF } from './exportar.js';
+import { renderTestigosSection, wireTestigosSection, leerTestigos, formatearTestigosTexto, parsearTestigosTexto, renderTestigosTablaHtml } from './testigos.js';
 
 export function initDocumentacion(container) {
 
@@ -146,6 +147,23 @@ export function initDocumentacion(container) {
         'Datos de contacto de testigos del hecho, si los hay',
       ],
     },
+    amparo_salud: {
+      label: 'Amparo de Salud con Medida Cautelar',
+      items: [
+        'DNI del/de la actor/a (paciente) y, si corresponde, del/de la representante legal',
+        'Credencial de afiliado/a a la obra social o prepaga demandada',
+        'Historia clínica completa y estudios médicos (análisis, imágenes, informes de especialistas)',
+        'Informe / prescripción médica que indique el tratamiento, medicamento, prótesis o prestación solicitada',
+        'Constancia de la solicitud de cobertura presentada ante la obra social/prepaga (nota, mail, formulario)',
+        'Respuesta de la demandada (negativa expresa) o constancia de silencio/demora, con fecha',
+        'Presupuesto o cotización del tratamiento, medicamento o prestación reclamada',
+        'Certificado Único de Discapacidad (CUD), si el/la paciente lo posee',
+        'Recibos de sueldo o constancia de ingresos, si se invoca situación de vulnerabilidad económica',
+        'Constancia de CUIT / CUIL del/de la actor/a',
+        'Constancia de domicilio real y de domicilio electrónico (notificaciones), si ya se cuenta',
+        'Carta poder / poder para pleitos a favor del estudio',
+      ],
+    },
   };
 
   // ── HTML ─────────────────────────────────────────────────────────────────────
@@ -188,6 +206,25 @@ export function initDocumentacion(container) {
         <textarea id="dc-extra" rows="3" placeholder="Ej: Constancia de CBU para transferencia de fondos"></textarea>
       </div>
 
+      ${renderTestigosSection('dc', { ayuda: 'Nombre y apellido, DNI, domicilio, celular y mail de cada testigo. Podés cargarlos vos, o pedirle al cliente que los complete desde su celular con el formulario aparte (ver más abajo) y pegar acá lo que te envíe.' })}
+
+      <div class="field-group" style="margin-top:8px">
+        <label for="dc-testigos-pegar">Pegar testigos enviados por el cliente (opcional)</label>
+        <textarea id="dc-testigos-pegar" rows="4" placeholder="Pegá acá el texto que te envió el cliente por WhatsApp/mail desde el formulario, y tocá 'Cargar testigos pegados'."></textarea>
+        <div style="margin-top:6px">
+          <button type="button" class="btn btn-ghost" id="dc-testigos-parsear" style="font-size:.8rem;padding:6px 14px">Cargar testigos pegados</button>
+          <button type="button" class="btn btn-ghost" id="dc-testigos-compartir" style="font-size:.8rem;padding:6px 14px">🔗 Copiar link del formulario para el cliente</button>
+        </div>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500;margin-top:10px;font-size:.85rem">
+        <input type="checkbox" id="dc-testigos-incluir" checked>
+        Incluir el listado de testigos en el texto/PDF principal
+      </label>
+      <div style="margin-top:8px">
+        <button type="button" class="btn btn-ghost" id="dc-testigos-pdf" style="font-size:.8rem;padding:6px 14px">📄 Exportar listado de testigos aparte (PDF)</button>
+      </div>
+
       <div class="form-row" style="justify-content:flex-start;gap:12px;margin-top:16px">
         <button class="btn btn-primary" id="dc-generar">Generar listado</button>
         <button class="btn btn-ghost"   id="dc-limpiar">Limpiar</button>
@@ -220,8 +257,57 @@ export function initDocumentacion(container) {
   const btnReset       = container.querySelector('#dc-reset-texto');
   const btnMarcarTodo   = container.querySelector('#dc-marcar-todo');
   const btnDesmarcarTodo = container.querySelector('#dc-desmarcar-todo');
+  const chkTestigosIncluir = container.querySelector('#dc-testigos-incluir');
+  const taTestigosPegar    = container.querySelector('#dc-testigos-pegar');
 
   let ultimoTextoGenerado = '';
+
+  // ── Testigos (opcional) ──────────────────────────────────────────────────────
+  const testigosUI = wireTestigosSection(container, 'dc');
+
+  container.querySelector('#dc-testigos-parsear').addEventListener('click', () => {
+    const parseados = parsearTestigosTexto(taTestigosPegar.value);
+    if (parseados.length === 0) {
+      alert('No se reconoció ningún testigo en el texto pegado. Verificá que respete el formato del formulario (Nombre y apellido / DNI / Domicilio / Celular / Mail).');
+      return;
+    }
+    parseados.forEach(t => testigosUI.agregarFila(t));
+    taTestigosPegar.value = '';
+  });
+
+  container.querySelector('#dc-testigos-compartir').addEventListener('click', () => {
+    const cliente = container.querySelector('#dc-cliente').value.trim();
+    const referencia = container.querySelector('#dc-referencia').value.trim();
+    const params = new URLSearchParams();
+    if (cliente) params.set('cliente', cliente);
+    if (referencia) params.set('caso', referencia);
+    const qs = params.toString();
+    const url = location.origin + '/formulario-testigos.html' + (qs ? '?' + qs : '');
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = container.querySelector('#dc-testigos-compartir');
+      const orig = btn.textContent;
+      btn.textContent = 'Link copiado ✓';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }).catch(() => { prompt('Copiá el link para el cliente:', url); });
+  });
+
+  container.querySelector('#dc-testigos-pdf').addEventListener('click', () => {
+    const testigos = leerTestigos(container, 'dc');
+    if (testigos.length === 0) {
+      alert('Cargá al menos un testigo antes de exportar el listado.');
+      return;
+    }
+    const referencia = container.querySelector('#dc-referencia').value.trim();
+    const cliente = container.querySelector('#dc-cliente').value.trim();
+    const html = `
+      ${cliente || referencia ? `<div class="info-box">
+        ${cliente ? `<strong>Cliente:</strong> ${esc(cliente)}<br>` : ''}
+        ${referencia ? `<strong>Referencia:</strong> ${esc(referencia)}` : ''}
+      </div>` : ''}
+      ${renderTestigosTablaHtml(testigos)}
+    `;
+    exportarPDF('Listado de testigos', html);
+  });
 
   function renderChecklist() {
     const tramite = TRAMITES[selTramite.value];
@@ -261,6 +347,8 @@ export function initDocumentacion(container) {
     }
 
     const saludo = cliente ? `Estimado/a ${cliente}:` : 'Estimado/a:';
+    const testigos = leerTestigos(container, 'dc');
+    const incluirTestigos = chkTestigosIncluir.checked && testigos.length > 0;
 
     const lineas = [
       saludo,
@@ -268,6 +356,7 @@ export function initDocumentacion(container) {
       `Para avanzar con su trámite${referencia ? ` (${referencia})` : ''} — ${tramite.label} —, le solicitamos nos envíe la siguiente documentación:`,
       '',
       ...todos.map((t, i) => `${i + 1}. ${t}`),
+      ...(incluirTestigos ? ['', 'TESTIGOS', '', formatearTestigosTexto(testigos)] : []),
       '',
       'Ante cualquier consulta, quedamos a disposición.',
       '',
@@ -284,6 +373,7 @@ export function initDocumentacion(container) {
     textarea.dataset.cliente = cliente;
     textarea.dataset.referencia = referencia;
     textarea.dataset.items = JSON.stringify(todos);
+    textarea.dataset.testigos = incluirTestigos ? JSON.stringify(testigos) : '[]';
   });
 
   btnLimp.addEventListener('click', () => {
@@ -291,6 +381,8 @@ export function initDocumentacion(container) {
     container.querySelector('#dc-referencia').value = '';
     taExtra.value = '';
     renderChecklist();
+    testigosUI.limpiar();
+    taTestigosPegar.value = '';
     divRes.style.display = 'none';
     textarea.value = '';
     ultimoTextoGenerado = '';
@@ -313,6 +405,7 @@ export function initDocumentacion(container) {
   container.querySelector('#dc-pdf').addEventListener('click', () => {
     if (!ultimoTextoGenerado) return;
     const items = JSON.parse(textarea.dataset.items || '[]');
+    const testigosPdf = JSON.parse(textarea.dataset.testigos || '[]');
     const cliente = textarea.dataset.cliente;
     const referencia = textarea.dataset.referencia;
 
@@ -330,6 +423,10 @@ export function initDocumentacion(container) {
           ${items.map((t, i) => `<tr><td>${i + 1}</td><td>${esc(t)}</td></tr>`).join('')}
         </tbody>
       </table>
+      ${testigosPdf.length > 0 ? `
+        <h3 style="margin-top:18px">Testigos</h3>
+        ${renderTestigosTablaHtml(testigosPdf)}
+      ` : ''}
       <p class="nota">Ante cualquier consulta, quedamos a disposición.</p>
     `;
     exportarPDF(`Documentación requerida — ${textarea.dataset.tramiteLabel}`, html);
