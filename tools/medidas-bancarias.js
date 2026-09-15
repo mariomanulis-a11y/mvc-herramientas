@@ -97,6 +97,25 @@ export function initMedidasBancarias(container) {
     otro:          'una maniobra de fraude informático',
   };
 
+  // Salario Mínimo Vital y Móvil (SMVM) — vigente desde el 02/09/2026 (Resolución
+  // 4/2026, Consejo Nacional del Empleo, la Productividad y el SMVM): $ 383.800.
+  // El Consejo lo actualiza periódicamente — VERIFICAR VIGENCIA antes de usar.
+  // El campo queda editable en el formulario para no depender de este valor fijo.
+  const SMVM_DEFAULT = 383800;
+
+  // Cálculo del tope de embargabilidad de remuneraciones — art. 1°, Dto. 484/87,
+  // reglamentario de los arts. 120 y 147 de la Ley de Contrato de Trabajo:
+  // - Hasta 1 SMVM: totalmente inembargable.
+  // - Entre 1 y 2 SMVM: embargable el 10% del importe que exceda el SMVM.
+  // - Más de 2 SMVM: embargable el 20% del importe que exceda el SMVM.
+  // No aplica a deudas alimentarias (art. 147, LCT, in fine; art. 4°, Dto. 484/87).
+  function calcularEmbargoDto48487(remuneracion, smvm) {
+    if (!remuneracion || !smvm || remuneracion <= smvm) return 0;
+    const excedente = remuneracion - smvm;
+    const tasa = remuneracion <= 2 * smvm ? 0.10 : 0.20;
+    return excedente * tasa;
+  }
+
   const ELEMENTOS_PRESERVAR = [
     { id: 'capturas',   label: 'Capturas de pantalla de la operación cuestionada y de las notificaciones recibidas' },
     { id: 'logs',       label: 'Logs de acceso a homebanking/aplicación (fecha, hora, dirección IP)' },
@@ -115,11 +134,14 @@ export function initMedidasBancarias(container) {
     incidente_embargo: 'Que, conforme los principios de especialidad y economía procesal, el planteo de levantamiento parcial de un embargo trabado en exceso de los límites legales debe articularse por vía de incidente ante el mismo juzgado que lo ordenó (arts. 175 y ccdtes. y 203 y ccdtes. del Código Procesal Civil y Comercial), por tratarse de una cuestión accesoria vinculada al cumplimiento de la medida ya dispuesta en autos, sin necesidad de promover un proceso autónomo.',
   };
 
-  function encuadreSupuesto(supuesto) {
+  function encuadreSupuesto(supuesto, d) {
     if (supuesto === 'ciberestafa') {
       return ' En el caso de autos, la verosimilitud del derecho surge de la denuncia penal formulada, de los extractos y constancias bancarias acompañadas, y de la ausencia de consentimiento de la parte actora para la operación cuestionada; el peligro en la demora surge de la afectación patrimonial ya producida y/o del riesgo cierto de que continúe devengándose el débito de cuotas sobre haberes de naturaleza alimentaria. La entidad demandada reviste la calidad de proveedora profesional de servicios financieros (arts. 1, 2 y 5, Ley 24.240), sobre quien pesa un deber de seguridad agravado respecto del sistema de banca electrónica que ella misma diseña, implementa y explota, y que —conforme los lineamientos de la Comunicación "A" 8280 del BCRA— se encuentra obligada a gestionar y reportar los ciberincidentes que afecten a sus clientes, sin perjuicio de que dicha normativa no releva a la entidad de su responsabilidad civil frente al usuario. La condición de consumidor de la parte actora impone, además, la aplicación del principio in dubio pro consumidor (art. 3, Ley 24.240) en la valoración de los extremos invocados.';
     }
-    return ' En el caso de autos, la verosimilitud del derecho surge del límite de inembargabilidad establecido por el art. 2 de la Ley 26.704 —tres (3) veces el promedio de haberes de los últimos seis (6) meses— y de la constancia de que el saldo retenido excede dicho límite; el peligro en la demora surge de la afectación actual a la disponibilidad de fondos de naturaleza alimentaria, indispensables para la subsistencia de la parte actora y su grupo familiar. Resulta asimismo de aplicación, en lo pertinente, el régimen de embargabilidad de remuneraciones del art. 120 de la Ley de Contrato de Trabajo y su decreto reglamentario N° 484/87, en cuanto fijan como tope el 10% o el 20% del excedente del Salario Mínimo Vital y Móvil según el tramo de que se trate.';
+    if (d && d.deuda_alimentaria) {
+      return ' En el caso de autos, si bien la deuda que motivó el embargo reviste naturaleza alimentaria —motivo por el cual no resultan aplicables los límites de embargabilidad de la Ley 26.704 ni del Decreto 484/87, conforme la excepción expresamente prevista en el art. 147 in fine de la Ley de Contrato de Trabajo y en el art. 4° del Decreto 484/87—, la fijación y el mantenimiento de la cuota alimentaria deben en todo caso respetar el límite que permita la subsistencia del alimentante, conforme lo dispone el propio art. 147 de la Ley de Contrato de Trabajo. La verosimilitud del derecho surge de la desproporción entre el monto retenido y la capacidad de pago de la parte actora, y el peligro en la demora de la afectación actual a su subsistencia y a la de su grupo familiar conviviente.';
+    }
+    return ' En el caso de autos, la verosimilitud del derecho surge, en forma concurrente, de dos límites legales distintos: a) el límite de inembargabilidad del saldo de la cuenta sueldo establecido por el art. 2 de la Ley 26.704 —tres (3) veces el promedio de haberes de los últimos seis (6) meses—; y b) el límite de embargabilidad de remuneraciones establecido por los arts. 120 y 147 de la Ley de Contrato de Trabajo y su decreto reglamentario N° 484/87, conforme el cual la remuneración es inembargable hasta la concurrencia del Salario Mínimo Vital y Móvil, y solo el excedente resulta embargable en la proporción del diez por ciento (10%) —si la remuneración no supera el doble del SMVM— o del veinte por ciento (20%) —si lo supera— (art. 1°, Dto. 484/87). Ambos límites concurren en autos, y la retención cuestionada los excede en cualquiera de los dos encuadres. El peligro en la demora surge de la afectación actual a la disponibilidad de fondos de naturaleza alimentaria, indispensables para la subsistencia de la parte actora y su grupo familiar. Se deja expresa constancia de que estos límites no resultan aplicables si la deuda que originó el embargo fuera de naturaleza alimentaria (art. 147, LCT, in fine; art. 4°, Dto. 484/87), extremo que no se verifica en el presente caso.';
   }
 
   function objetoMedida(medida) {
@@ -134,21 +156,36 @@ export function initMedidasBancarias(container) {
   }
 
   function petitorioMedida(medida, supuesto, d, excedente) {
+    const alimentaria = supuesto === 'embargo_excesivo' && d.deuda_alimentaria;
+    const fundamentoEmbargo = '(art. 2, Ley 26.704; arts. 120 y 147, LCT, y art. 1°, Dto. 484/87)';
     switch (medida) {
       case 'no_innovar':
-        return `Se decrete la MEDIDA CAUTELAR DE NO INNOVAR, ordenando a ${d.demandado} que se abstenga de debitar, reclamar, informar en centrales de riesgo crediticio y/o ejecutar por cualquier vía la suma cuestionada${d.monto_prestamo ? ` y/o las cuotas del préstamo por $ ${fmt(d.monto_prestamo)}` : ''}, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`;
+        if (supuesto === 'ciberestafa') {
+          return `Se decrete la MEDIDA CAUTELAR DE NO INNOVAR, ordenando a ${d.demandado} que se abstenga de debitar, reclamar, informar en centrales de riesgo crediticio y/o ejecutar por cualquier vía la suma cuestionada${d.monto_prestamo ? ` y/o las cuotas del préstamo por $ ${fmt(d.monto_prestamo)}` : ''}, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`;
+        }
+        return alimentaria
+          ? `Se decrete la MEDIDA CAUTELAR DE NO INNOVAR, ordenando a ${d.demandado} que se abstenga de incrementar la retención practicada sobre la cuenta de la actora por encima del monto que garantice su subsistencia (art. 147, LCT), hasta tanto se sustancie la vía pertinente de revisión de la cuota.`
+          : `Se decrete la MEDIDA CAUTELAR DE NO INNOVAR, ordenando a ${d.demandado} que se abstenga de incrementar la retención practicada sobre la cuenta de la actora por encima de los límites legales de embargabilidad ${fundamentoEmbargo}, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`;
       case 'innovativa':
-        return supuesto === 'ciberestafa'
-          ? `Se decrete la MEDIDA CAUTELAR INNOVATIVA, ordenando a ${d.demandado} que restituya a la actora la suma de $ ${fmt(d.monto_afectado)} indebidamente sustraída/debitada, se abstenga de reclamar y/o ejecutar el préstamo no solicitado, y cese en el reporte de la actora en centrales de riesgo crediticio, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`
-          : `Se decrete la MEDIDA CAUTELAR INNOVATIVA, ordenando a ${d.demandado} que desafecte y restituya de inmediato la suma de $ ${fmt(excedente)}, retenida en exceso del límite legal de inembargabilidad (art. 2, Ley 26.704), reintegrándola a la cuenta de la actora, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`;
+        if (supuesto === 'ciberestafa') {
+          return `Se decrete la MEDIDA CAUTELAR INNOVATIVA, ordenando a ${d.demandado} que restituya a la actora la suma de $ ${fmt(d.monto_afectado)} indebidamente sustraída/debitada, se abstenga de reclamar y/o ejecutar el préstamo no solicitado, y cese en el reporte de la actora en centrales de riesgo crediticio, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`;
+        }
+        return alimentaria
+          ? `Se decrete la MEDIDA CAUTELAR INNOVATIVA, ordenando la readecuación provisoria de la retención practicada por ${d.demandado} a un monto que garantice la subsistencia de la actora y su grupo familiar (art. 147, LCT), hasta tanto se sustancie la vía pertinente de reducción de cuota.`
+          : `Se decrete la MEDIDA CAUTELAR INNOVATIVA, ordenando a ${d.demandado} que desafecte y restituya de inmediato la suma de $ ${fmt(excedente)}, retenida en exceso de los límites legales de embargabilidad ${fundamentoEmbargo}, reintegrándola a la cuenta de la actora, hasta tanto recaiga sentencia firme en el proceso principal a promoverse.`;
       case 'autosatisfactiva':
-        return supuesto === 'ciberestafa'
-          ? `Se decrete, con carácter de urgente y, en subsidio, como medida cautelar innovativa de tramitación urgente, la orden a ${d.demandado} de restituir de manera inmediata la suma de $ ${fmt(d.monto_afectado)} y abstenerse de reclamar y/o ejecutar el préstamo no solicitado, habilitándose días y horas inhábiles (art. 153, CPCC) en atención a la urgencia invocada.`
-          : `Se decrete, con carácter de urgente y, en subsidio, como medida cautelar innovativa de tramitación urgente, la orden a ${d.demandado} de desafectar y restituir de manera inmediata la suma de $ ${fmt(excedente)} retenida en exceso del límite legal de inembargabilidad, habilitándose días y horas inhábiles (art. 153, CPCC) en atención a la urgencia invocada.`;
+        if (supuesto === 'ciberestafa') {
+          return `Se decrete, con carácter de urgente y, en subsidio, como medida cautelar innovativa de tramitación urgente, la orden a ${d.demandado} de restituir de manera inmediata la suma de $ ${fmt(d.monto_afectado)} y abstenerse de reclamar y/o ejecutar el préstamo no solicitado, habilitándose días y horas inhábiles (art. 153, CPCC) en atención a la urgencia invocada.`;
+        }
+        return alimentaria
+          ? `Se decrete, con carácter de urgente y, en subsidio, como medida cautelar innovativa de tramitación urgente, la readecuación provisoria de la retención practicada a un monto que garantice la subsistencia de la actora y su grupo familiar (art. 147, LCT), habilitándose días y horas inhábiles (art. 153, CPCC) en atención a la urgencia invocada.`
+          : `Se decrete, con carácter de urgente y, en subsidio, como medida cautelar innovativa de tramitación urgente, la orden a ${d.demandado} de desafectar y restituir de manera inmediata la suma de $ ${fmt(excedente)} retenida en exceso de los límites legales de embargabilidad ${fundamentoEmbargo}, habilitándose días y horas inhábiles (art. 153, CPCC) en atención a la urgencia invocada.`;
       case 'aseguramiento_pruebas':
         return `Se decrete la producción de PRUEBA ANTICIPADA (art. 326, CPCC), ordenando a ${d.demandado} y/o a los proveedores de servicios de comunicaciones que correspondan la preservación y posterior remisión de los elementos individualizados en el punto de prueba, bajo apercibimiento de lo dispuesto por el art. 388 del Código Civil y Comercial de la Nación.`;
       case 'incidente_embargo':
-        return `Se haga lugar al presente incidente y se ordene el LEVANTAMIENTO PARCIAL del embargo trabado sobre la cuenta de titularidad de la actora en ${d.demandado}, limitándolo al monto que resulte embargable conforme el art. 2 de la Ley 26.704 (hasta 3 veces el promedio de haberes de los últimos 6 meses), ordenando la inmediata desafectación y restitución de la suma retenida en exceso ($ ${fmt(excedente)}).`;
+        return alimentaria
+          ? `Se haga lugar al presente incidente y se ordene la readecuación de la retención trabada sobre la cuenta de titularidad de la actora en ${d.demandado} a un monto que garantice su subsistencia y la de su grupo familiar, conforme el art. 147 de la Ley de Contrato de Trabajo.`
+          : `Se haga lugar al presente incidente y se ordene el LEVANTAMIENTO PARCIAL del embargo trabado sobre la cuenta de titularidad de la actora en ${d.demandado}, limitándolo al monto que resulte embargable conforme los límites legales ${fundamentoEmbargo}, ordenando la inmediata desafectación y restitución de la suma retenida en exceso ($ ${fmt(excedente)}).`;
       default:
         return '';
     }
@@ -262,7 +299,15 @@ export function initMedidasBancarias(container) {
           <div class="field-group"><label for="mb-sueldo-promedio">Sueldo promedio últimos 6 meses ($)</label><input type="number" id="mb-sueldo-promedio"></div>
           <div class="field-group"><label for="mb-saldo-retenido">Saldo retenido en la cuenta ($)</label><input type="number" id="mb-saldo-retenido"></div>
         </div>
+        <div class="form-row">
+          <div class="field-group"><label for="mb-remuneracion-bruta">Remuneración bruta mensual (opcional, para el cálculo del Dto. 484/87)</label><input type="number" id="mb-remuneracion-bruta"></div>
+          <div class="field-group"><label for="mb-smvm">SMVM vigente ($)</label><input type="number" id="mb-smvm" value="${SMVM_DEFAULT}"></div>
+        </div>
+        <p style="font-size:.72rem;color:var(--color-muted);margin:-6px 0 10px">SMVM de referencia: $ ${fmt(SMVM_DEFAULT)}, vigente desde el 02/09/2026 (Resolución 4/2026, Consejo Nacional del Empleo, la Productividad y el SMVM). Verificar actualización antes de presentar; el campo es editable.</p>
         <p id="mb-calculo-embargo" style="font-size:.82rem;color:var(--color-muted);margin:0 0 10px"></p>
+        <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500;margin-top:6px;font-size:.85rem">
+          <input type="checkbox" id="mb-deuda-alimentaria"> La deuda que originó el embargo es de naturaleza alimentaria (cuota de alimentos / litis expensas)
+        </label>
         <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500;margin-top:6px;font-size:.85rem">
           <input type="checkbox" id="mb-expediente-conocido"> Se conoce el expediente de origen del embargo
         </label>
@@ -363,11 +408,21 @@ export function initMedidasBancarias(container) {
   function actualizarCalculoEmbargo() {
     const sp = parseFloat(val('mb-sueldo-promedio')) || 0;
     const sr = parseFloat(val('mb-saldo-retenido')) || 0;
+    const rb = parseFloat(val('mb-remuneracion-bruta')) || 0;
+    const smvm = parseFloat(val('mb-smvm')) || 0;
+    const alimentaria = container.querySelector('#mb-deuda-alimentaria').checked;
     const limite = sp * 3;
     const excedente = Math.max(0, sr - limite);
-    container.querySelector('#mb-calculo-embargo').textContent = sp
-      ? `Límite de inembargabilidad (art. 2, Ley 26.704 — 3x sueldo promedio): $ ${fmt(limite)}. Excedente retenido a reclamar: $ ${fmt(excedente)}.`
-      : '';
+    const embargoDto = calcularEmbargoDto48487(rb, smvm);
+
+    const partes = [];
+    if (alimentaria) {
+      partes.push('Deuda alimentaria: NO resultan aplicables los límites de embargabilidad de la Ley 26.704 ni del Dto. 484/87 (art. 147, LCT, in fine; art. 4°, Dto. 484/87). La cuota debe fijarse en un monto que permita la subsistencia del alimentante.');
+    } else {
+      if (sp) partes.push(`Ley 26.704 (3x sueldo promedio): límite inembargable $ ${fmt(limite)}. Excedente retenido a reclamar: $ ${fmt(excedente)}.`);
+      if (rb && smvm) partes.push(`Dto. 484/87 (tope por remuneración, arts. 120/147 LCT): sobre remuneración bruta de $ ${fmt(rb)} y SMVM de $ ${fmt(smvm)}, la proporción embargable es del ${rb <= 2 * smvm ? '10%' : '20%'} del excedente, es decir, un máximo embargable por período de $ ${fmt(embargoDto)}.`);
+    }
+    container.querySelector('#mb-calculo-embargo').textContent = partes.join(' ');
   }
 
   selSupuesto.addEventListener('change', () => { poblarMedidas(); actualizarCamposSupuesto(); });
@@ -389,9 +444,10 @@ export function initMedidasBancarias(container) {
   container.querySelector('#mb-expediente-conocido').addEventListener('change', (e) => {
     container.querySelector('#mb-wrap-expediente').style.display = e.target.checked ? '' : 'none';
   });
-  ['mb-sueldo-promedio', 'mb-saldo-retenido'].forEach(id => {
+  ['mb-sueldo-promedio', 'mb-saldo-retenido', 'mb-remuneracion-bruta', 'mb-smvm'].forEach(id => {
     container.querySelector(`#${id}`).addEventListener('input', actualizarCalculoEmbargo);
   });
+  container.querySelector('#mb-deuda-alimentaria').addEventListener('change', actualizarCalculoEmbargo);
   chkSumarFondo.addEventListener('change', (e) => {
     wrapFondo.style.display = e.target.checked ? '' : 'none';
   });
@@ -419,6 +475,9 @@ export function initMedidasBancarias(container) {
       fecha_reclamo_previo: fmtFecha(val('mb-fecha-reclamo-previo')),
       sueldo_promedio: val('mb-sueldo-promedio') || '0',
       saldo_retenido: val('mb-saldo-retenido') || '0',
+      remuneracion_bruta: val('mb-remuneracion-bruta') || '0',
+      smvm: val('mb-smvm') || String(SMVM_DEFAULT),
+      deuda_alimentaria: container.querySelector('#mb-deuda-alimentaria').checked,
       expediente_conocido: container.querySelector('#mb-expediente-conocido').checked,
       nro_expediente: val('mb-nro-expediente'),
       juzgado_origen: val('mb-juzgado-origen'),
@@ -437,7 +496,7 @@ export function initMedidasBancarias(container) {
     const contracautela = val('mb-contracautela') || 'Caución juratoria';
 
     const hechos = supuesto === 'ciberestafa' ? hechosCiberestafa(d) : hechosEmbargoExcesivo(d, excedente);
-    const derecho = REQUISITOS_BASE[medida] + encuadreSupuesto(supuesto);
+    const derecho = REQUISITOS_BASE[medida] + encuadreSupuesto(supuesto, d);
 
     const elementosActivos = ELEMENTOS_PRESERVAR.filter(e => container.querySelector(`#mb-el-${e.id}`).checked);
     const pruebaTexto = medida === 'aseguramiento_pruebas'
@@ -507,15 +566,25 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     const sp = parseFloat(d.sueldo_promedio) || 0;
     const sr = parseFloat(d.saldo_retenido) || 0;
     const limite = sp * 3;
-    return `Que la parte actora, ${d.actor}, DNI ${d.dni}, percibe sus haberes mediante acreditación en la cuenta sueldo que mantiene en ${d.demandado}, con un promedio de remuneración de los últimos seis (6) meses de $ ${fmt(sp)}. Que dicha cuenta reviste el carácter de "cuenta sueldo" en los términos de la Ley 26.704, motivo por el cual resulta inembargable hasta el monto equivalente a tres (3) veces dicho promedio, es decir, hasta la suma de $ ${fmt(limite)}. Que no obstante ello, la entidad demandada trabó y/o mantiene trabada una retención sobre el saldo de la cuenta por la suma de $ ${fmt(sr)}, superando el límite legal de inembargabilidad en la suma de $ ${fmt(excedente)}. ${d.expediente_conocido ? `Que dicha retención fue ordenada en los autos en trámite ante ${d.juzgado_origen || '[JUZGADO DE ORIGEN]'}${d.nro_expediente ? ` (Expte. N° ${d.nro_expediente})` : ''}.` : 'Que la actora no ha podido individualizar el expediente y/o la orden judicial que habría dado origen a la retención cuestionada.'} ${d.cedula_notificada ? 'Que la retención le fue notificada mediante cédula, la cual se acompaña como documental.' : 'Que la retención no le fue notificada formalmente a la actora mediante cédula.'} Que la retención de una suma superior al límite legal afecta directamente la posibilidad de la actora de afrontar sus gastos de subsistencia y los de su grupo familiar.`;
+    const rb = parseFloat(d.remuneracion_bruta) || 0;
+    const smvm = parseFloat(d.smvm) || 0;
+    const embargoDto = calcularEmbargoDto48487(rb, smvm);
+
+    const parrafoLimites = d.deuda_alimentaria
+      ? `Que si bien la deuda que dio origen a la retención cuestionada reviste naturaleza alimentaria, circunstancia por la cual no resultan aplicables al caso los límites de embargabilidad de la Ley 26.704 ni del Decreto 484/87 (art. 147, LCT, in fine; art. 4°, Dto. 484/87), la cuota debe en todo caso ser fijada y mantenida dentro de un monto que permita la subsistencia de la actora, en su carácter de alimentante, conforme lo dispone el propio art. 147 de la Ley de Contrato de Trabajo.`
+      : `Que dicha cuenta reviste el carácter de "cuenta sueldo" en los términos de la Ley 26.704, motivo por el cual resulta inembargable hasta el monto equivalente a tres (3) veces dicho promedio, es decir, hasta la suma de $ ${fmt(limite)}.${(rb && smvm) ? ` Que, asimismo, conforme los arts. 120 y 147 de la Ley de Contrato de Trabajo y su decreto reglamentario N° 484/87, la remuneración de la actora —de $ ${fmt(rb)} brutos mensuales— resulta inembargable hasta la concurrencia del Salario Mínimo Vital y Móvil (de $ ${fmt(smvm)}), siendo embargable únicamente el excedente en la proporción del ${rb <= 2 * smvm ? 'diez por ciento (10%)' : 'veinte por ciento (20%)'} (art. 1°, Dto. 484/87), lo que arroja un máximo embargable por período de $ ${fmt(embargoDto)}.` : ''} Que la retención cuestionada excede en autos los límites legales referidos, los que resultan de aplicación concurrente.`;
+
+    return `Que la parte actora, ${d.actor}, DNI ${d.dni}, percibe sus haberes mediante acreditación en la cuenta sueldo que mantiene en ${d.demandado}, con un promedio de remuneración de los últimos seis (6) meses de $ ${fmt(sp)}. ${parrafoLimites} Que no obstante ello, la entidad demandada trabó y/o mantiene trabada una retención sobre el saldo de la cuenta por la suma de $ ${fmt(sr)}${!d.deuda_alimentaria ? `, superando el límite legal de inembargabilidad en la suma de $ ${fmt(excedente)}` : ''}. ${d.expediente_conocido ? `Que dicha retención fue ordenada en los autos en trámite ante ${d.juzgado_origen || '[JUZGADO DE ORIGEN]'}${d.nro_expediente ? ` (Expte. N° ${d.nro_expediente})` : ''}.` : 'Que la actora no ha podido individualizar el expediente y/o la orden judicial que habría dado origen a la retención cuestionada.'} ${d.cedula_notificada ? 'Que la retención le fue notificada mediante cédula, la cual se acompaña como documental.' : 'Que la retención no le fue notificada formalmente a la actora mediante cédula.'} Que la retención de una suma superior al límite legal afecta directamente la posibilidad de la actora de afrontar sus gastos de subsistencia y los de su grupo familiar.`;
   }
 
   container.querySelector('#mb-limpiar').addEventListener('click', () => {
-    ['mb-actor', 'mb-dni', 'mb-domicilio', 'mb-demandado', 'mb-domicilio-demandado', 'mb-fecha-hecho', 'mb-relato-hecho', 'mb-monto-afectado', 'mb-monto-prestamo', 'mb-datos-denuncia', 'mb-fecha-reclamo-previo', 'mb-sueldo-promedio', 'mb-saldo-retenido', 'mb-nro-expediente', 'mb-juzgado-origen', 'mb-domicilio-procesal', 'mb-monto-fondo'].forEach(id => {
+    ['mb-actor', 'mb-dni', 'mb-domicilio', 'mb-demandado', 'mb-domicilio-demandado', 'mb-fecha-hecho', 'mb-relato-hecho', 'mb-monto-afectado', 'mb-monto-prestamo', 'mb-datos-denuncia', 'mb-fecha-reclamo-previo', 'mb-sueldo-promedio', 'mb-saldo-retenido', 'mb-remuneracion-bruta', 'mb-nro-expediente', 'mb-juzgado-origen', 'mb-domicilio-procesal', 'mb-monto-fondo'].forEach(id => {
       const el = container.querySelector(`#${id}`); if (el) el.value = '';
     });
     container.querySelector('#mb-juzgado').value = 'Juzgado de Primera Instancia en lo Civil y Comercial N° __ del Departamento Judicial de ___, Provincia de Buenos Aires';
     container.querySelector('#mb-contracautela').value = 'Caución juratoria';
+    container.querySelector('#mb-smvm').value = SMVM_DEFAULT;
+    container.querySelector('#mb-deuda-alimentaria').checked = false;
     container.querySelector('#mb-prestamo-no-solicitado').checked = false;
     container.querySelector('#mb-wrap-monto-prestamo').style.display = 'none';
     container.querySelector('#mb-denuncia-penal').checked = true;
