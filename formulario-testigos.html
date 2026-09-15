@@ -45,8 +45,13 @@
       <div id="ft-mensaje-box" class="field-group">
         <textarea id="ft-texto" readonly></textarea>
       </div>
+      <p style="font-size:.78rem;color:var(--color-muted);margin-bottom:6px">Enviar por WhatsApp a:</p>
+      <div class="btn-row" style="margin-top:0">
+        <a class="btn btn-success" data-wa-idx="0" target="_blank" rel="noopener">📱 Mario</a>
+        <a class="btn btn-success" data-wa-idx="1" target="_blank" rel="noopener">📱 Soledad</a>
+        <a class="btn btn-success" data-wa-idx="2" target="_blank" rel="noopener">📱 Camila</a>
+      </div>
       <div class="btn-row">
-        <a class="btn btn-success" id="ft-whatsapp" target="_blank" rel="noopener">📱 Enviar por WhatsApp</a>
         <a class="btn btn-ghost" id="ft-mail">✉️ Enviar por mail</a>
         <button class="btn btn-ghost" id="ft-copiar">📋 Copiar texto</button>
       </div>
@@ -60,7 +65,13 @@
   <script type="module">
     import { renderTestigosSection, wireTestigosSection, leerTestigos, formatearTestigosTexto } from './tools/testigos.js';
 
-    const WA_NUMERO = '1144496992';
+    // Mismos tres celulares de contacto del estudio que figuran en los PDF
+    // (ver tools/exportar.js: WA_NUMERO_1/2/3) — Mario, Soledad y Camila.
+    const WA_NUMEROS = [
+      { nombre: 'Mario',   numero: '1144496992' },
+      { nombre: 'Soledad', numero: '1155781501' },
+      { nombre: 'Camila',  numero: '1138224662' },
+    ];
     const EMAIL = 'mvcabogadospilar@gmail.com';
 
     const holder = document.getElementById('ft-testigos-holder');
@@ -100,7 +111,10 @@
       document.getElementById('ft-resultado').classList.remove('ft-hidden');
 
       const encoded = encodeURIComponent(texto);
-      document.getElementById('ft-whatsapp').href = `https://wa.me/54${WA_NUMERO}?text=${encoded}`;
+      document.querySelectorAll('[data-wa-idx]').forEach(a => {
+        const { numero } = WA_NUMEROS[Number(a.dataset.waIdx)];
+        a.href = `https://wa.me/54${numero}?text=${encoded}`;
+      });
       document.getElementById('ft-mail').href = `mailto:${EMAIL}?subject=${encodeURIComponent('Datos de testigos' + (caso ? ' — ' + caso : ''))}&body=${encoded}`;
 
       document.getElementById('ft-resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
