@@ -359,7 +359,10 @@ export function initMedidasBancarias(container) {
 
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:24px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Reclamo administrativo previo (documento aparte)</div>
       <p style="font-size:.78rem;color:var(--color-muted);margin:0 0 10px">Genera una nota independiente dirigida al BCRA (Usuarios Financieros) y/o Defensa del Consumidor, útil como antecedente probatorio de mora y agotamiento de vía. No sustituye la vía judicial.</p>
-      <button class="btn btn-ghost" id="mb-reclamo-admin">📄 Generar reclamo administrativo (PDF)</button>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <button class="btn btn-ghost" id="mb-reclamo-admin">📄 Exportar PDF</button>
+        <button class="btn btn-ghost" id="mb-reclamo-admin-word">📝 Exportar Word</button>
+      </div>
 
       <p style="margin-top:24px;font-size:.78rem;color:var(--color-muted);border-top:1px solid var(--color-border);padding-top:12px">
         Escrito orientativo. Verificar en cada caso el fuero/juzgado competente, la vigencia de los valores del Salario Mínimo Vital y Móvil, y la jurisprudencia del fuero de destino antes de su presentación.
@@ -430,10 +433,14 @@ export function initMedidasBancarias(container) {
   poblarMedidas();
   actualizarCamposSupuesto();
 
-  selAbogado.addEventListener('change', () => {
-    emailNotifInput.value = ABOGADOS_BY_ID[selAbogado.value].domicilioElectronico;
-  });
-  emailNotifInput.value = ABOGADOS_BY_ID[selAbogado.value].domicilioElectronico;
+  function actualizarAbogado() {
+    const a = ABOGADOS_BY_ID[selAbogado.value];
+    if (!a) return;
+    emailNotifInput.value = a.domicilioElectronico;
+    container.querySelector('#mb-matricula').value = a.matricula;
+  }
+  selAbogado.addEventListener('change', actualizarAbogado);
+  actualizarAbogado();
 
   container.querySelector('#mb-prestamo-no-solicitado').addEventListener('change', (e) => {
     container.querySelector('#mb-wrap-monto-prestamo').style.display = e.target.checked ? '' : 'none';
@@ -602,7 +609,7 @@ Recordatorios previos a la presentación (no forman parte del escrito):
     poblarMedidas();
     actualizarCamposSupuesto();
     selAbogado.selectedIndex = 0;
-    emailNotifInput.value = ABOGADOS_BY_ID[selAbogado.value].domicilioElectronico;
+    actualizarAbogado();
     divRes.style.display = 'none';
     textarea.value = '';
     ultimoTextoGenerado = '';
@@ -631,7 +638,7 @@ Recordatorios previos a la presentación (no forman parte del escrito):
   });
 
   // ── Reclamo administrativo previo (documento aparte) ───────────────────────
-  container.querySelector('#mb-reclamo-admin').addEventListener('click', () => {
+  function datosReclamoAdmin() {
     const supuesto = selSupuesto.value;
     const actor = val('mb-actor') || '[ACTOR]';
     const dni = val('mb-dni') || '[DNI]';
@@ -647,12 +654,28 @@ Recordatorios previos a la presentación (no forman parte del escrito):
       ? `Me dirijo a Uds. en mi carácter de letrado ${val('mb-caracter-letrado') === 'apoderado' ? 'apoderado' : 'patrocinante'} de ${actor}, DNI ${dni}, a fin de formular RECLAMO ADMINISTRATIVO PREVIO contra ${demandado}, en virtud de haber sido mi mandante/patrocinada víctima de una maniobra de fraude informático (ciberestafa bancaria) que afectó fondos de su titularidad y/o dio lugar a la contratación no consentida de un préstamo, sin que la entidad haya restituido a la fecha la situación patrimonial previa al hecho. Se deja constancia de que, conforme la Comunicación "A" 8280 del BCRA, la entidad se encuentra obligada a gestionar y reportar los ciberincidentes que afecten a sus clientes, sin que ello la releve de su responsabilidad civil frente al usuario damnificado. Se solicita: 1) la restitución íntegra de los fondos afectados y/o la anulación del préstamo no consentido; 2) el cese de todo reporte de mi mandante/patrocinada en centrales de riesgo crediticio vinculado al hecho relatado; y 3) se informe el estado del trámite en un plazo no mayor a diez (10) días hábiles, bajo apercibimiento de iniciar las acciones judiciales que por derecho correspondan. Se acompaña la documentación respaldatoria del reclamo.`
       : `Me dirijo a Uds. en mi carácter de letrado ${val('mb-caracter-letrado') === 'apoderado' ? 'apoderado' : 'patrocinante'} de ${actor}, DNI ${dni}, a fin de formular RECLAMO ADMINISTRATIVO PREVIO contra ${demandado}, en virtud de haber retenido dicha entidad, sobre la cuenta sueldo de mi mandante/patrocinada, una suma que excede el límite legal de inembargabilidad establecido por el art. 2 de la Ley 26.704 (tres veces el promedio de haberes de los últimos seis meses). Se solicita: 1) la inmediata desafectación y restitución del monto retenido en exceso de dicho límite; 2) se informe la orden judicial y el expediente que habría dado origen a la retención, de existir; y 3) se informe el estado del trámite en un plazo no mayor a diez (10) días hábiles, bajo apercibimiento de iniciar las acciones judiciales que por derecho correspondan. Se acompaña la documentación respaldatoria del reclamo (recibos de sueldo y extractos bancarios del período involucrado).`;
 
+    const firmaTexto = `${abogadoSel.nombre}, ${abogadoSel.genero === 'M' ? 'abogado' : 'abogada'} (${matricula})`;
+    return { destinatario, cuerpo, firmaTexto };
+  }
+
+  container.querySelector('#mb-reclamo-admin').addEventListener('click', () => {
+    const { destinatario, cuerpo, firmaTexto } = datosReclamoAdmin();
     const html = `
       <div class="info-box"><strong>Destinatario:</strong> ${escHtml(destinatario)}</div>
       <div class="info-box" style="white-space:pre-wrap">${escHtml(cuerpo)}</div>
-      <p class="nota">${escHtml(`${abogadoSel.nombre}, ${abogadoSel.genero === 'M' ? 'abogado' : 'abogada'} (${matricula})`)}</p>
+      <p class="nota">${escHtml(firmaTexto)}</p>
     `;
     exportarPDF('Reclamo Administrativo Previo — BCRA / Defensa del Consumidor', html);
+  });
+
+  container.querySelector('#mb-reclamo-admin-word').addEventListener('click', () => {
+    const { destinatario, cuerpo, firmaTexto } = datosReclamoAdmin();
+    const html = `
+      <p><strong>Destinatario:</strong> ${escHtml(destinatario)}</p>
+      ${cuerpo.split('\n').map(l => `<p>${escHtml(l) || '&nbsp;'}</p>`).join('')}
+      <p>${escHtml(firmaTexto)}</p>
+    `;
+    exportarWord('Reclamo Administrativo Previo — BCRA - Defensa del Consumidor', html);
   });
 
   function escHtml(s) {
