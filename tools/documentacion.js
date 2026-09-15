@@ -164,6 +164,33 @@ export function initDocumentacion(container) {
         'Carta poder / poder para pleitos a favor del estudio',
       ],
     },
+    ciberestafa_bancaria: {
+      label: 'Medida Cautelar/Urgente — Ciberestafa Bancaria',
+      items: [
+        'DNI del/de la actor/a (víctima)',
+        'Constancia de denuncia penal (N° de IPP y dependencia interviniente)',
+        'Extractos y resúmenes bancarios del período involucrado',
+        'Capturas de pantalla de la operación cuestionada y de las notificaciones recibidas (mail, SMS, WhatsApp)',
+        'Constancia del reclamo previo efectuado ante la entidad financiera, si lo hubiera',
+        'Datos del préstamo no solicitado, si correspondiera (monto, fecha, N° de operación)',
+        'Constancia de CUIT / CUIL del/de la actor/a',
+        'Constancia de domicilio real y de domicilio electrónico (notificaciones), si ya se cuenta',
+        'Carta poder / poder para pleitos a favor del estudio',
+      ],
+    },
+    embargo_excesivo_haberes: {
+      label: 'Medida Cautelar/Urgente — Retención de Haberes más allá del Límite Legal',
+      items: [
+        'DNI del/de la actor/a',
+        'Recibos de sueldo de los últimos 6 (seis) meses, a los fines del cálculo del límite de inembargabilidad (art. 2, Ley 26.704)',
+        'Extracto bancario de la cuenta sueldo donde conste la retención cuestionada',
+        'Cédula de notificación del embargo, si fue notificada',
+        'Datos del expediente y juzgado de origen del embargo, si se conocen',
+        'Constancia de CUIT / CUIL del/de la actor/a',
+        'Constancia de domicilio real y de domicilio electrónico (notificaciones), si ya se cuenta',
+        'Carta poder / poder para pleitos a favor del estudio',
+      ],
+    },
   };
 
   // ── HTML ─────────────────────────────────────────────────────────────────────

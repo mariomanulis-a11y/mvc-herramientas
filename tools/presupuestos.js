@@ -112,6 +112,34 @@ export function initPresupuestos(container) {
       costoInaccion: () => 'La demora en judicializar un reclamo de cobertura de salud puede agravar el cuadro clínico del paciente y, en determinados casos, tornar irreversible el perjuicio, además de dificultar la reparación económica posterior. La vía del amparo con medida cautelar busca precisamente evitar esa demora, obteniendo una respuesta jurisdiccional en un plazo considerablemente menor al de un proceso ordinario.',
       gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'peritos'],
     },
+    ciberestafa_bancaria: {
+      label: 'Medida Cautelar/Urgente — Ciberestafa Bancaria',
+      campos: ['actor_ciberestafa', 'demandado_ciberestafa', 'monto_afectado_ciberestafa', 'prestamo_no_solicitado_pres', 'denuncia_penal_pres'],
+      alcance: () => 'Análisis del caso y encuadre de la vía procesal más adecuada (medida de no innovar, cautelar innovativa, autosatisfactiva o aseguramiento de pruebas); interposición de la medida cautelar/urgente correspondiente; gestión del reclamo administrativo previo ante el BCRA y/o Defensa del Consumidor; seguimiento hasta la resolución de la cautelar y, en su caso, promoción de la demanda de fondo por nulidad y daños y perjuicios.',
+      etapas: () => [
+        'Análisis del caso, reclamo administrativo previo y preparación de la medida',
+        'Interposición y resolución de la medida cautelar/urgente',
+        'Demanda de fondo y seguimiento hasta sentencia o acuerdo',
+      ],
+      baseDesc: 'Monto afectado por la ciberestafa / monto del préstamo no consentido',
+      enfoque: () => 'Su objetivo es recuperar los fondos sustraídos y neutralizar las consecuencias del fraude (deudas no consentidas, reportes en centrales de riesgo) en el menor tiempo posible. Para lograrlo, nos encargamos de:',
+      costoInaccion: () => 'La demora en accionar permite que continúe devengándose el débito de cuotas del préstamo no consentido, que se acumulen intereses y reportes negativos en centrales de riesgo crediticio, y que se deteriore la prueba disponible (logs, capturas, metadatos), cuya preservación depende del tiempo de retención de cada proveedor de servicios. Actuar con celeridad —incluyendo, si corresponde, una prueba anticipada— maximiza las chances de recuperación íntegra de los fondos y de reversión de las consecuencias del fraude.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480', 'peritos'],
+    },
+    embargo_excesivo: {
+      label: 'Medida Cautelar/Urgente — Retención de Haberes más allá del Límite Legal',
+      campos: ['actor_embargo', 'demandado_embargo', 'sueldo_promedio_pres', 'saldo_retenido_pres', 'expediente_conocido_pres'],
+      alcance: () => 'Cálculo del límite de inembargabilidad de la cuenta sueldo (art. 2, Ley 26.704) y del excedente retenido; gestión del reclamo administrativo previo ante el BCRA; interposición del incidente de levantamiento parcial de embargo o, en su caso, de la medida cautelar/urgente autónoma correspondiente; seguimiento hasta la desafectación y restitución de los fondos retenidos en exceso.',
+      etapas: () => [
+        'Cálculo del excedente y reclamo administrativo previo',
+        'Incidente de levantamiento parcial de embargo o medida urgente autónoma',
+        'Desafectación y restitución de los fondos retenidos en exceso',
+      ],
+      baseDesc: 'Monto retenido en exceso del límite legal de inembargabilidad',
+      enfoque: () => 'Su objetivo es recuperar la disponibilidad de los fondos de naturaleza alimentaria retenidos en exceso del límite legal, en el menor tiempo posible, dado que afectan directamente su subsistencia y la de su grupo familiar. Para lograrlo, nos encargamos de:',
+      costoInaccion: () => 'Mientras no se plantee el reclamo correspondiente, la retención indebida se mantiene y compromete mes a mes la disponibilidad de fondos destinados a gastos esenciales. Cuanto más se demore el planteo, mayor es el perjuicio acumulado y más difícil resulta, en la práctica, reconstruir el detalle de los períodos afectados.',
+      gastos: ['tasa_justicia', 'sobretasa_justicia', 'bono_ley_8480'],
+    },
     asesoramiento_pyme: {
       label: 'Asesoramiento Integral PYME (Laboral, RRHH, Compliance y Control Interno)',
       campos: ['empresa_cliente', 'rubro_pyme', 'cant_empleados_pyme'],
@@ -164,6 +192,18 @@ export function initPresupuestos(container) {
     { id: 'demandado_amparo',      label: 'Demandado (obra social / prepaga / Estado)', tipo: 'text', opcional: true, placeholder: 'Ej: OSDE, IOMA, Provincia de Buenos Aires' },
     { id: 'prestacion_reclamada',  label: 'Prestación / tratamiento reclamado',         tipo: 'text', opcional: true, placeholder: 'Medicación, cirugía, tratamiento, prótesis, etc.' },
     { id: 'urgencia_medica',       label: '¿Reviste urgencia médica actual?',           tipo: 'checkbox' },
+
+    { id: 'actor_ciberestafa',            label: 'Actor / víctima',                            tipo: 'text', placeholder: 'Nombre y apellido' },
+    { id: 'demandado_ciberestafa',        label: 'Entidad financiera / billetera virtual demandada', tipo: 'text', opcional: true },
+    { id: 'monto_afectado_ciberestafa',   label: 'Monto afectado (opcional)',                  tipo: 'number', opcional: true },
+    { id: 'prestamo_no_solicitado_pres',  label: '¿Se solicitó un préstamo no consentido?',    tipo: 'checkbox' },
+    { id: 'denuncia_penal_pres',          label: '¿Se formuló denuncia penal?',                tipo: 'checkbox' },
+
+    { id: 'actor_embargo',                label: 'Actor / titular de la cuenta',               tipo: 'text', placeholder: 'Nombre y apellido' },
+    { id: 'demandado_embargo',            label: 'Banco donde percibe los haberes',            tipo: 'text', opcional: true },
+    { id: 'sueldo_promedio_pres',         label: 'Sueldo promedio últimos 6 meses (opcional)', tipo: 'number', opcional: true },
+    { id: 'saldo_retenido_pres',          label: 'Saldo retenido en la cuenta (opcional)',     tipo: 'number', opcional: true },
+    { id: 'expediente_conocido_pres',     label: '¿Se conoce el expediente de origen del embargo?', tipo: 'checkbox' },
   ];
 
   const CAMPO_BY_ID = Object.fromEntries(CAMPOS_CONFIG.map(c => [c.id, c]));
