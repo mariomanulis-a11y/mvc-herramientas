@@ -75,6 +75,9 @@
     <button class="nav-item" data-tool="demanda-art">
       <span class="nav-icon">🦺</span> Demanda / Recurso ART
     </button>
+    <button class="nav-item" data-tool="demanda-transito">
+      <span class="nav-icon">🚗</span> Demanda por Accidente de Tránsito (PBA)
+    </button>
     <button class="nav-item" data-tool="minutas">
       <span class="nav-icon">📝</span> Minutas de Caso
     </button>
@@ -149,6 +152,7 @@
     'amparo-salud':   { label: 'Generador de Amparo por Salud con Medida Cautelar', load: () => import('./tools/amparo-salud.js').then(m => m.initAmparoSalud) },
     'medidas-bancarias': { label: 'Generador de Medidas Cautelares Bancarias', load: () => import('./tools/medidas-bancarias.js').then(m => m.initMedidasBancarias) },
     'demanda-art':    { label: 'Generador de Demanda / Recurso — ART', load: () => import('./tools/demanda-art.js').then(m => m.initDemandaArt) },
+    'demanda-transito': { label: 'Generador de Demanda por Accidente de Tránsito (PBA)', load: () => import('./tools/demanda-transito.js').then(m => m.initDemandaTransito) },
     minutas:          { label: 'Generador de Minutas de Caso',        load: () => import('./tools/minutas.js').then(m => m.initMinutas) },
     'escrito-sucesion': { label: 'Generador de Escrito de Sucesión',  load: () => import('./tools/escrito-sucesion.js').then(m => m.initEscritoSucesion) },
     divorcio:         { label: 'Generador de Divorcio (PBA)',        load: () => import('./tools/divorcio.js').then(m => m.initDivorcio) },
@@ -168,7 +172,7 @@
     intereses:'📈', actualizacion:'💹', plazos:'📅',
     incapacidad:'🩺', 'danio-punitivo':'⚠️', 'carta-documento':'✉️',
     'carta-poder-laboral':'🖋️', 'demanda-despido':'🏛️', 'demanda-consumidor':'🛡️',
-    'amparo-salud':'🏥', 'medidas-bancarias':'🏦', 'demanda-art':'🦺', minutas:'📝',
+    'amparo-salud':'🏥', 'medidas-bancarias':'🏦', 'demanda-art':'🦺', 'demanda-transito':'🚗', minutas:'📝',
     'escrito-sucesion':'📜',
     divorcio:'💔',
     presupuestos:'🧾', documentacion:'📑',
@@ -185,7 +189,7 @@
     'Derecho Laboral':    ['liquidacion','ley24013','ley25323','liquidacion-integral'],
     'Cálculos Judiciales':['intereses','actualizacion','plazos'],
     'Indemnizaciones':    ['incapacidad','danio-punitivo'],
-    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','medidas-bancarias','demanda-art','minutas','escrito-sucesion','divorcio','presupuestos','documentacion','convenio-honorarios'],
+    'Documentos':         ['carta-documento','carta-poder-laboral','demanda-despido','demanda-consumidor','amparo-salud','medidas-bancarias','demanda-art','demanda-transito','minutas','escrito-sucesion','divorcio','presupuestos','documentacion','convenio-honorarios'],
     'Consultoría PYME':   ['diagnostico-pyme','checklist-pyme','control-jornada','politicas-rrhh','formularios-evaluacion'],
     'Asistente IA':       ['dalmacio'],
   };

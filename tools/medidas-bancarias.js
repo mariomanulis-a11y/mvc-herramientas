@@ -681,4 +681,48 @@ Recordatorios previos a la presentación (no forman parte del escrito):
   function escHtml(s) {
     return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
+
+  // ── Prefill desde Minutas de Caso ────────────────────────────────────────
+  (function prefillDesdeMinutas() {
+    let payload;
+    try { payload = JSON.parse(localStorage.getItem('mvc_prefill_medidas_bancarias') || 'null'); } catch { payload = null; }
+    if (!payload || !payload.campos) return;
+
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#e8f4ea;border:1px solid #7ab88a;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:.85rem;color:#1f4d2c;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap';
+    banner.innerHTML = `
+      <span>📋 Hay datos de una minuta cargados el ${payload.fecha || ''} — ¿los cargamos en este formulario?</span>
+      <span style="display:flex;gap:8px">
+        <button class="btn btn-success" id="mb-prefill-cargar" type="button">Cargar</button>
+        <button class="btn btn-ghost" id="mb-prefill-descartar" type="button">Descartar</button>
+      </span>`;
+    container.querySelector('.tool-card').insertBefore(banner, container.querySelector('.tool-card').children[1]);
+
+    banner.querySelector('#mb-prefill-cargar').addEventListener('click', () => {
+      if (payload.supuesto && SUPUESTOS[payload.supuesto]) {
+        selSupuesto.value = payload.supuesto;
+        poblarMedidas();
+        actualizarCamposSupuesto();
+      }
+      if (payload.medida && MEDIDAS[payload.medida]) selMedida.value = payload.medida;
+      actualizarHintMedida();
+      Object.entries(payload.campos).forEach(([id, valor]) => {
+        const el = container.querySelector(`#mb-${id}`);
+        if (el && valor) el.value = valor;
+      });
+      if (payload.checks) {
+        Object.entries(payload.checks).forEach(([id, valor]) => {
+          const el = container.querySelector(`#mb-${id}`);
+          if (el && valor) { el.checked = true; el.dispatchEvent(new Event('change')); }
+        });
+      }
+      actualizarCalculoEmbargo();
+      localStorage.removeItem('mvc_prefill_medidas_bancarias');
+      banner.remove();
+    });
+    banner.querySelector('#mb-prefill-descartar').addEventListener('click', () => {
+      localStorage.removeItem('mvc_prefill_medidas_bancarias');
+      banner.remove();
+    });
+  })();
 }

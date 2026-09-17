@@ -23,6 +23,8 @@ export function initMinutas(container) {
     art:        { label: 'ART — Riesgos del Trabajo', destino: 'demanda-art',        prefillKey: 'mvc_prefill_art',        destinoLabel: 'Generador de Demanda ART' },
     sucesiones: { label: 'Sucesiones',                destino: 'escrito-sucesion',   prefillKey: 'mvc_prefill_sucesion',   destinoLabel: 'Generador de Escrito de Sucesión' },
     divorcio:   { label: 'Divorcio',                  destino: 'divorcio',           prefillKey: 'mvc_prefill_divorcio',   destinoLabel: 'Generador de Escrito de Divorcio' },
+    medidas_bancarias: { label: 'Medidas Cautelares Bancarias (ciberestafa / embargo excesivo)', destino: 'medidas-bancarias', prefillKey: 'mvc_prefill_medidas_bancarias', destinoLabel: 'Generador de Medidas Cautelares Bancarias' },
+    transito:   { label: 'Daños y Perjuicios — Accidente de Tránsito', destino: 'demanda-transito', prefillKey: 'mvc_prefill_transito', destinoLabel: 'Generador de Demanda por Accidente de Tránsito' },
   };
 
   const SUCESIONES_SUBTIPOS = [
@@ -40,6 +42,12 @@ export function initMinutas(container) {
     { value: 'indirecto',           label: 'Despido indirecto (art. 246 LCT)' },
     { value: 'impugnacion_causa',   label: 'Impugnación de la causa invocada por el empleador (art. 242 LCT)' },
     { value: 'estabilidad_especial', label: 'Estabilidad especial (sindical / maternidad / matrimonio)' },
+  ];
+
+  const TIPOS_ESTABILIDAD = [
+    { value: 'sindical',    label: 'Estabilidad sindical (arts. 48/52, Ley 23.551)' },
+    { value: 'maternidad',  label: 'Estabilidad por maternidad (art. 177, LCT)' },
+    { value: 'matrimonio',  label: 'Estabilidad por matrimonio (art. 181, LCT)' },
   ];
 
   const CONSUMIDOR_MATERIAS = [
@@ -80,13 +88,89 @@ export function initMinutas(container) {
     { value: 'estado_nacional',           label: 'Estado Nacional (Min. Salud / SeNaDis / Incluir Salud / PAMI)' },
     { value: 'estado_provincial_municipal', label: 'Estado Provincial / Municipal' },
     { value: 'mutual',                    label: 'Mutual / Asociación Civil prestadora de servicios de salud' },
+    { value: 'art_riesgos_trabajo',       label: 'ART — Aseguradora de Riesgos del Trabajo (Ley 24.557)' },
   ];
+
+  // Sub-tipo de reclamo/prestación, dependiente de la materia — replica
+  // MATERIAS[x].tipos de amparo-salud.js para que el intake capture el mismo
+  // nivel de detalle que el generador de destino.
+  const AMPARO_TIPOS = {
+    obra_social_nacional: [
+      { value: 'medicamento_alto_costo',        label: 'Medicamento de alto costo' },
+      { value: 'cobertura_no_pmo',               label: 'Cobertura no incluida en el PMO' },
+      { value: 'discapacidad_ley24901',          label: 'Discapacidad (Ley 24.901)' },
+      { value: 'salud_mental',                   label: 'Salud mental (Ley 26.657)' },
+      { value: 'trha',                           label: 'Tratamiento de reproducción humana asistida (TRHA)' },
+      { value: 'hiv',                            label: 'VIH / hepatitis / enfermedades de transmisión sexual' },
+      { value: 'cannabis_medicinal',             label: 'Cannabis medicinal' },
+      { value: 'transplante',                    label: 'Trasplante' },
+      { value: 'tercera_edad',                   label: 'Tercera edad / PMOA' },
+      { value: 'incompatibilidad_coberturas',    label: 'Incompatibilidad / superposición de coberturas' },
+      { value: 'vacunacion',                     label: 'Vacunación' },
+    ],
+    prepaga: [
+      { value: 'medicamento_alto_costo',        label: 'Medicamento de alto costo' },
+      { value: 'cobertura_no_pmo',               label: 'Cobertura no incluida en el PMO' },
+      { value: 'discapacidad_ley24901',          label: 'Discapacidad (Ley 24.901)' },
+      { value: 'salud_mental',                   label: 'Salud mental (Ley 26.657)' },
+      { value: 'trha',                           label: 'Tratamiento de reproducción humana asistida (TRHA)' },
+      { value: 'hiv',                            label: 'VIH / hepatitis / enfermedades de transmisión sexual' },
+      { value: 'cannabis_medicinal',             label: 'Cannabis medicinal' },
+      { value: 'transplante',                    label: 'Trasplante' },
+      { value: 'tercera_edad',                   label: 'Tercera edad / PMOA' },
+      { value: 'incompatibilidad_coberturas',    label: 'Incompatibilidad / superposición de coberturas' },
+      { value: 'vacunacion',                     label: 'Vacunación' },
+      { value: 'rescision_unilateral',           label: 'Rescisión unilateral del contrato por la prepaga' },
+      { value: 'aumento_cuota_dnu70',            label: 'Aumento de cuota — impugnación (DNU 70/2023)' },
+    ],
+    obra_social_provincial: [
+      { value: 'medicamento_alto_costo',        label: 'Medicamento de alto costo' },
+      { value: 'discapacidad_ley24901',          label: 'Discapacidad (Ley 24.901)' },
+      { value: 'cobertura_no_pmo',               label: 'Cobertura no incluida en el PMO' },
+      { value: 'salud_mental',                   label: 'Salud mental (Ley 26.657)' },
+      { value: 'tercera_edad',                   label: 'Tercera edad' },
+    ],
+    estado_nacional: [
+      { value: 'medicamento_alto_costo',        label: 'Medicamento de alto costo' },
+      { value: 'discapacidad_ley24901',          label: 'Discapacidad (Ley 24.901)' },
+      { value: 'incompatibilidad_coberturas',    label: 'Incompatibilidad / superposición de coberturas' },
+      { value: 'vacunacion',                     label: 'Vacunación' },
+    ],
+    estado_provincial_municipal: [
+      { value: 'medicamento_alto_costo',        label: 'Medicamento de alto costo' },
+      { value: 'discapacidad_ley24901',          label: 'Discapacidad (Ley 24.901)' },
+      { value: 'migrantes_sin_cobertura',        label: 'Migrante sin cobertura formal' },
+      { value: 'tercera_edad_geriatrico',        label: 'Tercera edad — alojamiento geriátrico' },
+      { value: 'salud_mental',                   label: 'Salud mental (Ley 26.657)' },
+    ],
+    art_riesgos_trabajo: [
+      { value: 'cobertura_tratamiento_rehabilitacion', label: 'Cobertura de tratamiento / rehabilitación' },
+      { value: 'internacion',                          label: 'Internación' },
+    ],
+    mutual: [
+      { value: 'medicamento_alto_costo',        label: 'Medicamento de alto costo' },
+      { value: 'discapacidad_ley24901',          label: 'Discapacidad (Ley 24.901)' },
+      { value: 'cobertura_no_pmo',               label: 'Cobertura no incluida en el PMO' },
+    ],
+  };
 
   const ART_TIPOS = [
     { value: 'apelacion_comision_medica',            label: 'Apelación del dictamen de Comisión Médica' },
     { value: 'accion_civil_art_4',                   label: 'Acción civil — opción art. 4, Ley 26.773' },
     { value: 'accion_contra_empleador_no_asegurado', label: 'Acción directa — empleador no asegurado' },
     { value: 'cobro_prestaciones_dinerarias',        label: 'Cobro de prestaciones dinerarias reconocidas' },
+  ];
+
+  const MB_SUPUESTOS = [
+    { value: 'ciberestafa',       label: 'Ciberestafa bancaria (phishing / vishing / smishing / ingeniería social)' },
+    { value: 'embargo_excesivo',  label: 'Retención bancaria de haberes más allá del límite legal (cuenta sueldo)' },
+  ];
+  const MB_MEDIDAS = [
+    { value: 'no_innovar',           label: 'Medida de no innovar (art. 230 CPCCN)' },
+    { value: 'innovativa',           label: 'Medida cautelar innovativa (art. 232 CPCCN)' },
+    { value: 'autosatisfactiva',     label: 'Medida autosatisfactiva / proceso urgente' },
+    { value: 'aseguramiento_pruebas', label: 'Aseguramiento de pruebas / prueba anticipada (art. 326 CPCCN)' },
+    { value: 'incidente_embargo',    label: 'Incidente de levantamiento parcial de embargo' },
   ];
 
   const DOC_ITEMS = [
@@ -196,6 +280,21 @@ export function initMinutas(container) {
           <div class="field-group" style="grid-column:1/-1"><label for="mn-d_causa_invocada">Causa invocada por el empleador (si la hubo)</label><textarea id="mn-d_causa_invocada" rows="2"></textarea></div>
         </div>
 
+        <div id="mn-d-bloque-estabilidad" style="display:none;margin-top:10px">
+          <div class="display-box">
+            <strong>Estabilidad especial — datos específicos</strong>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-top:8px">
+              <div class="field-group"><label for="mn-d_tipo_estabilidad">Tipo de estabilidad invocada</label>
+                <select id="mn-d_tipo_estabilidad">${TIPOS_ESTABILIDAD.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}</select>
+              </div>
+              <div class="field-group" style="align-self:flex-end">
+                <label class="checkbox-label"><input type="checkbox" id="mn-d_via_administrativa_agotada"> Vía administrativa previa agotada (si corresponde)</label>
+              </div>
+              <div class="field-group" style="grid-column:1/-1"><label for="mn-d_fundamento_estabilidad">Fundamento fáctico de la estabilidad invocada</label><textarea id="mn-d_fundamento_estabilidad" rows="2" placeholder="Cargo gremial, fecha de notificación de embarazo/nacimiento, fecha de matrimonio, etc."></textarea></div>
+            </div>
+          </div>
+        </div>
+
         <div class="display-box" style="margin-top:14px">
           <strong>Plazo crítico — Prescripción de la acción (art. 256 LCT, 2 años corridos)</strong>
           <div class="form-row" style="margin-top:8px">
@@ -236,6 +335,7 @@ export function initMinutas(container) {
           <div class="field-group"><label for="mn-a_tipo_demandado">Tipo de demandado</label>
             <select id="mn-a_tipo_demandado">${AMPARO_MATERIAS.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}</select>
           </div>
+          <div class="field-group"><label for="mn-a_tipo_reclamo">Tipo de reclamo / prestación</label><select id="mn-a_tipo_reclamo"></select></div>
           <div class="field-group"><label for="mn-a_numero_afiliado">N° de afiliado (opcional)</label><input type="text" id="mn-a_numero_afiliado"></div>
           <div class="field-group"><label for="mn-a_medico_tratante">Médico/a tratante (opcional)</label><input type="text" id="mn-a_medico_tratante"></div>
           <div class="field-group"><label for="mn-a_fecha_prescripcion">Fecha de la prescripción médica (opcional)</label><input type="date" id="mn-a_fecha_prescripcion"></div>
@@ -460,6 +560,84 @@ export function initMinutas(container) {
         </div>
       </div>
 
+      <div id="mn-bloque-medidas_bancarias" class="mn-bloque-rama" style="display:none">
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Medidas Cautelares Bancarias — datos específicos</div>
+        <p style="font-size:.78rem;color:var(--color-muted);margin:-4px 0 10px">La Contraparte cargada arriba se toma como entidad bancaria/financiera demandada.</p>
+        <div class="form-row">
+          <div class="field-group" style="flex:1">
+            <label for="mn-mb_supuesto">Supuesto de hecho</label>
+            <select id="mn-mb_supuesto">${MB_SUPUESTOS.map(s => `<option value="${s.value}">${s.label}</option>`).join('')}</select>
+          </div>
+          <div class="field-group" style="flex:1">
+            <label for="mn-mb_medida">Medida / vía procesal sugerida</label>
+            <select id="mn-mb_medida">${MB_MEDIDAS.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}</select>
+          </div>
+        </div>
+
+        <div id="mn-mb-bloque-ciberestafa">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+            <div class="field-group"><label for="mn-mb_fecha_hecho">Fecha del hecho</label><input type="date" id="mn-mb_fecha_hecho"></div>
+            <div class="field-group"><label for="mn-mb_monto_afectado">Monto afectado ($)</label><input type="number" id="mn-mb_monto_afectado" min="0" step="0.01"></div>
+            <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-mb_prestamo_no_solicitado"> Se solicitó un préstamo no consentido</label></div>
+            <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-mb_denuncia_penal" checked> Se formuló denuncia penal</label></div>
+            <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-mb_reclamo_previo_banco"> Se efectuó reclamo previo ante la entidad</label></div>
+            <div class="field-group" style="grid-column:1/-1"><label for="mn-mb_relato_hecho">Relato del hecho</label><textarea id="mn-mb_relato_hecho" rows="2"></textarea></div>
+          </div>
+        </div>
+
+        <div id="mn-mb-bloque-embargo" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+            <div class="field-group"><label for="mn-mb_sueldo_promedio">Sueldo promedio últimos 6 meses ($)</label><input type="number" id="mn-mb_sueldo_promedio" min="0" step="0.01"></div>
+            <div class="field-group"><label for="mn-mb_saldo_retenido">Saldo retenido en la cuenta ($)</label><input type="number" id="mn-mb_saldo_retenido" min="0" step="0.01"></div>
+            <div class="field-group"><label for="mn-mb_remuneracion_bruta">Remuneración bruta mensual (opcional)</label><input type="number" id="mn-mb_remuneracion_bruta" min="0" step="0.01"></div>
+            <div class="field-group"><label for="mn-mb_smvm">SMVM vigente ($, opcional)</label><input type="number" id="mn-mb_smvm" min="0" step="0.01"></div>
+            <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-mb_deuda_alimentaria"> La deuda que originó el embargo es de naturaleza alimentaria</label></div>
+            <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-mb_expediente_conocido"> Se conoce el expediente de origen del embargo</label></div>
+            <div class="field-group"><label for="mn-mb_nro_expediente">N° de expediente (si se conoce)</label><input type="text" id="mn-mb_nro_expediente"></div>
+            <div class="field-group"><label for="mn-mb_juzgado_origen">Juzgado de origen (si se conoce)</label><input type="text" id="mn-mb_juzgado_origen"></div>
+          </div>
+        </div>
+
+        <div class="display-box" style="margin-top:14px">
+          <strong>Plazo crítico — Prescripción de la acción (art. 50, Ley 24.240, 3 años corridos — orientativo)</strong>
+          <div class="form-row" style="margin-top:8px">
+            <div class="field-group"><label for="mn-mb_plazo_fecha">Fecha del hecho o su conocimiento</label><input type="date" id="mn-mb_plazo_fecha"></div>
+            <div class="field-group" style="align-self:flex-end"><button class="btn btn-ghost" id="mn-mb_plazo_calc" type="button">Calcular vencimiento</button></div>
+          </div>
+          <div id="mn-mb_plazo_resultado"></div>
+        </div>
+      </div>
+
+      <div id="mn-bloque-transito" class="mn-bloque-rama" style="display:none">
+        <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:18px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Accidente de Tránsito — datos específicos</div>
+        <p style="font-size:.78rem;color:var(--color-muted);margin:-4px 0 10px">La Contraparte cargada arriba se toma como conductor demandado.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+          <div class="field-group"><label for="mn-tr_titular_vehiculo">Titular registral del vehículo (si es distinto del conductor)</label><input type="text" id="mn-tr_titular_vehiculo"></div>
+          <div class="field-group"><label for="mn-tr_aseguradora">Aseguradora a citar en garantía</label><input type="text" id="mn-tr_aseguradora"></div>
+          <div class="field-group"><label for="mn-tr_poliza">N° de póliza (si se conoce)</label><input type="text" id="mn-tr_poliza"></div>
+          <div class="field-group"><label for="mn-tr_fecha_hecho">Fecha del hecho</label><input type="date" id="mn-tr_fecha_hecho"></div>
+          <div class="field-group"><label for="mn-tr_lugar_hecho">Lugar del hecho</label><input type="text" id="mn-tr_lugar_hecho"></div>
+          <div class="field-group"><label for="mn-tr_vehiculo_actor">Vehículo del actor (marca/modelo/dominio)</label><input type="text" id="mn-tr_vehiculo_actor"></div>
+          <div class="field-group"><label for="mn-tr_vehiculo_demandado">Vehículo del demandado (marca/modelo/dominio)</label><input type="text" id="mn-tr_vehiculo_demandado"></div>
+          <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-tr_prioridad_paso"> El demandado carecía de prioridad de paso / cometió una infracción de tránsito</label></div>
+          <div class="field-group" style="grid-column:1/-1"><label for="mn-tr_relato_hecho">Relato / mecánica del accidente</label><textarea id="mn-tr_relato_hecho" rows="2"></textarea></div>
+          <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-tr_hubo_lesiones"> Hubo lesiones personales</label></div>
+          <div class="field-group" style="align-self:flex-end"><label class="checkbox-label"><input type="checkbox" id="mn-tr_mediacion_cumplida" checked> Se cumplió la mediación previa (Ley 13.951)</label></div>
+        </div>
+        <div id="mn-tr-bloque-lesiones" style="display:none;margin-top:8px">
+          <div class="field-group"><label for="mn-tr_diagnostico">Diagnóstico / lesiones sufridas</label><textarea id="mn-tr_diagnostico" rows="2"></textarea></div>
+        </div>
+
+        <div class="display-box" style="margin-top:14px">
+          <strong>Plazo crítico — Prescripción de la acción (art. 2561, CCyC, 3 años corridos)</strong>
+          <div class="form-row" style="margin-top:8px">
+            <div class="field-group"><label for="mn-tr_plazo_fecha">Fecha del hecho</label><input type="date" id="mn-tr_plazo_fecha"></div>
+            <div class="field-group" style="align-self:flex-end"><button class="btn btn-ghost" id="mn-tr_plazo_calc" type="button">Calcular vencimiento</button></div>
+          </div>
+          <div id="mn-tr_plazo_resultado"></div>
+        </div>
+      </div>
+
       <!-- ══ Bloque común: cronología, documentación, testigos, gestiones, valoración ══ -->
       <div class="form-section-title" style="font-weight:700;color:var(--color-accent);margin:22px 0 8px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em">Cronología de hechos</div>
       <div id="mn-cronologia-wrapper" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -528,6 +706,8 @@ export function initMinutas(container) {
     art: container.querySelector('#mn-bloque-art'),
     sucesiones: container.querySelector('#mn-bloque-sucesiones'),
     divorcio: container.querySelector('#mn-bloque-divorcio'),
+    medidas_bancarias: container.querySelector('#mn-bloque-medidas_bancarias'),
+    transito: container.querySelector('#mn-bloque-transito'),
   };
   const bloqueContraparte = container.querySelector('#mn-bloque-contraparte');
   const bloqueCoactores = container.querySelector('#mn-bloque-coactores');
@@ -594,6 +774,46 @@ export function initMinutas(container) {
   }
   selCMateria.addEventListener('change', poblarTiposConsumidor);
   poblarTiposConsumidor();
+
+  // ── Amparo de Salud: tipo de reclamo dependiente de la materia ──────────
+  const selAMateria = container.querySelector('#mn-a_tipo_demandado');
+  const selATipo = container.querySelector('#mn-a_tipo_reclamo');
+  function poblarTiposAmparo() {
+    const tipos = AMPARO_TIPOS[selAMateria.value] || [];
+    selATipo.innerHTML = tipos.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
+  }
+  selAMateria.addEventListener('change', poblarTiposAmparo);
+  poblarTiposAmparo();
+
+  // ── Despido: sub-tipo de estabilidad especial ───────────────────────────
+  const selDCausal = container.querySelector('#mn-d_causal');
+  const bloqueEstabilidad = container.querySelector('#mn-d-bloque-estabilidad');
+  function actualizarBloqueEstabilidad() {
+    bloqueEstabilidad.style.display = selDCausal.value === 'estabilidad_especial' ? 'block' : 'none';
+  }
+  selDCausal.addEventListener('change', actualizarBloqueEstabilidad);
+  actualizarBloqueEstabilidad();
+
+  // ── Medidas Cautelares Bancarias: supuesto → campos y medida sugerida ────
+  const selMbSupuesto = container.querySelector('#mn-mb_supuesto');
+  const selMbMedida = container.querySelector('#mn-mb_medida');
+  const bloqueMbCiberestafa = container.querySelector('#mn-mb-bloque-ciberestafa');
+  const bloqueMbEmbargo = container.querySelector('#mn-mb-bloque-embargo');
+  function actualizarBloqueMedidasBancarias() {
+    const esCiber = selMbSupuesto.value === 'ciberestafa';
+    bloqueMbCiberestafa.style.display = esCiber ? 'block' : 'none';
+    bloqueMbEmbargo.style.display = esCiber ? 'none' : 'block';
+    selMbMedida.value = esCiber ? 'innovativa' : 'incidente_embargo';
+  }
+  selMbSupuesto.addEventListener('change', actualizarBloqueMedidasBancarias);
+  actualizarBloqueMedidasBancarias();
+
+  // ── Accidente de Tránsito: lesiones ──────────────────────────────────────
+  const chkTrLesiones = container.querySelector('#mn-tr_hubo_lesiones');
+  const bloqueTrLesiones = container.querySelector('#mn-tr-bloque-lesiones');
+  chkTrLesiones.addEventListener('change', () => {
+    bloqueTrLesiones.style.display = chkTrLesiones.checked ? 'block' : 'none';
+  });
 
   // ── Documentación: mostrar/ocultar detalle ──────────────────────────────
   container.querySelectorAll('.mn-doc-check').forEach(chk => {
@@ -762,6 +982,18 @@ export function initMinutas(container) {
     renderPlazo('mn-art_plazo_resultado_presc', calcularAnios(new Date(f + 'T00:00:00'), 2), 'corridos');
   });
 
+  container.querySelector('#mn-mb_plazo_calc').addEventListener('click', () => {
+    const f = val('mn-mb_plazo_fecha');
+    if (!f) return;
+    renderPlazo('mn-mb_plazo_resultado', calcularAnios(new Date(f + 'T00:00:00'), 3), 'corridos');
+  });
+
+  container.querySelector('#mn-tr_plazo_calc').addEventListener('click', () => {
+    const f = val('mn-tr_plazo_fecha');
+    if (!f) return;
+    renderPlazo('mn-tr_plazo_resultado', calcularAnios(new Date(f + 'T00:00:00'), 3), 'corridos');
+  });
+
   // ── Generar minuta ───────────────────────────────────────────────────────
   function bloqueRamaTexto() {
     if (ramaActual === 'despido') {
@@ -776,7 +1008,10 @@ Causal invocada: ${container.querySelector('#mn-d_causal').selectedOptions[0].te
 Forma de comunicación: ${val('mn-d_forma_comunicacion') || '-'}
 Fecha de intimación/es: ${fmtFechaISO(val('mn-d_fecha_intimaciones')) || '-'}
 Fecha de notificación de la causa: ${fmtFechaISO(val('mn-d_fecha_notificacion_causa')) || '-'}
-Causa invocada por el empleador: ${val('mn-d_causa_invocada') || '-'}`;
+Causa invocada por el empleador: ${val('mn-d_causa_invocada') || '-'}${container.querySelector('#mn-d_causal').value === 'estabilidad_especial' ? `
+Tipo de estabilidad invocada: ${container.querySelector('#mn-d_tipo_estabilidad').selectedOptions[0].textContent}
+Vía administrativa previa agotada: ${container.querySelector('#mn-d_via_administrativa_agotada').checked ? 'Sí' : 'No'}
+Fundamento fáctico de la estabilidad: ${val('mn-d_fundamento_estabilidad') || '-'}` : ''}`;
     }
     if (ramaActual === 'consumidor') {
       return `CONSUMIDOR — DATOS ESPECÍFICOS
@@ -791,6 +1026,7 @@ Descripción del incumplimiento: ${val('mn-c_incumplimiento') || '-'}`;
     if (ramaActual === 'amparo') {
       return `AMPARO DE SALUD — DATOS ESPECÍFICOS
 Tipo de demandado: ${container.querySelector('#mn-a_tipo_demandado').selectedOptions[0].textContent}
+Tipo de reclamo / prestación: ${selATipo.selectedOptions[0]?.textContent || '-'}
 N° de afiliado: ${val('mn-a_numero_afiliado') || '-'}
 Médico/a tratante: ${val('mn-a_medico_tratante') || '-'}
 Fecha de prescripción médica: ${fmtFechaISO(val('mn-a_fecha_prescripcion')) || '-'}
@@ -884,6 +1120,39 @@ Cuidado personal: ${val('mn-dv_cuidado_personal') || '-'}
 Régimen de comunicación: ${val('mn-dv_regimen_comunicacion') || '-'}
 Cuota alimentaria: ${val('mn-dv_alimentos_hijos') || '-'}
 Otros acuerdos: ${val('mn-dv_otros_acuerdos') || '-'}`;
+    }
+    if (ramaActual === 'medidas_bancarias') {
+      const esCiber = selMbSupuesto.value === 'ciberestafa';
+      return `MEDIDAS CAUTELARES BANCARIAS — DATOS ESPECÍFICOS
+Supuesto de hecho: ${selMbSupuesto.selectedOptions[0].textContent}
+Medida / vía procesal sugerida: ${selMbMedida.selectedOptions[0].textContent}
+${esCiber ? `Fecha del hecho: ${fmtFechaISO(val('mn-mb_fecha_hecho')) || '-'}
+Monto afectado: ${val('mn-mb_monto_afectado') || '-'}
+¿Préstamo no consentido?: ${container.querySelector('#mn-mb_prestamo_no_solicitado').checked ? 'Sí' : 'No'}
+¿Denuncia penal formulada?: ${container.querySelector('#mn-mb_denuncia_penal').checked ? 'Sí' : 'No'}
+¿Reclamo previo ante la entidad?: ${container.querySelector('#mn-mb_reclamo_previo_banco').checked ? 'Sí' : 'No'}
+Relato del hecho: ${val('mn-mb_relato_hecho') || '-'}` : `Sueldo promedio últimos 6 meses: ${val('mn-mb_sueldo_promedio') || '-'}
+Saldo retenido: ${val('mn-mb_saldo_retenido') || '-'}
+Remuneración bruta mensual: ${val('mn-mb_remuneracion_bruta') || '-'}
+SMVM de referencia: ${val('mn-mb_smvm') || '-'}
+¿Deuda de naturaleza alimentaria?: ${container.querySelector('#mn-mb_deuda_alimentaria').checked ? 'Sí' : 'No'}
+¿Se conoce el expediente de origen?: ${container.querySelector('#mn-mb_expediente_conocido').checked ? 'Sí' : 'No'}
+N° de expediente: ${val('mn-mb_nro_expediente') || '-'}
+Juzgado de origen: ${val('mn-mb_juzgado_origen') || '-'}`}`;
+    }
+    if (ramaActual === 'transito') {
+      return `ACCIDENTE DE TRÁNSITO — DATOS ESPECÍFICOS
+Titular registral del vehículo (si distinto del conductor): ${val('mn-tr_titular_vehiculo') || '-'}
+Aseguradora a citar en garantía: ${val('mn-tr_aseguradora') || '-'}
+N° de póliza: ${val('mn-tr_poliza') || '-'}
+Fecha del hecho: ${fmtFechaISO(val('mn-tr_fecha_hecho')) || '-'}
+Lugar del hecho: ${val('mn-tr_lugar_hecho') || '-'}
+Vehículo del actor: ${val('mn-tr_vehiculo_actor') || '-'}
+Vehículo del demandado: ${val('mn-tr_vehiculo_demandado') || '-'}
+¿Carecía de prioridad de paso / infracción de tránsito?: ${container.querySelector('#mn-tr_prioridad_paso').checked ? 'Sí' : 'No'}
+Relato / mecánica del accidente: ${val('mn-tr_relato_hecho') || '-'}
+¿Hubo lesiones personales?: ${chkTrLesiones.checked ? 'Sí' : 'No'}${chkTrLesiones.checked ? `\nDiagnóstico / lesiones: ${val('mn-tr_diagnostico') || '-'}` : ''}
+¿Se cumplió la mediación previa (Ley 13.951)?: ${container.querySelector('#mn-tr_mediacion_cumplida').checked ? 'Sí' : 'No'}`;
     }
     return '';
   }
@@ -985,6 +1254,8 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     container.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(el => { el.value = ''; el.classList.remove('error'); });
     container.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
     poblarTiposConsumidor();
+    poblarTiposAmparo();
+    actualizarBloqueEstabilidad();
     container.querySelectorAll('.mn-doc-check').forEach(c => c.checked = false);
     container.querySelectorAll('.mn-doc-dato').forEach(el => { el.disabled = true; el.style.display = 'none'; });
     wrapCronologia().innerHTML = ''; cronContador.count = 0; cronContador.activos = 0;
@@ -1000,8 +1271,14 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
     container.querySelector('#mn-a_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-art_plazo_resultado_cm').innerHTML = '';
     container.querySelector('#mn-art_plazo_resultado_presc').innerHTML = '';
+    container.querySelector('#mn-mb_plazo_resultado').innerHTML = '';
+    container.querySelector('#mn-tr_plazo_resultado').innerHTML = '';
     container.querySelector('#mn-a_plazo_feria').checked = true;
     container.querySelector('#mn-art_plazo_feria').checked = true;
+    container.querySelector('#mn-mb_denuncia_penal').checked = true;
+    container.querySelector('#mn-tr_mediacion_cumplida').checked = true;
+    actualizarBloqueMedidasBancarias();
+    bloqueTrLesiones.style.display = 'none';
     chkSucAdministrador.checked = false;
     wrapSucAdministrador.style.display = 'none';
     actualizarBloqueTestamentoMinuta();
@@ -1094,11 +1371,14 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
           forma_comunicacion: val('mn-d_forma_comunicacion'),
           fecha_intimaciones: val('mn-d_fecha_intimaciones'),
           fecha_notificacion_causa: val('mn-d_fecha_notificacion_causa'),
+          tipo_estabilidad: selDCausal.value === 'estabilidad_especial' ? val('mn-d_tipo_estabilidad') || container.querySelector('#mn-d_tipo_estabilidad').value : '',
+          fundamento_estabilidad: selDCausal.value === 'estabilidad_especial' ? val('mn-d_fundamento_estabilidad') : '',
         },
         selects: {
           registrado: val('mn-d_registrado') || container.querySelector('#mn-d_registrado').value,
           causal: val('mn-d_causal') || container.querySelector('#mn-d_causal').value,
         },
+        viaAdministrativaAgotada: container.querySelector('#mn-d_via_administrativa_agotada').checked,
       };
     }
     if (ramaActual === 'consumidor') {
@@ -1127,6 +1407,7 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
         ...base,
         ...extrasPartes,
         materia: container.querySelector('#mn-a_tipo_demandado').value,
+        tipo: selATipo.value,
         campos: {
           nombre: val('mn-cliente_nombre'),
           dni: val('mn-cliente_dni'),
@@ -1230,6 +1511,68 @@ Documento de trabajo interno del Estudio. No constituye un escrito judicial ni a
         otroConyugePropone: container.querySelector('#mn-dv_otro_conyuge_propone').checked,
         hijos,
         bienes,
+      };
+    }
+    if (ramaActual === 'medidas_bancarias') {
+      const esCiber = selMbSupuesto.value === 'ciberestafa';
+      return {
+        ...base,
+        ...extrasPartes,
+        supuesto: selMbSupuesto.value,
+        medida: selMbMedida.value,
+        campos: {
+          actor: val('mn-cliente_nombre'),
+          dni: val('mn-cliente_dni'),
+          domicilio: val('mn-cliente_domicilio'),
+          demandado: val('mn-contraparte_nombre'),
+          'domicilio-demandado': val('mn-contraparte_domicilio'),
+          ...(esCiber ? {
+            'fecha-hecho': val('mn-mb_fecha_hecho'),
+            'monto-afectado': val('mn-mb_monto_afectado'),
+            'relato-hecho': val('mn-mb_relato_hecho'),
+          } : {
+            'sueldo-promedio': val('mn-mb_sueldo_promedio'),
+            'saldo-retenido': val('mn-mb_saldo_retenido'),
+            'remuneracion-bruta': val('mn-mb_remuneracion_bruta'),
+            smvm: val('mn-mb_smvm'),
+            'nro-expediente': val('mn-mb_nro_expediente'),
+            'juzgado-origen': val('mn-mb_juzgado_origen'),
+          }),
+        },
+        checks: {
+          'prestamo-no-solicitado': container.querySelector('#mn-mb_prestamo_no_solicitado').checked,
+          'denuncia-penal': container.querySelector('#mn-mb_denuncia_penal').checked,
+          'reclamo-previo-banco': container.querySelector('#mn-mb_reclamo_previo_banco').checked,
+          'deuda-alimentaria': container.querySelector('#mn-mb_deuda_alimentaria').checked,
+          'expediente-conocido': container.querySelector('#mn-mb_expediente_conocido').checked,
+        },
+      };
+    }
+    if (ramaActual === 'transito') {
+      return {
+        ...base,
+        ...extrasPartes,
+        campos: {
+          actor: val('mn-cliente_nombre'),
+          'actor-dni': val('mn-cliente_dni'),
+          'actor-domicilio': val('mn-cliente_domicilio'),
+          'demandado-conductor': val('mn-contraparte_nombre'),
+          'demandado-domicilio': val('mn-contraparte_domicilio'),
+          'demandado-titular': val('mn-tr_titular_vehiculo'),
+          aseguradora: val('mn-tr_aseguradora'),
+          poliza: val('mn-tr_poliza'),
+          'fecha-hecho': val('mn-tr_fecha_hecho'),
+          'lugar-hecho': val('mn-tr_lugar_hecho'),
+          'vehiculo-actor': val('mn-tr_vehiculo_actor'),
+          'vehiculo-demandado': val('mn-tr_vehiculo_demandado'),
+          'relato-hecho': val('mn-tr_relato_hecho'),
+          diagnostico: chkTrLesiones.checked ? val('mn-tr_diagnostico') : '',
+        },
+        checks: {
+          'prioridad-paso': container.querySelector('#mn-tr_prioridad_paso').checked,
+          'hubo-lesiones': chkTrLesiones.checked,
+          'mediacion-cumplida': container.querySelector('#mn-tr_mediacion_cumplida').checked,
+        },
       };
     }
     return base;

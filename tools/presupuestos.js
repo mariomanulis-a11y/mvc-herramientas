@@ -86,10 +86,10 @@ export function initPresupuestos(container) {
       subtipos: { consumidor: 'Derecho del Consumidor', transito: 'Accidentes de Tránsito' },
       campos: ['reclamante_danio', 'demandado_danio', 'monto_estimado_danio', 'instancia_previa', 'aseguradora'],
       alcance: (sub) => sub === 'transito'
-        ? 'Gestión de la instancia de mediación prejudicial obligatoria (Ley 26.589); inicio de la demanda por daños y perjuicios derivados del accidente de tránsito; producción de prueba; seguimiento hasta sentencia o acuerdo.'
+        ? 'Gestión de la instancia de mediación prejudicial obligatoria (Ley 13.951, Provincia de Buenos Aires); inicio de la demanda por daños y perjuicios derivados del accidente de tránsito, con citación en garantía de la aseguradora (art. 118, Ley 17.418); producción de prueba; seguimiento hasta sentencia o acuerdo.'
         : 'Reclamo administrativo previo ante COPREC / autoridad de Defensa del Consumidor (si correspondiera); inicio de la demanda por daños y perjuicios; producción de prueba; seguimiento hasta sentencia o acuerdo.',
       etapas: (sub) => [
-        sub === 'transito' ? 'Mediación prejudicial obligatoria (Ley 26.589) y preparación de la demanda' : 'Reclamo administrativo previo (COPREC / Def. del Consumidor) y preparación de la demanda',
+        sub === 'transito' ? 'Mediación prejudicial obligatoria (Ley 13.951) y preparación de la demanda' : 'Reclamo administrativo previo (COPREC / Def. del Consumidor) y preparación de la demanda',
         'Etapa probatoria hasta el llamado de autos para sentencia',
         'Sentencia / acuerdo homologatorio y ejecución',
       ],
